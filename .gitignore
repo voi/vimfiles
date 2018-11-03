@@ -1,0 +1,8 @@
+.git
+.bzr
+.bzrignore
+_etc
+_skk
+pack
+_local_*.vim
+!_local_rc.vim
