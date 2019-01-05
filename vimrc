@@ -267,7 +267,7 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
-  highlight CursorIM  gui=NONE  guifg=#f8f8f8  guibg=#8000ff ctermfg=White ctermbg=Red
+  highlight CursorIM  gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
 
   " statusline
   highlight StatusLine_Modes      guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
@@ -281,13 +281,11 @@ function! s:Vimrc_HighlightPlus() abort "{{{
   highlight link TrailingSpace NonText
 
   if &g:background ==# 'dark'
-    highlight SpecialKey   gui=NONE      guifg=#808080  guibg=bg ctermfg=grey
-    highlight LineNr       gui=NONE      guifg=#FFFFFF  guibg=#000000 term=NONE ctermfg=White ctermbg=Black 
+    " highlight SpecialKey   gui=NONE      guifg=#808080  guibg=bg ctermfg=grey 
     highlight ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
 
   else
-    highlight SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey
-    highlight LineNr       gui=NONE      guifg=#FFFFFF  guibg=darkgrey term=NONE ctermfg=Black ctermbg=White  
+    " highlight SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
     highlight ZenkakuSpace gui=underline guifg=grey cterm=underline ctermfg=grey
 
   endif
@@ -325,6 +323,8 @@ augroup vimrc_auto_commands
   " ** filetype
   autocmd BufNewFile,BufRead *.hta setfiletype  xhtml
   autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setfiletype  xml
+  autocmd BufRead,BufNewFile *.cas setf casl2
+  autocmd BufRead,BufNewFile *.changelog setf changelog
 
   if has('win32')
     autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setlocal fenc=cp932 ff=dos
@@ -369,6 +369,9 @@ augroup vimrc_auto_commands
   autocmd FileType markdown   iabbr <buffer> -[ - [ ]
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
+
+  autocmd FileType casl2 setl sw=10 ts=10 sts=10
+  autocmd FileType changelog setl textwidth=0
 augroup END
 
 
@@ -739,15 +742,21 @@ command! -nargs=? -complete=file GitResolved  call <SID>buffer_command_do( 'git 
 
 " *****************************************************************************
 "
-augroup additional-syntax
+augroup vimrc_additional_syntax
   autocmd FileType c,cpp syn keyword vcType __int16 __int32 __int64 WORD DWORD SHORT USHORT LONG ULONG
       \ | syn keyword vcType WPARAM LPARAM BOOL TRUE FALSE
       \ | hi link vcType  Typedef
 
+  autocmd FileType c,cpp syn match Operator /->\|::\|;;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
+  autocmd FileType *     syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
+  autocmd FileType *     syn match Operator /!\ze[[:alnum:](]/
+  autocmd FileType *     syn match Bold     /[{}()<>\[\]]/
+      \ | hi Bold gui=bold
+
   autocmd FileType log syn match LogDateTime  /\d\{4}\/\d\{2}\/\d\{2}/
       \ | syn match LogDateTime     /\d\{4}-\d\{2}-\d\{2}/
       \ | syn match LogDateTime     /\d\{2}:\d\{2}:\d\{2}\%(\.\d\{1,3}\)\?/
-      \ | syn match LogDumpNonZero  /\<\x\{2}\>/
+      \ | syn match LogDumpNonZero  /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/
       \ | syn match LogDumpZero     /<00\>/
       \ | syn match LogDumpSpace    /<20\>/
       \ | syn match LogErrWord      /\cERR\%[OR]/
@@ -790,7 +799,7 @@ endfunction "}}}
 command! -nargs=1 -complete=customlist,Plugin_ReadTemplate_Complete Snippet 
     \ call <SID>Vimrc_ReadTemplate( <f-args> )
 
-augroup vimrc-snippet-command
+augroup vimrc_snippet_command
   autocmd FileReadPost * call <SID>Vimrc_ReadTemplatePost()
 augroup END
 
@@ -805,6 +814,47 @@ function! s:find_repos_dir() abort "{{{
 endfunction "}}}
 
 command! -nargs=0 Root call <SID>find_repos_dir()
+
+
+" *****************************************************************************
+""
+let g:changelog_spacing_errors = 0
+let g:changelog_dateformat = '%Y-%m-%d'
+let g:changelog_username = '<localhost>'
+
+
+""
+nnoremap <Leader>x :TodoToggle<CR>
+xnoremap <Leader>x :TodoToggle<CR>
+
+xnoremap syy :EncloseText -a 
+xnoremap sdd :EncloseText -d 
+xnoremap srr :EncloseText -r 
+
+nnoremap sn  :Snippet 
+
+nnoremap <silent> s. :LLs<CR>
+
+
+""
+nnoremap <silent> <F2>    :browse e<CR>
+nnoremap <silent> <C-F2>  :browse tabe<CR>
+nnoremap <silent> <C-F4>  :bwipeout<CR>
+nnoremap <silent> <C-s>   :update<CR>
+
+nnoremap <silent> <F9>    :lnext<CR>zz
+nnoremap <silent> <S-F9>  :lprevious<CR>zz
+
+nnoremap <silent> <F10>   :cnext<CR>zz
+nnoremap <silent> <S-F10> :cprevious<CR>zz
+
+nnoremap <silent> <F11>   :Outline  %<CR>
+nnoremap <silent> <S-F11> :Outline! %<CR>
+
+nnoremap <silent> <F12>   :LGTag <C-r><C-w><CR>
+
+nnoremap <silent> [b :bprev<CR>
+nnoremap <silent> ]b :bnext<CR>
 
 
 " *****************************************************************************

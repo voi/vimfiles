@@ -48,5 +48,22 @@ augroup END
 
 
 " ***********************************************
+if has('win32')
+  set columns=120
+  set lines=50
+  set linespace=1
+  set guifont=Cica:h12,Consolas:h12
+  set guifontwide=Cica:h12,HSGothicM:h12
+  set rop=type:directx,renmode:5,taamode:1,contrast:3
+  " winpos 372 55
+endif
+
+" colorscheme delek 
+" colorscheme desert
+" colorscheme fruchtig
+colorscheme suika
+
+
+" ***********************************************
 runtime! _local_*.vim
 
