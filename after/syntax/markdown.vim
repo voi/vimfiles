@@ -1,14 +1,55 @@
 " vim:ft=vim
+syntax clear markdownLineStart
+syntax match markdownLineStart /^\%(\s*\S\)\@=/ nextgroup=@markdownBlock,htmlSpecialChar skipwhite display
 
 syntax clear markdownCodeBlock
 syntax cluster markdownBlock remove=markdownCodeBlock
+
+"" 4.5 Fenced code blocks
+syntax region markdownCode matchgroup=rawHtmlTag start=/<pre[^>]*>/  end=/<\/pre>/  contains=markdownBlockquoteNest,markdownCodeHtml
+syntax region markdownCode matchgroup=rawHtmlTag start=/<code[^>]*>/ end=/<\/code>/ contains=markdownBlockquoteNest,markdownCodeHtml
+
+syntax region markdownCode start=/\z(`\{3,}\)\%(\s*[^`]\+$\)\?/  end=/\z1`*\s*$/  keepend
+syntax region markdownCode start=/\z(\~\{3,}\)\%(\s*[^~]\+$\)\?/ end=/\z1\~*\s*$/ keepend
+
+"" 6.4 Emphasis and strong emphasis
+function! s:EmphasisAndStrongStar(name, count) "{{{
+  execute 'syntax region markdown'. a:name .
+        \ ' start=/\%(\_^\|[^\\\*]\)\@<=\*\{' . a:count . '}\%([^[:space:][:punct:]]\)\@=/' .
+        \ ' end=/[^[:space:][:punct:]]\@<=\*\{' . a:count . '}\%($\|[^\\\*]\)\@=/' .
+        \ ' keepend oneline'
+endfunction "}}}
+
+function! s:EmphasisAndStrongUnderline(name, count) "{{{
+  execute 'syntax region markdown'. a:name .
+        \ ' start=/\%(\_^\|[[:space:][:punct:]]\)\@<=_\{' . a:count . '}\%([^[:space:][:punct:]]\)\@=/' .
+        \ ' end=/[^[:space:][:punct:]]\@<=_\{' . a:count . '}\%($\|[[:space:][:punct:]]\)\@=/' .
+        \ ' keepend oneline'
+  execute 'syntax region markdown'. a:name .
+        \ ' start=/[[:punct:]]\@<=_\{' . a:count . '}[[:punct:]]\@=/' .
+        \ ' end=/[[:punct:]]\@<=_\{' . a:count . '}\>/' .
+        \ ' keepend oneline'
+endfunction "}}}
+
+syntax clear markdownItalic
+syntax clear markdownBold 
+syntax clear markdownBoldItalic 
+syntax clear markdownError
+
+call s:EmphasisAndStrongStar('Italic', 1)
+call s:EmphasisAndStrongStar('Bold ', 2)
+call s:EmphasisAndStrongStar('BoldItalic ', 3)
+
+call s:EmphasisAndStrongUnderline('Italic', 1)
+call s:EmphasisAndStrongUnderline('Bold ', 2)
+call s:EmphasisAndStrongUnderline('BoldItalic ', 3)
 
 
 "" Github Flaver
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "" fenced code block
-syntax region markdownCode matchgroup=markdownCodeDelimiter start=/\z(`\{3,}\)\%(\s*[^`]\+$\)\?/  end=/\z1`*\s*$/  containedin=@markdownBlock keepend
-syntax region markdownCode matchgroup=markdownCodeDelimiter start=/\z(\~\{3,}\)\%(\s*[^~]\+$\)\?/ end=/\z1\~*\s*$/ containedin=@markdownBlock keepend
+syntax region markdownCode matchgroup=markdownCodeDelimiter start=/\z(`\{3,}\)\%(\s*[^`]\+$\)\?/  end=/\z1`*\s*$/  keepend
+syntax region markdownCode matchgroup=markdownCodeDelimiter start=/\z(\~\{3,}\)\%(\s*[^~]\+$\)\?/ end=/\z1\~*\s*$/ keepend
 
 "" Tables
 syntax match markdownExTable /|[: ]-\+[: ]\?\s*/   containedin=@markdownBlock
