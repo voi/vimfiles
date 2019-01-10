@@ -12,6 +12,18 @@ syntax region markdownCode matchgroup=rawHtmlTag start=/<code[^>]*>/ end=/<\/cod
 syntax region markdownCode start=/\z(`\{3,}\)\%(\s*[^`]\+$\)\?/  end=/\z1`*\s*$/  keepend
 syntax region markdownCode start=/\z(\~\{3,}\)\%(\s*[^~]\+$\)\?/ end=/\z1\~*\s*$/ keepend
 
+"" 5.2 List items
+syntax clear markdownListMarker
+syntax clear markdownListOrderedMarker
+
+syntax cluster markdownListNext contains=@markdownHeader,markdownCode,markdownFencedCode,markdownBlockquote,markdownRule
+
+syntax match markdownListMarker /[-+*]\s*$/ contained
+syntax match markdownListMarker /\([-+*]\)\s\+\%(\1\|[[:space:]]\)\@!/ contained nextgroup=@markdownListNext,@markdownInline skipwhite
+
+syntax match markdownListOrderedMarker /\d\{1,9}[.)]\s*$/ contained
+syntax match markdownListOrderedMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownListNext,@markdownInline skipwhite
+
 "" 6.4 Emphasis and strong emphasis
 function! s:EmphasisAndStrongStar(name, count) "{{{
   execute 'syntax region markdown'. a:name .
@@ -37,12 +49,12 @@ syntax clear markdownBoldItalic
 syntax clear markdownError
 
 call s:EmphasisAndStrongStar('Italic', 1)
-call s:EmphasisAndStrongStar('Bold ', 2)
-call s:EmphasisAndStrongStar('BoldItalic ', 3)
+call s:EmphasisAndStrongStar('Bold', 2)
+call s:EmphasisAndStrongStar('BoldItalic', 3)
 
 call s:EmphasisAndStrongUnderline('Italic', 1)
-call s:EmphasisAndStrongUnderline('Bold ', 2)
-call s:EmphasisAndStrongUnderline('BoldItalic ', 3)
+call s:EmphasisAndStrongUnderline('Bold', 2)
+call s:EmphasisAndStrongUnderline('BoldItalic', 3)
 
 
 "" Github Flaver
@@ -59,16 +71,17 @@ syntax match markdownExTable /|\ze\%(\s[^-:]\|$\)/ containedin=@markdownBlock
 syntax region markdownDelete start="\%(\_^\|[^\\\~]\)\@<=\~\{2}\%([^\~]\|\_$\)" end="\~\{2}" oneline containedin=@markdownInline
 
 " todo list
-syntax match markdownListTodo /\[ \]/    containedin=@markdownInline
-syntax match markdownListDone /\[x\] .*/ containedin=@markdownInline
+syntax match markdownListTodo /\[ \]/
+syntax match markdownListDone /\[x\] .*/
+
+syntax cluster markdownInline add=markdownListTodo
+syntax cluster markdownInline add=markdownListDone
 
 " reference
 syntax match markdownReference /#\@<!#[[:alnum:]-_]\+/
 
 " mentions
 syntax match markdownMentions /@[^[:space:](]\+\%(([^)]\+)\)\?/
-
-
 
 
 "" Link refernce definitions/Annotation
@@ -99,8 +112,8 @@ hi def link markdownDelete   SpecialKey
 hi def link markdownListTodo Statement
 hi def link markdownListDone SpecialKey
 
-hi def link markdownReference Tag
-hi def link markdownMentions  PreProc
+hi def link markdownReference PreProc
+hi def link markdownMentions  Tag
 
 hi def link markdownExDefList    Statement
 hi def link markdownExNote       String
