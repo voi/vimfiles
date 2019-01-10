@@ -364,9 +364,9 @@ augroup vimrc_auto_commands
   autocmd FileType dosbatch   setlocal commentstring=@rem\ %s
   autocmd FileType vim        setlocal fenc=utf8 ff=unix
 
-  autocmd FileType markdown   setlocal nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_IndentExpr_Markdown()
-  autocmd FileType markdown   setlocal tabstop=4 commentstring=<!--\ %s\ -->
-  autocmd FileType markdown   iabbr <buffer> -[ - [ ]
+  autocmd FileType markdown setlocal nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_IndentExpr_Markdown()
+      \ | setlocal tabstop=4 commentstring=<!--\ %s\ -->
+      \ | iabbr <buffer> -[ - [ ]
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
 
@@ -743,22 +743,27 @@ command! -nargs=? -complete=file GitResolved  call <SID>buffer_command_do( 'git 
 " *****************************************************************************
 "
 augroup vimrc_additional_syntax
-  autocmd FileType c,cpp syn keyword vcType __int16 __int32 __int64 WORD DWORD SHORT USHORT LONG ULONG
-      \ | syn keyword vcType WPARAM LPARAM BOOL TRUE FALSE
-      \ | hi link vcType  Typedef
-
-  autocmd FileType c,cpp syn match Operator /->\|::\|;;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
-  autocmd FileType *     syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
-  autocmd FileType *     syn match Operator /!\ze[[:alnum:](]/
-  autocmd FileType *     syn match Bold     /[{}()<>\[\]]/
+  autocmd FileType * syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
+      \ | syn match Bold     /[{}]/
       \ | hi Bold gui=bold
+
+  autocmd FileType c,cpp syn keyword Typedef __int16 __int32 __int64 BYTE WORD DWORD SHORT USHORT LONG ULONG
+      \ | syn keyword Typedef WPARAM LPARAM BOOL TRUE FALSE WINAPI TCHAR UINT_PTR
+
+  autocmd FileType c,cpp,java,javascript syn match Operator /;;\|[<>!|&=~+\-\*\/]=\|||\|&&\|++\|--/
+      \ | syn match Operator /::\ze\w/
+      \ | syn match Operator /\*\</
+      \ | syn match Operator /\>\*/
+      \ | syn match Statement /!\</
+      \ | syn match Statement /!\ze(/
+      \ | syn match Statement /\%(->\|\.\)\</
 
   autocmd FileType log syn match LogDateTime  /\d\{4}\/\d\{2}\/\d\{2}/
       \ | syn match LogDateTime     /\d\{4}-\d\{2}-\d\{2}/
       \ | syn match LogDateTime     /\d\{2}:\d\{2}:\d\{2}\%(\.\d\{1,3}\)\?/
       \ | syn match LogDumpNonZero  /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/
-      \ | syn match LogDumpZero     /<00\>/
-      \ | syn match LogDumpSpace    /<20\>/
+      \ | syn match LogDumpZero     /\<00\>/
+      \ | syn match LogDumpSpace    /\<20\>/
       \ | syn match LogErrWord      /\cERR\%[OR]/
       \ | hi def link LogDateTime     Identifier
       \ | hi def link LogDumpZero     SpecialKey
