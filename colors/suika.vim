@@ -34,7 +34,7 @@ hi       SignColumn   guifg=NONE    guibg=NONE    gui=NONE
 
 hi       IncSearch    guifg=NONE    guibg=NONE    gui=INVERSE
 
-hi       LineNr       guifg=#438EC3 guibg=#FFFFFF gui=bold
+hi       LineNr       guifg=#438EC3 guibg=#FFFFC6 gui=bold
 
 hi       MatchParen   guifg=#001217 guibg=#B1FF00 gui=NONE
 
@@ -42,7 +42,7 @@ hi       ModeMsg      guifg=#FFFFFF guibg=#1B5C8A gui=NONE
 hi! link MoreMsg      ModeMsg
 
 hi       NonText      guifg=#438EC3 guibg=NONE    gui=NONE
-hi       Normal       guifg=#001217 guibg=#FFFFE6 gui=NONE
+hi       Normal       guifg=#001217 guibg=#FFFFFF gui=NONE
 
 hi       Pmenu        guifg=#001217 guibg=#EFADA9 gui=NONE
 hi! link PmenuSel     WildMenu
@@ -53,7 +53,8 @@ hi! link Question     ModeMsg
 
 hi! link Search       WildMenu
 
-hi! link SpecialKey   NonText
+hi       SpecialKey   guifg=#B1D0E7 guibg=NONE    gui=NONE
+hi       SpecialKey   guifg=#9EC5E0 guibg=NONE    gui=NONE
 
 hi       SpellBad   guifg=#FF0007 guibg=NONE    gui=UNDERCURL, guisp=#FF0007
 hi! link SpellCap   SpellBad
@@ -91,6 +92,7 @@ hi! link Float     Number
 hi       Identifier guifg=#FF0086 guibg=#FFCCE7 gui=NONE
 
 hi       Statement  guifg=#FB660A guibg=#FEE0CD gui=NONE
+hi       Operator   guifg=#FB660A guibg=NONE    gui=NONE
 
 hi       PreProc    guifg=#FF0007 guibg=#FFCCCE gui=NONE
 
