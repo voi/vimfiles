@@ -14,15 +14,15 @@ syntax region markdownCode start=/\z(\~\{3,}\)\%(\s*[^~]\+$\)\?/ end=/\z1\~*\s*$
 
 "" 5.2 List items
 syntax clear markdownListMarker
-syntax clear markdownListOrderedMarker
+syntax clear markdownOrderedListMarker
 
 syntax cluster markdownListNext contains=@markdownHeader,markdownCode,markdownFencedCode,markdownBlockquote,markdownRule
 
 syntax match markdownListMarker /[-+*]\s*$/ contained
 syntax match markdownListMarker /\([-+*]\)\s\+\%(\1\|[[:space:]]\)\@!/ contained nextgroup=@markdownListNext,@markdownInline skipwhite
 
-syntax match markdownListOrderedMarker /\d\{1,9}[.)]\s*$/ contained
-syntax match markdownListOrderedMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownListNext,@markdownInline skipwhite
+syntax match markdownOrderedListMarker /\d\{1,9}[.)]\s*$/ contained
+syntax match markdownOrderedListMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownListNext,@markdownInline skipwhite
 
 "" 6.4 Emphasis and strong emphasis
 function! s:EmphasisAndStrongStar(name, count) "{{{
