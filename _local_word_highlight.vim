@@ -88,10 +88,10 @@ function! WordHighlight_Update() abort "{{{
     call remove( w:match_table, l:key )
   endfor
 
-  for [ l:key, l:pattern ] in filter( items( s:entry_table ),
-      \ { idx, val -> !has_key( w:match_table, val[ 0 ] ) })
+  for l:key in filter( keys( s:entry_table ),
+      \ { idx, val -> !has_key( w:match_table, val ) })
     let w:match_table[ l:key ] = matchadd( printf( 'WordHighlight%d',
-        \ l:key % len( s:highlight_table )), l:pattern )
+        \ l:key % len( s:highlight_table )), s:entry_table[ l:key ] )
   endfor
 endfunction "}}}
 
