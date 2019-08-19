@@ -22,7 +22,7 @@ let g:eskk#large_dictionary = { 'path': globpath(&rtp, '_skk/SKK-JISYO.L'), 'sor
 
 let g:eskk#sub_dictionaries = extend(
     \ get(g:, 'eskk#sub_dictionaries', []),
-    \ map(sort(globpath(&rtp, '_skk/SKK-JISYO.*', 0, 1)), { -> { 'path': v:val, 'sorted': 1, 'encoding': 'euc-jp' } })
+    \ map(sort(globpath(&rtp, '_skk/SKK-JISYO.??*', 0, 1)), { -> { 'path': v:val, 'sorted': 1, 'encoding': 'euc-jp' } })
     \ )
 " default: encoding=euc-jp, timeout=1000, type=dictionary
 " let g:eskk#server = { 'host': 'localhost', 'port': 30001 }
