@@ -702,7 +702,7 @@ function! s:tag2qfitem(bufnr, fname, taginfo) "{{{
       \ }
 endfunction "}}}
 
-function! s:simple_outline(is_bang, files) "{{{
+function! s:simple_outline(is_loc, is_vert) "{{{
   if &fileencoding !=# &termencoding
     let lines = map(getbufline('%', 1, '$'), { idx, val -> iconv(val, &fileencoding, &termencoding) })
   else
@@ -714,28 +714,42 @@ function! s:simple_outline(is_bang, files) "{{{
   let fname = expand('%')
 
   call writefile(getbufline('%', 1, '$'), tmp_source)
-  let tags = map(map(systemlist('ctags -n -f - ' . tmp_source), 
+
+  let force = ''
+  if &filetype ==# 'vim' | let force = '--language-force=vim' | endif
+  if &filetype ==# 'markdown' | let foc = '--language-force=markdown' | endif
+
+  let tags = map(map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)), 
       \ { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
       \ { idx, val -> s:tag2qfitem(bufnr, fname, val) })
   call delete(tmp_source)
 
-  call setloclist(0, tags, ' ')
-
-  if a:is_bang
-    execute 'topleft vertical ' . (&columns/3) . ' lopen'
+  if a:is_vert
+    let vert = 'vertical ' . (&columns/3)
   else
-    topleft lopen
+    let vert = ''
   endif
 
-  call matchadd('Conceal', '^.\+|\d\+\%(\s*col\s*\d\+\)\?|')
-  call matchadd('SpecialKey', '(.*)$')
-  call matchadd('SpecialKey', ' : \w\+$')
+  if a:is_loc
+    call setloclist(0, tags, ' ')
+    execute 'topleft ' . vert . ' lopen'
+  else
+    call setqflist(tags, ' ')
+    execute 'topleft ' . vert . ' copen'
+  endif
 
-  setlocal concealcursor=n
-  setlocal conceallevel=3
+  if &filetype ==# 'qf'
+    call matchadd('Conceal', '^.\+|\d\+\%(\s*col\s*\d\+\)\?|')
+    call matchadd('SpecialKey', '(.*)$')
+    call matchadd('SpecialKey', ' : \w\+$')
+
+    setlocal concealcursor=n
+    setlocal conceallevel=3
+  endif
 endfunction "}}}
 
-command! -bang -nargs=1 -complete=file Outline  call <SID>simple_outline(<bang>0, [ <q-args> ])
+command! -bang Toc      call <SID>simple_outline(<bang>0, 0)
+command! -bang Outline  call <SID>simple_outline(<bang>0, 1)
 
 
 " *****************************************************************************
@@ -890,8 +904,8 @@ nnoremap <silent> <F10>   :cnext<CR>zz
 nnoremap <silent> <S-F10> :cprevious<CR>zz
 nnoremap <silent> <C-F10> :topleft cw<CR>
 
-nnoremap <silent> <F11>   :Outline  %<CR>
-nnoremap <silent> <S-F11> :Outline! %<CR>
+nnoremap <silent> <F11>   :Toc!<CR>
+nnoremap <silent> <S-F11> :Outline!<CR>
 
 nnoremap <silent> <F12>   :LGTag <C-r><C-w><CR>
 
