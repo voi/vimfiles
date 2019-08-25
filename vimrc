@@ -506,35 +506,22 @@ command! -range -nargs=+ -complete=customlist,<SID>Vimrc_Complete_Alignment Alig
 
 
 " *****************************************************************************
-function! s:escape_trim(word) abort "{{{
-  return substitute(escape(a:word, '\.*[]'), '\v^\s*|\s$', '', 'g')
+function! s:Vimrc_ToggleComment(first_line, last_line) abort "{{{
+  let [cbegin, cend] = split(escape(&commentstring, '/?'), '\s*%s\s*', 1)
+  let pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
+
+  for ln in range(a:first_line, a:last_line)
+    let line = getline(ln)
+
+    if line =~# pattern
+      call setline(ln, substitute(line, pattern, '\1\2', ''))
+    else
+      call setline(ln, substitute(line, '\v^(\s*)(\S.*)', '\1' . cbegin . '\2' . cend, ''))
+    endif
+  endfor
 endfunction "}}}
 
-function! s:Vimrc_ToggleComment() abort "{{{
-  let l:line = getline('.')
-  let [l:begin, l:end] = split(&commentstring, '%s', 1)
-
-  if match(l:begin, '\s\+$') < 0
-    let l:pattern = printf('\V\^\(\s\*\)%s\(\.\*\)%s',
-        \ s:escape_trim(l:begin), s:escape_trim(l:end))
-  else
-    let l:pattern = printf('\V\^\(\s\*\)%s\%%(%s\)\?\(\.\*\)%s', 
-        \ s:escape_trim(l:begin), matchstr(l:begin, '\s\+$'), s:escape_trim(l:end))
-  endif
-
-  if l:line =~# l:pattern
-    let l:line = substitute(l:line, l:pattern, '\1\2', '')
-  else
-    let l:line = substitute(l:line, '\v^(\s*)(\S.*)', '\1' . l:begin . '\2' . l:end, '')
-  endif
-
-  call setline('.', l:line)
-endfunction "}}}
-
-" command! -range -nargs=0 ToggleComment call <SID>Vimrc_ToggleComment(<line1>, <line2>) 
-
-nnoremap <silent> gc :call <SID>Vimrc_ToggleComment()<CR>
-vnoremap <silent> gc :call <SID>Vimrc_ToggleComment()<CR>
+command! -range -nargs=0 CommentIt call <SID>Vimrc_ToggleComment(<line1>, <line2>) 
 
 
 " *****************************************************************************
@@ -889,6 +876,9 @@ let g:changelog_username = '<localhost>'
 ""
 nnoremap <silent> <Leader>x :TodoToggle<CR>
 vnoremap <silent> <Leader>x :TodoToggle<CR>
+nnoremap <silent> gc :CommentIt<CR>
+vnoremap <silent> gc :CommentIt<CR>
+
 
 nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
 
