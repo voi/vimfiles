@@ -677,6 +677,33 @@ else
 endif
 
 
+" *****************************************************************************
+"
+command! -bang -nargs=? BufList  call <SID>set_and_open_quickfix(
+    \ {
+    \   'items': call({ pattern -> filter(map(filter(range(1, bufnr('$')),
+    \     { idx, val -> bufexists(val) && buflisted(val) && bufloaded(val) }),
+    \     { idx, val -> { 'bufnr':val, 'filename':bufname(val) } }),
+    \     { idx, val -> val.filename =~# join(pattern, '') }) },
+    \     [ [ '', <q-args> ] ]),
+    \   'title': 'buffers: <q-args>'
+    \ }, {
+    \   '|| $': 'Conceal'
+    \ },
+    \ <bang>0, 0)
+
+command! -bang -nargs=? Olds  call <SID>set_and_open_quickfix(
+    \ {
+    \   'items': call({ pattern -> filter(map(copy(v:oldfiles),
+    \     { idx, val -> { 'filename':fnamemodify(expand(val), ':p') } }),
+    \     { idx, val -> val.filename =~# join(pattern, '') }) },
+    \     [ [ '', <q-args> ] ]),
+    \   'title': 'oldfiles: <q-args>'
+    \ }, {
+    \   '|| $': 'Conceal'
+    \ },
+    \ <bang>0, 0)
+
 
 " *****************************************************************************
 "
@@ -872,6 +899,9 @@ nnoremap <silent> <Leader>x :GfmTodo<CR>
 vnoremap <silent> <Leader>x :GfmTodo<CR>
 
 nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
+
+nnoremap <Leader>b :BufList 
+nnoremap <Leader>u :Olds 
 
 vnoremap syy :EncloseText -a 
 vnoremap sdd :EncloseText -d 
