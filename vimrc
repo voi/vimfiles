@@ -630,19 +630,34 @@ function! s:do_command(cmdline) abort "{{{
   endif  
 endfunction
 
-function! s:quickfix_command(is_bang, commands, errformat) abort "{{{
-  let ctx = {
-      \ 'efm': a:errformat,
-      \ 'lines': split(s:do_command(join(a:commands, ' ')), '\n'),
-      \ 'title': join(a:commands, ' ')
-      \ }
-  if a:is_bang
-    call setloclist(0, [], ' ', ctx)
-    topleft lopen
+function! s:set_and_open_quickfix(what, colors, is_loc, is_vert) "{{{
+  let vert = a:is_vert ? 'vertical ' . (&columns/4) : ''
+
+  if a:is_loc
+    call setloclist(0, [], ' ', a:what)
+    execute 'topleft ' . vert . ' lopen'
   else
-    call setqflist([], ' ', ctx)
-    topleft copen
+    call setqflist([], ' ', a:what)
+    execute 'topleft ' . vert . ' copen'
   endif
+
+  if &filetype ==# 'qf' && !empty(a:colors)
+    for [ syn, hi ] in items(a:colors)
+      call matchadd(hi, syn)
+    endfor
+
+    setlocal concealcursor=n
+    setlocal conceallevel=3
+  endif
+endfunction "}}}
+
+function! s:quickfix_command(is_loc, commands, errformat) abort "{{{
+  call s:set_and_open_quickfix(
+      \ {
+      \   'efm': a:errformat,
+      \   'lines': split(s:do_command(join(a:commands, ' ')), '\n'),
+      \   'title': join(a:commands, ' ')
+      \ }, {}, is_loc, 0)
 endfunction "}}}
 
 
@@ -654,14 +669,13 @@ command! -bang -nargs=* GTag  call <SID>quickfix_command(
 command! -nargs=* LGTag GTag! <args>
 
 if has('win32')
-  command! -bang -nargs=? Ls  call <SID>quickfix_command(
+  command! -bang -nargs=? -complete=dir Ls  call <SID>quickfix_command(
       \ <bang>0, [ 'dir /B /A:-D ', <q-args> ], '%f')
 else
-  command! -bang -nargs=? Ls  call <SID>quickfix_command(
+  command! -bang -nargs=? -complete=dir Ls  call <SID>quickfix_command(
       \ <bang>0, [ 'ls -1 -F | grep -v /', <q-args> ], '%f')
 endif
 
-command! -nargs=0 LLs  Ls!
 
 
 " *****************************************************************************
@@ -689,49 +703,33 @@ function! s:tag2qfitem(bufnr, fname, taginfo) "{{{
 endfunction "}}}
 
 function! s:simple_outline(is_loc, is_vert) "{{{
-  if &fileencoding !=# &termencoding
-    let lines = map(getbufline('%', 1, '$'), { idx, val -> iconv(val, &fileencoding, &termencoding) })
-  else
-    let lines = getbufline('%', 1, '$')
-  endif
-
   let tmp_source = tempname() . '.' . expand('%:e')
-  let bufnr = bufnr('%')
-  let fname = expand('%')
 
   call writefile(getbufline('%', 1, '$'), tmp_source)
 
-  let force = ''
-  if &filetype ==# 'vim' | let force = '--language-force=vim' | endif
-  if &filetype ==# 'markdown' | let foc = '--language-force=markdown' | endif
 
+  let force = '' " ' --jcode=utf8 '
+
+  if &filetype ==# 'cpp' | let force .= '--language-force=c++' | endif
+  if &filetype ==# 'vim' | let force .= '--language-force=vim' | endif
+  if &filetype ==# 'markdown' | let force .= '--language-force=markdown' | endif
+
+  let bufnr = bufnr('%')
+  let fname = expand('%')
   let tags = map(map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)), 
       \ { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
       \ { idx, val -> s:tag2qfitem(bufnr, fname, val) })
+
   call delete(tmp_source)
-
-  if a:is_vert
-    let vert = 'vertical ' . (&columns/3)
-  else
-    let vert = ''
-  endif
-
-  if a:is_loc
-    call setloclist(0, tags, ' ')
-    execute 'topleft ' . vert . ' lopen'
-  else
-    call setqflist(tags, ' ')
-    execute 'topleft ' . vert . ' copen'
-  endif
-
-  if &filetype ==# 'qf'
-    call matchadd('Conceal', '^.\+|\d\+\%(\s*col\s*\d\+\)\?|')
-    call matchadd('SpecialKey', '(.*)$')
-    call matchadd('SpecialKey', ' : \w\+$')
-
-    setlocal concealcursor=n
-    setlocal conceallevel=3
-  endif
+  call s:set_and_open_quickfix(
+      \ { 'items': tags, 'title': printf('ctags %s', tmp_source)},
+      \ {
+      \   '^.\+|\d\+\%(\s*col\s*\d\+\)\?|': 'Conceal',
+      \   '(.*)$': 'SpecialKey',
+      \   ' : \w\+$': 'SpecialKey',
+      \   ' \.\.\+': 'SpecialKey'
+      \ },
+      \ a:is_loc, a:is_vert)
 endfunction "}}}
 
 command! -bang Toc      call <SID>simple_outline(<bang>0, 0)
