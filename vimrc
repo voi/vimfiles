@@ -609,12 +609,9 @@ command! -range -nargs=* -complete=customlist,<SID>Vimrc_Complete_EncloseText
 
 
 " *****************************************************************************
-function! s:Vimrc_ToggleTodoList(begin, end) range "{{{
-  silent execute printf('silent %d,%ds/^\s*[-+*] \zs\[\([x ]\)\]/\=(submatch(1) ==# "x" ? "[ ]" : "[x]")/',
-      \ a:begin, a:end)
-endfunction "}}}
-
-command! -range -nargs=0 TodoToggle call <SID>Vimrc_ToggleTodoList(<line1>, <line2>)
+command! -range -nargs=0 GfmTodo call call({ begin, end -> 
+    \ execute(printf('silent %d,%ds/^\s*[-+*] \zs\[[x ]\]/\=(submatch(0) ==# "[x]" ? "[ ]" : "[x]")/', begin, end)) },
+    \ [ <line1>, <line2> ])
 
 
 " *****************************************************************************
@@ -874,11 +871,11 @@ let g:changelog_username = '<localhost>'
 
 
 ""
-nnoremap <silent> <Leader>x :TodoToggle<CR>
-vnoremap <silent> <Leader>x :TodoToggle<CR>
 nnoremap <silent> gc :CommentIt<CR>
 vnoremap <silent> gc :CommentIt<CR>
 
+nnoremap <silent> <Leader>x :GfmTodo<CR>
+vnoremap <silent> <Leader>x :GfmTodo<CR>
 
 nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
 
