@@ -112,6 +112,7 @@ set isfname+=(,)
 
 set autowrite autowriteall
 set autoread
+set autochdir
 
 
 " ***********************************************
@@ -149,10 +150,8 @@ onoremap a' 2i'
 onoremap a` 2i`
 
 ""
-nnoremap x "_x
-nnoremap X "_X
-vnoremap x "_x
-vnoremap X "_X
+nnoremap d "_d
+vnoremap d "_d
 
 inoremap <silent> <C-l> <Del>
 
@@ -180,6 +179,13 @@ nnoremap <silent> cj :cnext<CR>zz
 " buffer
 nnoremap <silent> [b :bprev<CR>
 nnoremap <silent> ]b :bnext<CR>
+
+" window
+nnoremap <silent> sj <C-w>j
+nnoremap <silent> sk <C-w>k
+nnoremap <silent> sh <C-w>h
+nnoremap <silent> sl <C-w>l
+nnoremap <silent> sp <C-w>p
 
 
 " hints
