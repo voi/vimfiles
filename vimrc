@@ -190,11 +190,7 @@ nnoremap <silent> sp <C-w>p
 
 " hints
 function! Vimrc_Register_hints(prefix, cmd) abort
-  redir => str
-  :execute a:cmd
-  redir END
-
-  echo str
+  echo execute(a:cmd)
 
   return a:prefix . nr2char(getchar())
 endfunction
@@ -627,11 +623,11 @@ vnoremap <silent> <C-j> :'<,'>move '>+1<CR>gv
 
 " *****************************************************************************
 function! s:do_command(cmdline) abort "{{{
-  " if has('iconv') && (&termencoding != &encoding)  
-    " return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)   
-  " else  
+  if has('iconv') && (&termencoding != &encoding)  
+    return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)   
+  else  
     return system(a:cmdline)
-  " endif  
+  endif  
 endfunction
 
 function! s:quickfix_command(is_bang, commands, errformat) abort "{{{
