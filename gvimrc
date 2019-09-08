@@ -52,6 +52,8 @@ if has('win32')
   set columns=120
   set lines=50
   set linespace=1
+  " UD_デジタル_教科書体_N-R:h11
+  " NasuM:h12
   set guifont=Cica:h12,Consolas:h12
   set guifontwide=Cica:h12,HGGothicM:h12
   set rop=type:directx,renmode:5,taamode:1,contrast:3
@@ -60,7 +62,6 @@ endif
 
 " colorscheme delek
 " colorscheme desert
-" colorscheme fruchtig
 colorscheme suika
 
 

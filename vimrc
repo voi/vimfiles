@@ -30,7 +30,6 @@ set fileencodings=utf-8,ucs-bom,euc-jp,eucjp-jisx0213,cp932,iso-2022-jp-3,iso-20
 if has('win32')
   set makeencoding=cp932
   set termencoding=cp932
-  set clipboard& clipboard+=unnamed
 endif
 
 
@@ -51,8 +50,8 @@ set statusline+=%#StatusLine_Insert#%{(mode()=='i')?'\ \ IN\ ':''}
 set statusline+=%#StatusLine_Replace#%{(mode()=='r')?'\ \ RE\ ':''}
 set statusline+=%#StatusLine_Visual#%{(mode()=='v')?'\ \ VI\ ':''}
 set statusline+=%#StatusLine_Modes#
-set statusline+=%{(&modified?'！':'')}
-set statusline+=%{(&readonly?'×':'')}
+set statusline+=%{(&modified?'⚡':'')}
+set statusline+=%{(&readonly?'❎':'')}
 set statusline+=〉
 set statusline+=%#StatusLine#
 set statusline+=\ %{pathshorten(bufname('%'))}  " short file name
@@ -101,6 +100,7 @@ set copyindent preserveindent
 set complete=.,b,k
 set wildignorecase
 set wildmode=list:full
+set pumheight=32
 
 if has('win32')
   set wildignore+=*\\.git\\*,*\\.hg\\*,*\\.svn\\*  " Windows ('noshellslash')
@@ -113,6 +113,10 @@ set isfname+=(,)
 set autowrite autowriteall
 set autoread
 set autochdir
+
+if has('clipboard')
+  set clipboard=
+endif
 
 
 " ***********************************************
@@ -158,16 +162,27 @@ inoremap <silent> <C-l> <Del>
 "" 
 nnoremap <silent> Y y$
 
+if has('clipboard')
+  nnoremap <silent> gy "*y
+  nnoremap <silent> gp "*p
+  nnoremap <silent> gP "*P
+
+  vnoremap <silent> gy "*y
+  vnoremap <silent> gp "*p
+  vnoremap <silent> gP "*P
+
+  vnoremap <silent> * "*p`<
+endif
+
 " visual replace
 vnoremap <silent> _ "0p`<
-vnoremap <silent> * "*p`<
 
 "" switch modes.
-nnoremap <silent> <Leader>e :setlocal expandtab! expandtab? <CR>
-nnoremap <silent> <Leader>h :setlocal hlsearch!  <CR>
-nnoremap <silent> <Leader>r :setlocal readonly!  readonly? <CR>
-nnoremap <silent> <Leader>w :setlocal wrap!      wrap?<CR>
-nnoremap <silent> <Leader>i :setlocal incsearch! incsearch?<CR>
+nnoremap <silent> <Leader>e :setl expandtab! expandtab?<CR>
+nnoremap <silent> <Leader>h :setl hlsearch!  hlsearch?<CR>
+nnoremap <silent> <Leader>r :setl readonly!  modifiable! modifiable?<CR>
+nnoremap <silent> <Leader>w :setl wrap!      wrap?<CR>
+nnoremap <silent> <Leader>i :setl incsearch! incsearch?<CR>
 
 " error jumps.
 nnoremap <silent> cp :lprevious<CR>zz
@@ -187,6 +202,15 @@ nnoremap <silent> sh <C-w>h
 nnoremap <silent> sl <C-w>l
 nnoremap <silent> sp <C-w>p
 
+" text operations
+nnoremap <silent> <Leader>d :copy .-1<CR>
+vnoremap <silent> <Leader>d :'<,'>copy '<-1<CR>gv
+
+nnoremap <silent> <C-k> :move .-2<CR>
+nnoremap <silent> <C-j> :move .+1<CR>
+
+vnoremap <silent> <C-k> :'<,'>move '<-2<CR>gv
+vnoremap <silent> <C-j> :'<,'>move '>+1<CR>gv
 
 " hints
 function! Vimrc_Register_hints(prefix, cmd) abort
@@ -293,11 +317,11 @@ function! s:Vimrc_HighlightPlus() abort "{{{
   highlight link TrailingSpace NonText
 
   if &g:background ==# 'dark'
-    " highlight SpecialKey   gui=NONE      guifg=#808080  guibg=bg ctermfg=grey 
+    highlight SpecialKey   gui=NONE      guifg=#808080  guibg=bg ctermfg=grey 
     highlight ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
 
   else
-    " highlight SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
+    highlight SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
     highlight ZenkakuSpace gui=underline guifg=grey cterm=underline ctermfg=grey
 
   endif
@@ -333,10 +357,8 @@ augroup vimrc_auto_commands
   autocmd!
 
   " ** filetype
-  autocmd BufNewFile,BufRead *.hta setfiletype  xhtml
   autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setfiletype  xml
   autocmd BufRead,BufNewFile *.cas setf casl2
-  autocmd BufRead,BufNewFile *.changelog setf changelog
 
   if has('win32')
     autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setlocal fenc=cp932 ff=dos
@@ -611,17 +633,6 @@ command! -range -nargs=0 GfmTodo call call({ begin, end ->
 
 
 " *****************************************************************************
-nnoremap <silent> <Leader>d :copy .-1<CR>
-vnoremap <silent> <Leader>d :'<,'>copy '<-1<CR>gv
-
-nnoremap <silent> <C-k> :move .-2<CR>
-nnoremap <silent> <C-j> :move .+1<CR>
-
-vnoremap <silent> <C-k> :'<,'>move '<-2<CR>gv
-vnoremap <silent> <C-j> :'<,'>move '>+1<CR>gv
-
-
-" *****************************************************************************
 function! s:do_command(cmdline) abort "{{{
   if has('iconv') && (&termencoding != &encoding)  
     return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)   
@@ -657,7 +668,7 @@ function! s:quickfix_command(is_loc, commands, errformat) abort "{{{
       \   'efm': a:errformat,
       \   'lines': split(s:do_command(join(a:commands, ' ')), '\n'),
       \   'title': join(a:commands, ' ')
-      \ }, {}, is_loc, 0)
+      \ }, {}, a:is_loc, 0)
 endfunction "}}}
 
 
@@ -754,7 +765,8 @@ function! s:simple_outline(is_loc, is_vert) "{{{
       \   '^.\+|\d\+\%(\s*col\s*\d\+\)\?|': 'Conceal',
       \   '(.*)$': 'SpecialKey',
       \   ' : \w\+$': 'SpecialKey',
-      \   ' \.\.\+': 'SpecialKey'
+      \   ' \.\.\+': 'SpecialKey',
+      \   '__anon\w\+\(\.\|::\)': 'SpecialKey'
       \ },
       \ a:is_loc, a:is_vert)
 endfunction "}}}
@@ -861,7 +873,7 @@ endfunction "}}}
 
 function! s:Vimrc_ReadTemplatePost() abort "{{{
   call setline("'[", map(getline("'[", "']"), { idx, val -> 
-      \ substitute(val, '%[YmdHMS]', '\=strftime(submatch(0))', 'g') }))
+      \ substitute(val, '%[YmdaAHMS]', '\=strftime(submatch(0))', 'g') }))
 endfunction "}}}
 
 command! -nargs=1 -complete=customlist,Plugin_ReadTemplate_Complete Snippet 
