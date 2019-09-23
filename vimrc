@@ -234,6 +234,12 @@ nnoremap <expr> <Leader>@  Vimrc_Register_hints('@', 'registers')
 
 
 " ***********************************************
+inoreabbr -d <C-r>=strftime('%Y-%m-%d')<CR>
+inoreabbr /d <C-r>=strftime('%Y/%m/%d')<CR>
+inoreabbr -t <C-r>=strftime('%H:%M:%s')<CR>
+
+
+" ***********************************************
 "" utility commands
 "" tempolaly buffer.
 command! -nargs=? -complete=filetype Temp 
@@ -383,7 +389,11 @@ augroup vimrc_auto_commands
 
   " visualize wide-space (need scriptencoding == fenc on vimrc)
   autocmd VimEnter,WinEnter * call matchadd('ZenkakuSpace', '　')
-  autocmd VimEnter,WinEnter * call matchadd('TrailingSpace', '\s\{2,\}$')
+      \ | call matchadd('TrailingSpace', '\s\{2,\}$')
+      \ | call matchadd('Identifier', '\d\{4}-\d\{2}-\d\{2}')
+      \ | call matchadd('Identifier', '\d\{4}\/\d\{2}\/\d\{2}')
+      \ | call matchadd('Identifier', '\d\{2}:\d\{2}\%(:\d\{2}\%(\.\d\{1,3}\)\?\)\?')
+
 
   " additional colors
   autocmd VimEnter,ColorScheme * call <SID>Vimrc_HighlightPlus()
@@ -406,7 +416,7 @@ augroup vimrc_auto_commands
 
   autocmd FileType markdown setlocal nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_IndentExpr_Markdown()
       \ | setlocal tabstop=4 commentstring=<!--\ %s\ -->
-      \ | iabbr <buffer> -[ - [ ]
+      \ | inoreabbr <buffer> -[ - [ ]
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
 
@@ -529,12 +539,11 @@ function! s:Vimrc_ToggleComment(first_line, last_line) abort "{{{
   let pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
 
   for ln in range(a:first_line, a:last_line)
-    let line = getline(ln)
-
-    if line =~# pattern
-      call setline(ln, substitute(line, pattern, '\1\2', ''))
+    if getline(ln) =~# pattern
+      execute printf('%ds/%s/\1\2/', ln, pattern)
     else
-      call setline(ln, substitute(line, '\v^(\s*)(\S.*)', '\1' . cbegin . '\2' . cend, ''))
+      execute printf('%ds/\v^(\s*)(\S.*)/\1%s%s\2%s%s/',
+          \ ln, cbegin, (empty(cbegin) ? '' : ' '), (empty(cend) ? '' : ' '), cend)
     endif
   endfor
 endfunction "}}}
@@ -815,20 +824,15 @@ command! -nargs=? -complete=file GitResolved  call <SID>buffer_command_do('git r
 " *****************************************************************************
 "
 augroup vimrc_additional_syntax
-  autocmd FileType * syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
-      \ | syn match Bold /[{}]/
-      \ | syn match Date /\d\{4}-\d\{2}-\d\{2}/
-      \ | syn match Time /\d\{2}:\d\{2}\%(:\d\{2}\%(\.\d\{1,3}\)\?\)\?/
-      \ | hi Bold gui=bold
-      \ | hi def link Date Identifier
-      \ | hi def link Time Identifier
-
-  autocmd FileType c,cpp syn keyword Typedef __int16 __int32 __int64 __fastcall
+  autocmd FileType c,cpp
+      \   syn keyword Typedef __int16 __int32 __int64 __fastcall
       \ | syn keyword int16_t uint16_t int32_t uint32_t int64_t uint64_t
       \ | syn keyword Typedef BYTE WORD DWORD SHORT USHORT LONG ULONG LONGLONG ULONGLONG
       \ | syn keyword Typedef WPARAM LPARAM BOOL TRUE FALSE WINAPI UINT_PTR
 
-  autocmd FileType c,cpp,java,javascript syn match Operator /;;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
+  autocmd FileType c,cpp,java,javascript 
+      \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
+      \ | syn match Operator /;;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
       \ | syn match Operator /::\ze\w/
       \ | syn match Operator /\>[\*&]/
       \ | syn match Operator /\*\</
@@ -836,7 +840,7 @@ augroup vimrc_additional_syntax
       \ | syn match Statement /[!&]\ze(/
       \ | syn match Statement /\%(->\|\.\)\</
 
-  autocmd FileType log syn match LogDateTime  /\d\{4}\/\d\{2}\/\d\{2}/
+  autocmd FileType log 
       \ | syn match LogDumpNonZero /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/
       \ | syn match LogDumpZero    /\<00\>/
       \ | syn match LogDumpSpace   /\<20\>/
@@ -904,8 +908,8 @@ let g:changelog_username = '<localhost>'
 
 
 ""
-nnoremap <silent> gc :CommentIt<CR>
-vnoremap <silent> gc :CommentIt<CR>
+nnoremap <silent> <C-q> :CommentIt<CR>
+vnoremap <silent> <C-q> :CommentIt<CR>
 
 nnoremap <silent> <Leader>x :GfmTodo<CR>
 vnoremap <silent> <Leader>x :GfmTodo<CR>
