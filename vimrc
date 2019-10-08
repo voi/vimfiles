@@ -66,7 +66,6 @@ set guioptions+=cM
 
 set number
 set list
-set nowrap
 
 if has('gui')
   " |¦»▸>￫↲
@@ -96,6 +95,7 @@ set tabstop=4 shiftwidth=4 softtabstop=4
 
 set autoindent smartindent
 set copyindent preserveindent
+set breakindent breakindentopt=shift:2
 
 set complete=.,b,k
 set wildignorecase
@@ -183,6 +183,7 @@ nnoremap <silent> <Leader>h :setl hlsearch!  hlsearch?<CR>
 nnoremap <silent> <Leader>r :setl readonly!  modifiable! modifiable?<CR>
 nnoremap <silent> <Leader>w :setl wrap!      wrap?<CR>
 nnoremap <silent> <Leader>i :setl incsearch! incsearch?<CR>
+nnoremap <silent> <Leader>s :setl wrapscan!  wrapscan?<CR>
 
 " error jumps.
 nnoremap <silent> cp :lprevious<CR>zz
@@ -244,10 +245,6 @@ inoreabbr -t <C-r>=strftime('%H:%M:%s')<CR>
 "" tempolaly buffer.
 command! -nargs=? -complete=filetype Temp 
     \ execute printf('tabe %s_%s | setf %s', tempname(), strftime('%Y-%m-%d_%H-%M-%S'),
-    \   ('<args>' ==# '' ? (&filetype ==# 'qf' ? 'text' : &filetype) : '<args>'))
-
-command! -nargs=? -complete=filetype Scratch 
-    \ execute printf('tabe | setf %s',
     \   ('<args>' ==# '' ? (&filetype ==# 'qf' ? 'text' : &filetype) : '<args>'))
 
 "" rename
@@ -388,12 +385,13 @@ augroup vimrc_auto_commands
       \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
 
   " visualize wide-space (need scriptencoding == fenc on vimrc)
-  autocmd VimEnter,WinEnter * call matchadd('ZenkakuSpace', '　')
+  autocmd VimEnter,WinEnter * hi def Bold gui=bold
+      \ | call matchadd('ZenkakuSpace', '　')
       \ | call matchadd('TrailingSpace', '\s\{2,\}$')
-      \ | call matchadd('Identifier', '\d\{4}-\d\{2}-\d\{2}')
-      \ | call matchadd('Identifier', '\d\{4}\/\d\{2}\/\d\{2}')
-      \ | call matchadd('Identifier', '\d\{2}:\d\{2}\%(:\d\{2}\%(\.\d\{1,3}\)\?\)\?')
-
+      \ | call matchadd('Identifier', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
+      \ | call matchadd('Identifier', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
+      \ | call matchadd('Identifier', '\%(2[0-3]\|1[0-9]\|0[1-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
+      \ | call matchadd('Bold', '[{}]')
 
   " additional colors
   autocmd VimEnter,ColorScheme * call <SID>Vimrc_HighlightPlus()
@@ -506,22 +504,23 @@ function! s:Vimrc_Alignment(startl, endl, arguments) abort "{{{
   endif
 
   let l:ctx = s:align_parse(a:arguments)
-  let l:line_tokens = map(getline(a:startl, a:endl),
-      \ { key, val -> split(substitute(val, l:ctx.pattern, l:ctx.sub, l:ctx.global), l:ctx.delim, 1) })
+  let l:line_tokens = getline(a:startl, a:endl)
+      \ ->map({ key, val -> split(substitute(val, l:ctx.pattern, l:ctx.sub, l:ctx.global), l:ctx.delim, 1) })
   let l:width = 0
 
-  while max(map(copy(l:line_tokens), { key, val -> (len(val) > 1) }))
+  while l:line_tokens->copy()->map({ key, val -> (len(val) > 1) })->max()
     " 
-    let l:width = max(map(filter(copy(l:line_tokens),
-        \ { idx, val -> (len(val) > 1) }),
-        \ { key, val -> strdisplaywidth(val[0]) }))
+    let l:width = l:line_tokens->copy()
+        \ ->filter({ idx, val -> (len(val) > 1) })
+        \ ->map({ key, val -> strdisplaywidth(val[0]) })
+        \ ->max()
     " 
-    let l:line_tokens = map(l:line_tokens,
-        \ { key, val -> s:align_token(val, l:width, l:ctx) })
+    let l:line_tokens = l:line_tokens
+        \ ->map({ key, val -> s:align_token(val, l:width, l:ctx) })
   endwhile
 
   if l:width > 0
-    call setline(a:startl, map(l:line_tokens, 'v:val[0]'))
+    call setline(a:startl, l:line_tokens->map('v:val[0]'))
   endif
 endfunction "}}}
 
@@ -644,7 +643,7 @@ command! -range -nargs=0 GfmTodo call call({ begin, end ->
 " *****************************************************************************
 function! s:do_command(cmdline) abort "{{{
   if has('iconv') && (&termencoding != &encoding)  
-    return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)   
+    return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)
   else  
     return system(a:cmdline)
   endif  
@@ -701,11 +700,11 @@ endif
 "
 command! -bang -nargs=? BufList  call <SID>set_and_open_quickfix(
     \ {
-    \   'items': call({ pattern -> filter(map(filter(range(1, bufnr('$')),
-    \     { idx, val -> bufexists(val) && buflisted(val) && bufloaded(val) }),
-    \     { idx, val -> { 'bufnr':val, 'filename':bufname(val) } }),
-    \     { idx, val -> val.filename =~# join(pattern, '') }) },
-    \     [ [ '', <q-args> ] ]),
+    \   'items': call({ pattern -> range(1, bufnr('$'))
+    \     ->filter({ idx, val -> bufexists(val) && buflisted(val) && bufloaded(val) })
+    \     ->map({ idx, val -> { 'bufnr':val, 'filename':bufname(val) } })
+    \     ->filter({ idx, val -> val.filename =~# join(pattern, '') })
+    \   }, [ [ '', <q-args> ] ]),
     \   'title': 'buffers: <q-args>'
     \ }, {
     \   '|| $': 'Conceal'
@@ -714,10 +713,10 @@ command! -bang -nargs=? BufList  call <SID>set_and_open_quickfix(
 
 command! -bang -nargs=? Olds  call <SID>set_and_open_quickfix(
     \ {
-    \   'items': call({ pattern -> filter(map(copy(v:oldfiles),
-    \     { idx, val -> { 'filename':fnamemodify(expand(val), ':p') } }),
-    \     { idx, val -> val.filename =~# join(pattern, '') }) },
-    \     [ [ '', <q-args> ] ]),
+    \   'items': call({ pattern -> copy(v:oldfiles)
+    \     ->map({ idx, val -> { 'filename':fnamemodify(expand(val), ':p') } })
+    \     ->filter({ idx, val -> val.filename =~# join(pattern, '') })
+    \ }, [ [ '', <q-args> ] ]),
     \   'title': 'oldfiles: <q-args>'
     \ }, {
     \   '|| $': 'Conceal'
@@ -763,9 +762,10 @@ function! s:simple_outline(is_loc, is_vert) "{{{
 
   let bufnr = bufnr('%')
   let fname = expand('%')
-  let tags = map(map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)), 
-      \ { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
-      \ { idx, val -> s:tag2qfitem(bufnr, fname, val) })
+  let tags = printf('ctags -n -f - %s %s', force, tmp_source)
+      \ ->systemlist()
+      \ ->map({ idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') })
+      \ ->map({ idx, val -> s:tag2qfitem(bufnr, fname, val) })
 
   call delete(tmp_source)
   call s:set_and_open_quickfix(
@@ -859,8 +859,8 @@ function! Plugin_ReadTemplate_Complete(ArgLead, CmdLine, CursorPos) abort "{{{
   if &filetype !=# ''
     let l:template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
 
-    return map(globpath(l:template_path, '*.' . &filetype, 0, 1),
-        \ { idx, val -> fnamemodify(val, ':t:r') })
+    return globpath(l:template_path, '*.' . &filetype, 0, 1)
+        \ ->map({ idx, val -> fnamemodify(val, ':t:r') })
   else
     return []
   endif
@@ -876,8 +876,8 @@ function! s:Vimrc_ReadTemplate(files) abort "{{{
 endfunction "}}}
 
 function! s:Vimrc_ReadTemplatePost() abort "{{{
-  call setline("'[", map(getline("'[", "']"), { idx, val -> 
-      \ substitute(val, '%[YmdaAHMS]', '\=strftime(submatch(0))', 'g') }))
+  call setline("'[", getline("'[", "']")
+      \ ->map({ idx, val -> substitute(val, '%[YmdaAHMS]', '\=strftime(submatch(0))', 'g') }))
 endfunction "}}}
 
 command! -nargs=1 -complete=customlist,Plugin_ReadTemplate_Complete Snippet 
@@ -927,7 +927,7 @@ nnoremap sn  :Snippet
 
 
 ""
-nnoremap <silent> <Leader>s :up<CR>
+nnoremap <silent> <Leader><Leader> :up<CR>
 
 nnoremap <silent> <F9>    :lnext<CR>zz
 nnoremap <silent> <S-F9>  :lprevious<CR>zz
