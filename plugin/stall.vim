@@ -296,7 +296,7 @@ call Stall_add_source('buffer', g:stall_source_buffer)
 " ****************************************************************
 let g:stall_source_mru = {
     \ '_collection': 'oldfiles',
-    \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3  (\2)', '') },
+    \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3  :(\2)', '') },
     \ 'extract': { val -> substitute(val, '^\d\+:\s*', '', '') },
     \ 'open':   { context, flags -> context.fopen( 'e   ', context, flags) },
     \ 'tabopen':{ context, flags -> context.fopen( 'tabe', context, flags) },
@@ -310,7 +310,7 @@ function! g:stall_source_mru._on_ready(context, flags) "{{{
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
 
-  call matchadd('SpecialKey', '(.*)$')
+  call matchadd('Comment', ':(.*)$')
 endfunction "}}}
 
 function! g:stall_source_mru.fopen(cmd, context, flags) "{{{
@@ -332,7 +332,7 @@ call Stall_add_source('mru', g:stall_source_mru)
 
 " ****************************************************************
 let g:stall_source_files = {
-    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2  (\1)', '') },
+    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2  :(\1)', '') },
     \ 'tabopen':{ context, flags -> context.fopen('tabe', context, flags) },
     \ 'vsplit': { context, flags -> context.fopen('vsp ', context, flags) },
     \ 'split':  { context, flags -> context.fopen('sp  ', context, flags) }
@@ -353,6 +353,9 @@ function! g:stall_source_files._on_ready(context, flags) "{{{
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
   nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
+
+  call matchadd('Comment', ':(.*)$')
+  call matchadd('Statement', '[\\/]\ze ')
 endfunction "}}}
 
 function! g:stall_source_files.enter(context, flags) "{{{
@@ -381,15 +384,17 @@ function! g:stall_source_files.fopen(cmd, context, flags) "{{{
   let items = Stall_get_marked_items(a:context)
 
   if len(items) > 0
-    for cmd in items->map({ idx, val -> printf('%s %s', a:cmd, a:context.extract(val)) })
+    for cmd in items->map({ idx, val -> printf('%s %s', a:cmd, val) })
       execute cmd
     endfor
   else
-    execute printf('%s %s', a:cmd, a:context.extract(Stall_get_current_item(a:context, '')))
+    execute printf('%s %s', a:cmd, Stall_get_current_item(a:context, ''))
   endif
 endfunction "}}}
 
 call Stall_add_source('files', g:stall_source_files)
+
+command! -nargs=? -complete=dir StallFiles Stall files <args>
 
 
 " ****************************************************************
