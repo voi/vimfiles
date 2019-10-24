@@ -1,7 +1,7 @@
 " vim:ft=vim
 syntax clear markdownLineStart
 syntax match markdownLineStart /^\%(\s*\S\)\@=/
-    \ nextgroup=@markdownBlock,htmlSpecialChar skipwhite display
+    \ nextgroup=@markdownBlock,@markdownInline,htmlSpecialChar skipwhite display
 
 "" 4.2 ATX headers
 syn clear markdownH1
