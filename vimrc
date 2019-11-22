@@ -164,10 +164,12 @@ nnoremap <silent> Y y$
 
 if has('clipboard')
   nnoremap <silent> gy "*y
+  nnoremap <silent> gx "*x
   nnoremap <silent> gp "*p
   nnoremap <silent> gP "*P
 
   vnoremap <silent> gy "*y
+  vnoremap <silent> gx "*x
   vnoremap <silent> gp "*p
   vnoremap <silent> gP "*P
 
@@ -856,23 +858,19 @@ augroup END
 " *****************************************************************************
 "
 function! Plugin_ReadTemplate_Complete(ArgLead, CmdLine, CursorPos) abort "{{{
-  if &filetype !=# ''
-    let l:template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
+  let pattern = ( &filetype ==# '' ) ? '*' : '*.' . &filetype
+  let template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
 
-    return globpath(l:template_path, '*.' . &filetype, 0, 1)
-        \ ->map({ idx, val -> fnamemodify(val, ':t:r') })
-  else
-    return []
-  endif
+  return globpath(template_path, pattern, 0, 1)
+      \ ->map({ idx, val -> fnamemodify(val, ':t') })
 endfunction "}}}
 
 function! s:Vimrc_ReadTemplate(files) abort "{{{
-  if &filetype !=# ''
-    let l:template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
-    let l:template_path = fnamemodify(l:template_path, ':p') . a:files . '.' . &filetype
+  let afile = a:files . (( &filetype ==# '' ) ? '' : '.' . &filetype)
+  let template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
+  let template_path = fnamemodify(template_path, ':p') . afile
 
-    execute '.r ' . l:template_path
-  endif
+  execute '.r ' . template_path
 endfunction "}}}
 
 function! s:Vimrc_ReadTemplatePost() abort "{{{
@@ -916,8 +914,8 @@ vnoremap <silent> <Leader>x :GfmTodo<CR>
 
 nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
 
-nnoremap <Leader>b :BufList 
-nnoremap <Leader>u :Olds 
+nnoremap <Leader>b :BufList<CR>
+nnoremap <Leader>u :Olds<CR>
 
 vnoremap syy :EncloseText -a 
 vnoremap sdd :EncloseText -d 
