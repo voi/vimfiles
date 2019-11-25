@@ -61,10 +61,15 @@ function! s:stall_open(mods, args) "{{{
 
   "
   let winsize = ''
+  let bounds = []
 
   for opt in a:args->copy()->filter({ idx, val -> val =~# '^-' })
-    if opt =~# '^-no-quit$' | let context._no_quit = 1
-    elseif opt =~# '^-winsize=\d\+%\?$'   | let winsize = substitute(opt, '^-winsize=', '', '')
+    if opt =~# '^-no-quit$' 
+      let context._no_quit = 1
+    elseif opt =~# '^-winsize=\d\+%\?$'
+      let winsize = substitute(opt, '^-winsize=', '', '')
+    elseif opt =~# '^-fix-height=\d\+,\d\+$'
+      let bounds = split(substitute(opt, '^-fix-height=', '', ''), ',')->map({ idx, val -> str2nr(val) })
     endif
   endfor
 
@@ -97,6 +102,10 @@ function! s:stall_open(mods, args) "{{{
   call s:stall_call_handler(context, '_on_ready')
   call s:stall_update_view(context)
   call s:stall_set_context(context)
+
+  if !empty(bounds)
+    execute printf("%dwincmd _", max([min([line('$'), bounds[1]]), bounds[0]]))
+  endif
 endfunction "}}}
 
 function! s:stall_update_view(context)
