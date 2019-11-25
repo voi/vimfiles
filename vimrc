@@ -385,6 +385,8 @@ augroup vimrc_auto_commands
       \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
   autocmd FileType qf nnoremap <buffer> <expr> <C-N> printf(":%snewer\<CR>",
       \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
+  " <https://vim.fandom.com/wiki/Automatically_fitting_a_quickfix_window_height>
+  autocmd FileType qf execute printf("%dwincmd _", max([min([line("$"), 15]), 5]))
 
   " visualize wide-space (need scriptencoding == fenc on vimrc)
   autocmd VimEnter,WinEnter * hi def Bold gui=bold
