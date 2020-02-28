@@ -1,8 +1,7 @@
 "" vim: set ft=vim foldmethod=marker
 "" vim: set et ts=2 sts=2 sw=2
 if has('gui_running') && has('clientserver') && argc() && !&diff
-  let g:ignore_servers = [ v:servername ]
-  let servers = filter(split(serverlist(), '\n'), { idx, val -> index(g:ignore_servers, val) == -1 })
+  let servers = filter(split(serverlist(), '\n'), { idx, val -> v:servername !=# val })
 
   if !empty(servers)
     silent execute '!start gvim'
@@ -80,12 +79,14 @@ endif
 if has('conceal') | set conceallevel=1 | endif 
 
 set colorcolumn=120
-set formatoptions+=jnmM
+set formatoptions+=jnmM2
+set formatoptions-=l
 set display=lastline
 set nofixendofline
 set showtabline=2
 set textwidth=0
 set scrolloff=0
+set nowrap
 
 set whichwrap+=h,l,<,>,[,]
 set virtualedit+=block
@@ -153,27 +154,30 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-""
-nnoremap d "_d
-vnoremap d "_d
+"" blackhole
+nnoremap <silent> d "_d
+vnoremap <silent> d "_d
 
+"" home-key del
 inoremap <silent> <C-l> <Del>
 
-"" 
+"" compatible D
 nnoremap <silent> Y y$
 
+"" clipboard
 if has('clipboard')
   nnoremap <silent> gy "*y
+  nnoremap <silent> gY "*y$
   nnoremap <silent> gx "*x
+  nnoremap <silent> gX "*X
   nnoremap <silent> gp "*p
   nnoremap <silent> gP "*P
 
   vnoremap <silent> gy "*y
   vnoremap <silent> gx "*x
+  vnoremap <silent> gX "*X
   vnoremap <silent> gp "*p
   vnoremap <silent> gP "*P
-
-  vnoremap <silent> * "*p`<
 endif
 
 " visual replace
@@ -346,13 +350,28 @@ function! s:Vimrc_AutoComplete() abort "{{{
 endfunction "}}}
 
 " markdown indentexpr
-function! Vimrc_IndentExpr_Markdown() "{{{
+function! Vimrc_Markdown_IndentExpr() "{{{
   if v:lnum == 1 | return -1 | endif
 
   let l:baseLineNum = prevnonblank(v:lnum - 1)
   let l:marker = matchstr(getline(l:baseLineNum), '^\s*\zs\([-+*]\|\d\+[\.)]\)\s\+')
 
   return (l:marker !=# '' ? indent(l:baseLineNum) + len(l:marker) : -1)
+endfunction "}}}
+
+function! Vimrc_CLang_IncludeExpr(fname) "{{{
+  return get(system('global -P -a ' . a:fname)->split('\n'), 0, a:fname)
+endfunction "}}}
+
+function! Vimrc_CLang_TagFunc(pattern, flag, info) "{{{
+  let cmd = (a:flag ==# 'i') ?
+      \ printf('global -qat -g %s', a:pattern) :
+      \ printf('global -qat %s & global -qat -rs %s', a:pattern, a:pattern)
+
+  return system(cmd)
+      \ ->split('\n')
+      \ ->map({ idx, val -> substitute(val, '^\(\w\+\)\s\+\(\S.*\S\)\s\+\(\d\+\)$', '\1\t\2\t\3', '')->split('\t') })
+      \ ->map({ idx, val -> { 'name': get(val, 0, ''), 'filename': get(val, 1, ''), 'cmd':get(val, 2, '') } })
 endfunction "}}}
 
 
@@ -371,7 +390,7 @@ augroup vimrc_auto_commands
 
   " auto completion
   " autocmd InsertEnter * call <SID>Vimrc_AutoComplete() 
-  autocmd WinEnter * call <SID>Vimrc_AutoComplete()
+  " autocmd WinEnter * call <SID>Vimrc_AutoComplete()
 
   " Open the quickfix window automatically
   autocmd FileType help,qf nnoremap <buffer> q :pclose<CR><C-w>c
@@ -386,7 +405,7 @@ augroup vimrc_auto_commands
   autocmd FileType qf nnoremap <buffer> <expr> <C-N> printf(":%snewer\<CR>",
       \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
   " <https://vim.fandom.com/wiki/Automatically_fitting_a_quickfix_window_height>
-  autocmd FileType qf execute printf("%dwincmd _", max([min([line("$"), 15]), 5]))
+  " autocmd FileType qf execute printf("%dwincmd _", max([min([line("$"), 15]), 5]))
 
   " visualize wide-space (need scriptencoding == fenc on vimrc)
   autocmd VimEnter,WinEnter * hi def Bold gui=bold
@@ -405,19 +424,22 @@ augroup vimrc_auto_commands
   autocmd FileType * if &l:omnifunc == '' | setlocal omnifunc=syntaxcomplete#Complete | endif
   autocmd FileType c,cpp setlocal omnifunc=syntaxcomplete#Complete
 
-  autocmd FileType c,cpp,cs,java,javascript 
-      \ setlocal cindent cinoptions=:1s,l1,t0,(0,)0,W1s,u0,+0,g0
+  autocmd FileType c,cpp,cs,java,javascript setlocal
+      \ cindent cinoptions=:1s,l1,t0,(0,)0,W1s,u0,+0,g0
   autocmd FileType html,xhtml,xml,javascript,vim,markdown 
       \ setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
 
   autocmd FileType javascript setlocal cinoptions+=J1
-  autocmd FileType c,cpp      setlocal includeexpr=substitute(v:fname,'^\\/','','') path+=./;/
+  autocmd FileType c,cpp      setlocal path+=./;/
+      \ includeexpr=Vimrc_CLang_IncludeExpr(v:fname)
+      \ tagfunc=Vimrc_CLang_TagFunc
   autocmd FileType cpp        setlocal commentstring=//\ %s
   autocmd FileType dosbatch   setlocal commentstring=@rem\ %s
   autocmd FileType vim        setlocal fenc=utf8 ff=unix
 
-  autocmd FileType markdown setlocal nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_IndentExpr_Markdown()
-      \ | setlocal tabstop=4 commentstring=<!--\ %s\ -->
+  autocmd FileType markdown setlocal
+      \ nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_Markdown_IndentExpr()
+      \ tabstop=4 commentstring=<!--\ %s\ -->
       \ | inoreabbr <buffer> -[ - [ ]
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
@@ -542,9 +564,10 @@ function! s:Vimrc_ToggleComment(first_line, last_line) abort "{{{
   let pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
 
   for ln in range(a:first_line, a:last_line)
-    if getline(ln) =~# pattern
+    let line = getline(ln)
+    if line =~# pattern
       execute printf('%ds/%s/\1\2/', ln, pattern)
-    else
+    elseif line !=# ''
       execute printf('%ds/\v^(\s*)(\S.*)/\1%s%s\2%s%s/',
           \ ln, cbegin, (empty(cbegin) ? '' : ' '), (empty(cend) ? '' : ' '), cend)
     endif
@@ -641,6 +664,16 @@ command! -range -nargs=* -complete=customlist,<SID>Vimrc_Complete_EncloseText
 " *****************************************************************************
 command! -range -nargs=0 GfmTodo call call({ begin, end -> 
     \ execute(printf('silent %d,%ds/^\s*[-+*] \zs\[[x ]\]/\=(submatch(0) ==# "[x]" ? "[ ]" : "[x]")/', begin, end)) },
+    \ [ <line1>, <line2> ])
+
+
+" *****************************************************************************
+command! -range -nargs=0 IndentLine call call({ begin, end -> 
+    \ execute(printf('silent %d,%ds/^\ze./%s/', begin, end, (&expandtab ? repeat(' ',&sw) : '\t'))) },
+    \ [ <line1>, <line2> ])
+
+command! -range -nargs=0 UnIndentLine call call({ begin, end -> 
+    \ execute(printf('silent %d,%ds/^%s//', begin, end, (&expandtab ? repeat(' ',&sw) : '\t'))) },
     \ [ <line1>, <line2> ])
 
 
@@ -830,7 +863,7 @@ command! -nargs=? -complete=file GitResolved  call <SID>buffer_command_do('git r
 augroup vimrc_additional_syntax
   autocmd FileType c,cpp
       \   syn keyword Typedef __int16 __int32 __int64 __fastcall
-      \ | syn keyword int16_t uint16_t int32_t uint32_t int64_t uint64_t
+      \ | syn keyword Typedef int16_t uint16_t int32_t uint32_t int64_t uint64_t
       \ | syn keyword Typedef BYTE WORD DWORD SHORT USHORT LONG ULONG LONGLONG ULONGLONG
       \ | syn keyword Typedef WPARAM LPARAM BOOL TRUE FALSE WINAPI UINT_PTR
 
@@ -868,9 +901,8 @@ function! Plugin_ReadTemplate_Complete(ArgLead, CmdLine, CursorPos) abort "{{{
 endfunction "}}}
 
 function! s:Vimrc_ReadTemplate(files) abort "{{{
-  let afile = a:files . (( &filetype ==# '' ) ? '' : '.' . &filetype)
   let template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
-  let template_path = fnamemodify(template_path, ':p') . afile
+  let template_path = fnamemodify(template_path, ':p') . a:files
 
   execute '.r ' . template_path
 endfunction "}}}
@@ -908,6 +940,12 @@ let g:changelog_username = '<localhost>'
 
 
 ""
+nnoremap <silent> > :IndentLine<CR>
+nnoremap <silent> < :UnIndentLine<CR>
+
+vnoremap <silent> > :IndentLine<CR>
+vnoremap <silent> < :UnIndentLine<CR>
+
 nnoremap <silent> <C-q> :CommentIt<CR>
 vnoremap <silent> <C-q> :CommentIt<CR>
 
@@ -916,31 +954,11 @@ vnoremap <silent> <Leader>x :GfmTodo<CR>
 
 nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
 
-nnoremap <Leader>b :BufList<CR>
-nnoremap <Leader>u :Olds<CR>
-
 vnoremap syy :EncloseText -a 
 vnoremap sdd :EncloseText -d 
 vnoremap srr :EncloseText -r 
 
 nnoremap sn  :Snippet 
-
-
-""
-nnoremap <silent> <Leader><Leader> :up<CR>
-
-nnoremap <silent> <F9>    :lnext<CR>zz
-nnoremap <silent> <S-F9>  :lprevious<CR>zz
-nnoremap <silent> <C-F9>  :topleft lw<CR>
-
-nnoremap <silent> <F10>   :cnext<CR>zz
-nnoremap <silent> <S-F10> :cprevious<CR>zz
-nnoremap <silent> <C-F10> :topleft cw<CR>
-
-nnoremap <silent> <F11>   :Toc!<CR>
-nnoremap <silent> <S-F11> :Outline!<CR>
-
-nnoremap <silent> <F12>   :LGTag <C-r><C-w><CR>
 
 
 " *****************************************************************************

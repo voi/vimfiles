@@ -1141,6 +1141,8 @@ let s:emoji_table = [
 
 function! Vimrc_Emoji_Complete() abort "{{{
   call complete( col( '.' ), filter( s:emoji_table, { idx, val -> strdisplaywidth( val.word ) > 1 } ))
+
+  return ''
 endfunction "}}}
 
 inoremap <silent> <M-e> <C-r>=Vimrc_Emoji_Complete()<CR>
