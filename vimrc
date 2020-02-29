@@ -360,7 +360,7 @@ function! Vimrc_Markdown_IndentExpr() "{{{
 endfunction "}}}
 
 function! Vimrc_CLang_IncludeExpr(fname) "{{{
-  return get(system('global -P -a ' . a:fname)->split('\n'), 0, a:fname)
+  return get(split(system('global -P -a ' . a:fname), '\n'), 0, a:fname)
 endfunction "}}}
 
 function! Vimrc_CLang_TagFunc(pattern, flag, info) "{{{
@@ -368,10 +368,7 @@ function! Vimrc_CLang_TagFunc(pattern, flag, info) "{{{
       \ printf('global -qat -g %s', a:pattern) :
       \ printf('global -qat %s & global -qat -rs %s', a:pattern, a:pattern)
 
-  return system(cmd)
-      \ ->split('\n')
-      \ ->map({ idx, val -> substitute(val, '^\(\w\+\)\s\+\(\S.*\S\)\s\+\(\d\+\)$', '\1\t\2\t\3', '')->split('\t') })
-      \ ->map({ idx, val -> { 'name': get(val, 0, ''), 'filename': get(val, 1, ''), 'cmd':get(val, 2, '') } })
+  return map(map(split(system(cmd), '\n'), { idx, val -> substitute(val, '^\(\w\+\)\s\+\(\S.*\S\)\s\+\(\d\+\)$', '\1\t\2\t\3', '')->split('\t') }), { idx, val -> { 'name': get(val, 0, ''), 'filename': get(val, 1, ''), 'cmd':get(val, 2, '') } })
 endfunction "}}}
 
 

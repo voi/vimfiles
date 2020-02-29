@@ -28,7 +28,7 @@ endfunction "}}}
 
 function! s:stall_open(mods, args) "{{{
   let sources = get(g:, 'stall_sources', {})
-  let source_args = a:args->copy()->filter({ idx, val -> val !~# '^-' })
+  let source_args = filter(copy(a:args), { idx, val -> val !~# '^-' })
 
   if empty(source_args) | return | endif
 
@@ -47,70 +47,43 @@ function! s:stall_open(mods, args) "{{{
       \ '_args': source_args,
       \ '_do_toggle_mark': funcref('s:stall_toggle_mark'),
       \ '_do_filtering': funcref('s:stall_apply_filter'),
+      \ '_get_items': funcref('s:stall_get_items'),
+      \ '_get_view_items': funcref('s:stall_get_view_items'),
+      \ '_get_target_items': funcref('s:stall_get_target_items'),
       \ '_converter': { val -> val },
       \ '_sorter': { items -> items },
       \ '_no_quit': 0
       \ }, sources[source_name])
 
-  function! context.get_items() dict "{{{
-    return get(self, '_items', [])
-        \ ->copy()->map({ idx, val -> val[1] })
-  endfunction "}}}
-
-  function! context.get_view_items() dict "{{{
-    return get(self, '_view_items', [])
-        \ ->copy()->map({ idx, val -> val[1] })
-  endfunction "}}}
-
-  function! context.get_target_items() dict "{{{
-    let targets = get(self, '_view_items', [])
-        \ ->copy()
-        \ ->filter({ idx, val -> val[0] })
-        \ ->map({ idx, val -> val[1] })
-
-    if !empty(targets)
-      return targets
-    endif
-
-    let targets = self.get_view_items()
-    let idx = get(self, '_cursor_index', -1)
-
-    if idx < 0 || len(targets) <= idx
-      return []
-    else
-      return [ targets[idx] ]
-    endif
-  endfunction "}}}
-
   "
   call s:stall_call_handler(context, '_on_init', {})
 
   "
-  let context._items = s:stall_call_handler(context, '_collection', {})
-      \ ->map({ idx, val -> [ 0, val ] })
+  let context._items = map(s:stall_call_handler(context, '_collection', {}),
+      \ { idx, val -> [ 0, val ] })
 
   "
   let winsize = ''
   let bounds = []
   let is_popup = 0
 
-  for opt in a:args->copy()->filter({ idx, val -> val =~# '^-' })
+  for opt in filter(copy(a:args), { idx, val -> val =~# '^-' })
     if opt =~# '^-no-quit$' 
       let context._no_quit = 1
     elseif opt =~# '^-winsize=\d\+%\?$'
       let winsize = substitute(opt, '^-winsize=', '', '')
     elseif opt =~# '^-fix-height=\d\+,\d\+$'
-      let bounds = split(substitute(opt, '^-fix-height=', '', ''), ',')->map({ idx, val -> str2nr(val) })
+      let bounds = map(split(substitute(opt, '^-fix-height=', '', ''), ','),
+          \ { idx, val -> str2nr(val) })
     endif
   endfor
 
   if is_popup
     "
-    let a:context._view_items = get(a:context, '_items', [])
-        \ ->copy()
-    let view_lines = a:context._sorter(a:context._view_items
-        \ ->copy()
-        \ ->map({ idx, val -> a:context._converter(s:stall_item2line(val[1])) })))
+    let a:context._view_items = copy(get(a:context, '_items', []))
+    let view_lines = a:context._sorter(
+        \ map(copy(a:context._view_items),
+        \   { idx, val -> a:context._converter(s:stall_item2line(val[1])) }))
     call popup_menu(view_lines, {})
 
   else
@@ -157,11 +130,10 @@ function! s:stall_update_view(context)
 
   ""
   let pattern = get(a:context, '_filter', '')
-  let a:context._view_items = get(a:context, '_items', [])
-      \ ->copy()
-      \ ->filter({ idx, val -> s:stall_item2line(val[1]) =~ pattern })
+  let a:context._view_items = filter(copy(get(a:context, '_items', [])),
+      \ { idx, val -> s:stall_item2line(val[1]) =~ pattern })
   let cur_pos = line('.')
-  let item_count = a:context._view_items->len()
+  let item_count = len(a:context._view_items)
 
   if item_count < line('$')
     execute printf('silent! %d,$delete_', item_count + 1)
@@ -169,12 +141,10 @@ function! s:stall_update_view(context)
     let cur_pos = item_count
   endif
 
-  let marked = get(a:context, '_marked_char', '*')
-  let unmark = get(a:context, '_unmark_char', ' ')
-
-  call setline(1, a:context._sorter(a:context._view_items
-      \ ->copy()
-      \ ->map({ idx, val -> (val[0] ? marked : unmark ) . ' ' . a:context._converter(s:stall_item2line(val[1])) })))
+  call setline(1, a:context._sorter(map(copy(a:context._view_items),
+      \ { idx, val -> printf('%s %s',
+      \   val[0] ? '*' : ' ', a:context._converter(s:stall_item2line(val[1])))
+      \ })))
   call setpos('.', cur_pos)
 
   ""
@@ -209,6 +179,34 @@ function! s:stall_apply_filter(context, flags) "{{{
   call s:stall_update_view(a:context)
 endfunction "}}}
 
+function! s:stall_get_items() dict "{{{
+  return map(copy(get(self, '_items', [])),
+      \ { idx, val -> val[1] })
+endfunction "}}}
+
+function! s:stall_get_view_items() dict "{{{
+  return map(copy(get(self, '_view_items', [])),
+      \ { idx, val -> val[1] })
+endfunction "}}}
+
+function! s:stall_get_target_items() dict "{{{
+  let targets = filter(copy(get(self, '_view_items', [])),
+      \ { idx, val -> val[0] })
+
+  if !empty(targets)
+    return map(targets, { idx, val -> val[1] })
+  endif
+
+  let targets = self._get_view_items()
+  let idx = get(self, '_cursor_index', -1)
+
+  if idx < 0 || len(targets) <= idx
+    return []
+  else
+    return [ targets[idx] ]
+  endif
+endfunction "}}}
+
 
 " ****************************************************************
 let g:stall_sources = {}
@@ -228,8 +226,8 @@ function! Stall_handle_key(name) "{{{
   call s:stall_call_handler(context, a:name, flags)
 
   if get(flags, '_update', 0)
-    let context._items = s:stall_call_handler(context, '_collection', {})
-        \ ->map({ idx, val -> [ 0, val ] })
+    let context._items = map(s:stall_call_handler(context, '_collection', {}),
+        \ { idx, val -> [ 0, val ] })
   endif
 
   if get(flags, '_update', 0) ||
@@ -294,7 +292,7 @@ endfunction "}}}
 function! g:stall_source_registers.paste(key, context, flags) "{{{
   execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
   execute printf('normal %s%s',
-      \ matchstr(get(a:context.get_target_items(), 0, ''), '^"\S'),
+      \ matchstr(get(a:context._get_target_items(), 0, ''), '^"\S'),
       \ a:key)
 endfunction "}}}
 
@@ -322,18 +320,17 @@ endfunction "}}}
 function! g:stall_source_buffer.bopen(cmd, context, flags) "{{{
   execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
 
-  let items = a:context.get_target_items()
-
-  for cmd in items->map({ idx, val -> printf('%s b %s', a:cmd, a:context.extract(val)) })
+  for cmd in map(a:context._get_target_items(),
+      \ { idx, val -> printf('%s b %s', a:cmd, a:context.extract(val)) })
     execute cmd
   endfor
 endfunction "}}}
 
 function! g:stall_source_buffer.wipe(context, flags) "{{{
   let a:flags._update = 1
-  let items = a:context.get_target_items()
 
-  for cmd in items->map({ idx, val -> printf('bw %s', a:context.extract(val)) })
+  for cmd in map(a:context._get_target_items(), 
+      \ { idx, val -> printf('bw %s', a:context.extract(val)) })
     execute cmd
   endfor
 endfunction "}}}
@@ -364,9 +361,8 @@ endfunction "}}}
 function! g:stall_source_mru.fopen(cmd, context, flags) "{{{
   execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
 
-  let items = a:context.get_target_items()
-
-  for cmd in items->map({ idx, val -> printf('%s %s', a:cmd, a:context.extract(val)) })
+  for cmd in map(a:context._get_target_items(),
+      \ { idx, val -> printf('%s %s', a:cmd, a:context.extract(val)) })
     execute cmd
   endfor
 endfunction "}}}
@@ -387,8 +383,8 @@ function! g:stall_source_files._on_init(context, flags) "{{{
 endfunction "}}}
 
 function! g:stall_source_files._collection(context, flags) "{{{
-  return globpath(a:context.root, '*', 0, 1)
-      \ ->map({ idx, val -> fnamemodify(val, ':p') })
+  return map(globpath(a:context.root, '*', 0, 1), 
+      \ { idx, val -> fnamemodify(val, ':p') })
 endfunction "}}}
 
 function! g:stall_source_files._on_ready(context, flags) "{{{
@@ -403,7 +399,7 @@ function! g:stall_source_files._on_ready(context, flags) "{{{
 endfunction "}}}
 
 function! g:stall_source_files.enter(context, flags) "{{{
-  let item = get(a:context.get_target_items(), 0, '')
+  let item = get(a:context._get_target_items(), 0, '')
 
   if isdirectory(item)
     let a:context.root = item
@@ -425,9 +421,8 @@ endfunction "}}}
 function! g:stall_source_files.fopen(cmd, context, flags) "{{{
   execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
 
-  let items = a:command.get_target_items()
-
-  for cmd in items->map({ idx, val -> printf('%s %s', a:cmd, val) })
+  for cmd in map(a:context._get_target_items(),
+      \ { idx, val -> printf('%s %s', a:cmd, val) })
     execute cmd
   endfor
 endfunction "}}}
@@ -457,10 +452,10 @@ function! g:stall_source_ctags._collection(context, flags) "{{{
     let force = a:context.type_option[a:context._filetype]
   endif
 
-  let tags = printf('ctags -n -f - %s %s', force, tmp_source)
-      \ ->systemlist()
-      \ ->map({ idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') })
-      \ ->map({ idx, val -> a:context.tag2item(val) })
+  let tags = map(
+      \ map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
+      \   { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
+      \ { idx, val -> a:context.tag2item(val) })
 
   call delete(tmp_source)
 
@@ -479,7 +474,7 @@ endfunction "}}}
 function! g:stall_source_ctags.jump(context, flags) "{{{
   execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
   execute 'b ' . a:context._bufnr
-  execute '' . get(get(a:context.get_target_items(), 0, {}), 'lnum', line('.'))
+  execute '' . get(get(a:context._get_target_items(), 0, {}), 'lnum', line('.'))
 endfunction "}}}
 
 function! g:stall_source_ctags.tag2item(taginfo) "{{{
@@ -518,12 +513,12 @@ function! g:stall_source_remote._collection(context, flags) "{{{
 endfunction "}}}
 
 function! g:stall_source_remote.copy(context, flags) "{{{
-  call remote_send(get(a:context.get_target_items(), 0, ''),
+  call remote_send(get(a:context._get_target_items(), 0, ''),
       \ '<ESC>:edit ' . a:context._bufname . '<CR>')
 endfunction "}}}
 
 function! g:stall_source_remote.move(context, flags) "{{{
-  call remote_send(get(a:context.get_target_items(), 0, ''),
+  call remote_send(get(a:context._get_target_items(), 0, ''),
       \ '<ESC>:edit ' . a:context._bufname . '<CR>')
 
   execute 'bw ' . a:context._bufnr
