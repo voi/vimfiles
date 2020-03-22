@@ -10,13 +10,14 @@ function! s:stall_set_context(context) "{{{
 endfunction "}}}
 
 function! s:stall_call_handler(context, name, flags) "{{{
-  let result = []
   let Handler = get(a:context, a:name, 0)
 
   if type(Handler) == v:t_func
     let result = call(Handler, [a:context, a:flags], a:context) 
   elseif type(Handler) == v:t_string 
     let result = split(execute(Handler), '\n') 
+  else
+    let result = []
   endif
 
   if type(result) != v:t_list
@@ -45,13 +46,10 @@ function! s:stall_open(mods, args) "{{{
       \ '_filetype': &filetype,
       \ '_winid': win_getid(),
       \ '_args': source_args,
-      \ '_do_toggle_mark': funcref('s:stall_toggle_mark'),
       \ '_do_filtering': funcref('s:stall_apply_filter'),
-      \ '_get_items': funcref('s:stall_get_items'),
       \ '_get_view_items': funcref('s:stall_get_view_items'),
-      \ '_get_target_items': funcref('s:stall_get_target_items'),
+      \ '_get_target_item': funcref('s:stall_get_target_item'),
       \ '_converter': { val -> val },
-      \ '_sorter': { items -> items },
       \ '_no_quit': 0
       \ }, sources[source_name])
 
@@ -59,68 +57,53 @@ function! s:stall_open(mods, args) "{{{
   call s:stall_call_handler(context, '_on_init', {})
 
   "
-  let context._items = map(s:stall_call_handler(context, '_collection', {}),
-      \ { idx, val -> [ 0, val ] })
-
+  let context._items = s:stall_call_handler(context, '_collection', {})
   "
   let winsize = ''
-  let bounds = []
-  let is_popup = 0
+  let fitsize = 0
 
   for opt in filter(copy(a:args), { idx, val -> val =~# '^-' })
     if opt =~# '^-no-quit$' 
       let context._no_quit = 1
     elseif opt =~# '^-winsize=\d\+%\?$'
-      let winsize = substitute(opt, '^-winsize=', '', '')
-    elseif opt =~# '^-fix-height=\d\+,\d\+$'
-      let bounds = map(split(substitute(opt, '^-fix-height=', '', ''), ','),
-          \ { idx, val -> str2nr(val) })
+      let winsize = matchstr(opt, '\d\+%\?$')
+    elseif opt =~# '^-fitsize$'
+      let fitsize = 1
     endif
   endfor
 
-  if is_popup
-    "
-    let a:context._view_items = copy(get(a:context, '_items', []))
-    let view_lines = a:context._sorter(
-        \ map(copy(a:context._view_items),
-        \   { idx, val -> a:context._converter(s:stall_item2line(val[1])) }))
-    call popup_menu(view_lines, {})
-
-  else
-    "
-    if winsize =~ '%$'
-      if a:mods =~ '\<vert\%(ical\)\?\>'
-        let winsize = printf('%d', (winwidth(0) * str2nr(winsize)) / 100)
-      else
-        let winsize = printf('%d', (winheight(0) * str2nr(winsize)) / 100)
-      endif
+  "
+  if winsize =~ '%$'
+    if a:mods =~ '\<vert\%(ical\)\?\>'
+      let winsize = printf('%d', (winwidth(0) * str2nr(winsize)) / 100)
+    else
+      let winsize = printf('%d', (winheight(0) * str2nr(winsize)) / 100)
     endif
+  endif
 
-    " open buffer
-    call execute(printf('%s noautocmd silent! %snew %s %s',
-        \ a:mods, winsize, source_name, join(source_args, ' ')))
+  " open buffer
+  call execute(printf('%s noautocmd silent! %snew %s %s',
+      \ a:mods, winsize, source_name, join(source_args, ' ')))
 
-    " buffer option
-    setlocal filetype=stall buftype=nofile bufhidden=hide
-    setlocal noswapfile nowrap nonumber
-    setlocal nolist nobuflisted
-    setlocal winfixwidth winfixheight
+  " buffer option
+  setlocal filetype=stall buftype=nofile bufhidden=hide
+  setlocal noswapfile nowrap nonumber
+  setlocal nolist nobuflisted
+  setlocal winfixwidth winfixheight
 
-    " buffer autocmd
-    doautocmd BufEnter,BufWinEnter
+  " buffer autocmd
+  doautocmd BufEnter,BufWinEnter
 
-    " default keys
-    nnoremap <buffer> <silent> q :bw!<CR>
-    nnoremap <buffer> <silent> <Space> :call Stall_handle_key('_do_toggle_mark')<CR>
-    nnoremap <buffer> <silent> i :call Stall_handle_key('_do_filtering')<CR>
+  " default keys
+  nnoremap <buffer> <silent> q :bw!<CR>
+  nnoremap <buffer> <silent> i :call Stall_handle_key('_do_filtering')<CR>
 
-    call s:stall_call_handler(context, '_on_ready', {})
-    call s:stall_update_view(context)
-    call s:stall_set_context(context)
+  call s:stall_call_handler(context, '_on_ready', {})
+  call s:stall_update_view(context)
+  call s:stall_set_context(context)
 
-    if !empty(bounds)
-      execute printf("%dwincmd _", max([min([line('$'), bounds[1]]), bounds[0]]))
-    endif
+  if fitsize
+    execute printf("%dwincmd _", len(context._get_view_items()))
   endif
 endfunction "}}}
 
@@ -141,10 +124,8 @@ function! s:stall_update_view(context)
     let cur_pos = item_count
   endif
 
-  call setline(1, a:context._sorter(map(copy(a:context._view_items),
-      \ { idx, val -> printf('%s %s',
-      \   val[0] ? '*' : ' ', a:context._converter(s:stall_item2line(val[1])))
-      \ })))
+  call setline(1, map(copy(a:context._view_items),
+      \ { idx, val -> a:context._converter(s:stall_item2line(val)) }))
   call setpos('.', cur_pos)
 
   ""
@@ -159,19 +140,6 @@ function! s:stall_item2line(item) "{{{
   return string(a:item)
 endfunction "}}}
 
-function! s:stall_toggle_mark(context, flags) "{{{
-  let a:flags._no_quit = 1
-  let idx = line('.') - 1
-  let view_items = get(a:context, '_view_items', [])
-
-  if idx < len(view_items)
-    let view_items[idx][0] = !view_items[idx][0]
-    let a:context._view_items = view_items
-
-    call s:stall_update_view(a:context)
-  endif
-endfunction "}}}
-
 function! s:stall_apply_filter(context, flags) "{{{
   let a:flags._no_quit = 1
   let a:context._filter = input('> ', get(a:context, '_filter', ''))
@@ -179,87 +147,40 @@ function! s:stall_apply_filter(context, flags) "{{{
   call s:stall_update_view(a:context)
 endfunction "}}}
 
-function! s:stall_get_items() dict "{{{
-  return map(copy(get(self, '_items', [])),
-      \ { idx, val -> val[1] })
-endfunction "}}}
-
 function! s:stall_get_view_items() dict "{{{
-  return map(copy(get(self, '_view_items', [])),
-      \ { idx, val -> val[1] })
+  return copy(get(self, '_view_items', []))
 endfunction "}}}
 
-function! s:stall_get_target_items() dict "{{{
-  let targets = filter(copy(get(self, '_view_items', [])),
-      \ { idx, val -> val[0] })
-
-  if !empty(targets)
-    return map(targets, { idx, val -> val[1] })
-  endif
-
-  let targets = self._get_view_items()
-  let idx = get(self, '_cursor_index', -1)
-
-  if idx < 0 || len(targets) <= idx
-    return []
-  else
-    return [ targets[idx] ]
-  endif
+function! s:stall_get_target_item() dict "{{{
+  return get(self._get_view_items(),
+      \ get(self, '_cursor_index', -1), v:null)
 endfunction "}}}
 
 
 " ****************************************************************
 let g:stall_sources = {}
 
-function! Stall_add_source(name, object) "{{{
-  let sources = get(g:, 'stall_sources', {})
-  let sources[a:name] = extend(get(sources, a:name, {}), a:object)
-  let g:stall_sources = sources
-endfunction "}}}
-
 function! Stall_handle_key(name) "{{{
   let context = s:stall_get_context()
   let context._cursor_index = line('.') - 1
   let bufnr = bufnr('%')
-  let flags = {}
+  let flags = { '_no_quit': get(context, '_no_quit', 0) }
 
   call s:stall_call_handler(context, a:name, flags)
 
   if get(flags, '_update', 0)
-    let context._items = map(s:stall_call_handler(context, '_collection', {}),
-        \ { idx, val -> [ 0, val ] })
-  endif
+    let context._items = s:stall_call_handler(context, '_collection', {})
 
-  if get(flags, '_update', 0) ||
-      \ get(flags, '_redraw', 0)
     call s:stall_update_view(context)
   endif
 
   call s:stall_set_context(context)
 
-  if get(context, '_no_quit', 0) ||
-      \ get(flags, '_no_quit', 0) ||
-      \ get(flags, '_update', 0) ||
-      \ get(flags, '_redraw', 0)
+  if get(flags, '_no_quit', 0) || get(flags, '_update', 0)
     return
   else
     execute 'bw ' . bufnr
   endif
-endfunction "}}}
-
-function! Stall_set_source_property(source_name, prop_name, val) "{{{
-  let sources = get(g:, 'stall_sources', {})
-
-  if !has_key(sources, a:source_name)
-    return
-  endif
-
-  if (a:prop_name =~# '^_') && (a:prop_name !=# '_converter') && (a:prop_name !=# '_sorter')
-    return
-  endif
-
-  let sources[a:source_name][a:prop_name] = a:val
-  let g:stall_sources = sources
 endfunction "}}}
 
 
@@ -268,7 +189,7 @@ function! Stall_command_complete(argLead, cmdLine, cursorPos) "{{{
   let l:pattern = '^' . a:argLead
 
   if a:argLead =~# '^-'
-    return filter([ '-winsize=' ], 'v:val =~# l:pattern')
+    return filter([ '-winsize=', '-fitsize', '-no-quit' ], 'v:val =~# l:pattern')
   else
     return filter(keys(get(g:, 'stall_sources', {})), 'v:val =~# l:pattern')
   endif
@@ -278,38 +199,47 @@ command! -nargs=+ -complete=customlist,Stall_command_complete Stall call s:stall
 
 
 " ****************************************************************
-let g:stall_source_registers = {
-    \ '_collection': 'registers',
-    \ 'paste_before': { context, flags -> context.paste('P', context, flags) },
-    \ 'paste_after':  { context, flags -> context.paste('p', context, flags) }
+let g:stall_sources.registers = {
+    \ '_collection': 'registers'
     \ }
 
-function! g:stall_source_registers._on_ready(context, flags) "{{{
-  nnoremap <buffer> <silent> P :call Stall_handle_key('paste_before')<CR>
-  nnoremap <buffer> <silent> p :call Stall_handle_key('paste_after')<CR>
+function! g:stall_sources.registers._on_ready(context, flags) dict "{{{
+  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('paste')<CR>
 endfunction "}}}
 
-function! g:stall_source_registers.paste(key, context, flags) "{{{
-  execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
-  execute printf('normal %s%s',
-      \ matchstr(get(a:context._get_target_items(), 0, ''), '^"\S'),
-      \ a:key)
-endfunction "}}}
+function! g:stall_sources.registers.paste(context, flags) dict "{{{
+  let item = a:context._get_target_item()
 
-call Stall_add_source('registers', g:stall_source_registers)
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('normal %sp', matchstr(item, '"\S'))
+  endif
+endfunction "}}}
 
 
 " ****************************************************************
-let g:stall_source_buffer = {
+function! s:stall_sources_buffer_open(cmd, close, context, flags) "{{{
+  let a:flags._update = !a:close
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('%s %s', a:cmd, matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))
+  endif
+endfunction "}}}
+
+let g:stall_sources.buffer = {
     \ '_collection': 'ls',
-    \ 'extract': { val -> matchstr(val, '\%(^\s*\)\zs\d\+\ze\s') },
-    \ 'open':   { context, flags -> context.bopen( '      ', context, flags) },
-    \ 'tabopen':{ context, flags -> context.bopen( 'tabe |', context, flags) },
-    \ 'vsplit': { context, flags -> context.bopen( 'vsp  |', context, flags) },
-    \ 'split':  { context, flags -> context.bopen( 'sp   |', context, flags) },
+    \ 'open': function('s:stall_sources_buffer_open', [ 'b', 1 ]),
+    \ 'tabopen': function('s:stall_sources_buffer_open', [ 'tab new | b', 1 ]),
+    \ 'vsplit': function('s:stall_sources_buffer_open', [ 'vs | b', 1 ]),
+    \ 'split': function('s:stall_sources_buffer_open', [ 'sp | b', 1 ]),
+    \ 'wipe': function('s:stall_sources_buffer_open', [ 'bw', 0 ])
     \ }
 
-function! g:stall_source_buffer._on_ready(context, flags) "{{{
+function! g:stall_sources.buffer._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
   nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
@@ -317,39 +247,28 @@ function! g:stall_source_buffer._on_ready(context, flags) "{{{
   nnoremap <buffer> <silent> d    :call Stall_handle_key('wipe')<CR>
 endfunction "}}}
 
-function! g:stall_source_buffer.bopen(cmd, context, flags) "{{{
-  execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
-
-  for cmd in map(a:context._get_target_items(),
-      \ { idx, val -> printf('%s b %s', a:cmd, a:context.extract(val)) })
-    execute cmd
-  endfor
-endfunction "}}}
-
-function! g:stall_source_buffer.wipe(context, flags) "{{{
-  let a:flags._update = 1
-
-  for cmd in map(a:context._get_target_items(), 
-      \ { idx, val -> printf('bw %s', a:context.extract(val)) })
-    execute cmd
-  endfor
-endfunction "}}}
-
-call Stall_add_source('buffer', g:stall_source_buffer)
-
 
 " ****************************************************************
-let g:stall_source_mru = {
+function! s:stall_sources_mru_open(cmd, context, flags) "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('%s %s', a:cmd, substitute(item, '^\d\+:\s*', '', ''))
+  endif
+endfunction "}}}
+
+let g:stall_sources.mru = {
     \ '_collection': 'oldfiles',
     \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3  :(\2)', '') },
-    \ 'extract': { val -> substitute(val, '^\d\+:\s*', '', '') },
-    \ 'open':   { context, flags -> context.fopen( 'e   ', context, flags) },
-    \ 'tabopen':{ context, flags -> context.fopen( 'tabe', context, flags) },
-    \ 'vsplit': { context, flags -> context.fopen( 'vsp ', context, flags) },
-    \ 'split':  { context, flags -> context.fopen( 'sp  ', context, flags) }
+    \ 'open': function('s:stall_sources_mru_open', [ 'e' ]),
+    \ 'tabopen': function('s:stall_sources_mru_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_sources_mru_open', [ 'vsp' ]),
+    \ 'split':function('s:stall_sources_mru_open', [ 'sp' ]) 
     \ }
 
-function! g:stall_source_mru._on_ready(context, flags) "{{{
+function! g:stall_sources.mru._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
   nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
@@ -358,36 +277,35 @@ function! g:stall_source_mru._on_ready(context, flags) "{{{
   call matchadd('Comment', ':(.*)$')
 endfunction "}}}
 
-function! g:stall_source_mru.fopen(cmd, context, flags) "{{{
-  execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
-
-  for cmd in map(a:context._get_target_items(),
-      \ { idx, val -> printf('%s %s', a:cmd, a:context.extract(val)) })
-    execute cmd
-  endfor
-endfunction "}}}
-
-call Stall_add_source('mru', g:stall_source_mru)
-
 
 " ****************************************************************
-let g:stall_source_files = {
+function! s:stall_sources_files_open(cmd, context, flags) "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item) && !isdirectory(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('%s %s', a:cmd, val)
+  endif
+endfunction "}}}
+
+let g:stall_sources.files = {
     \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2  :(\1)', '') },
-    \ 'tabopen':{ context, flags -> context.fopen('tabe', context, flags) },
-    \ 'vsplit': { context, flags -> context.fopen('vsp ', context, flags) },
-    \ 'split':  { context, flags -> context.fopen('sp  ', context, flags) }
+    \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp' ]),
+    \ 'split': function('s:stall_sources_files_open', [ 'sp' ])
     \ }
 
-function! g:stall_source_files._on_init(context, flags) "{{{
+function! g:stall_sources.files._on_init(context, flags) dict "{{{
   let a:context.root = fnamemodify(get(a:context._args, 0, a:context._cwd), ':p')
 endfunction "}}}
 
-function! g:stall_source_files._collection(context, flags) "{{{
+function! g:stall_sources.files._collection(context, flags) dict "{{{
   return map(globpath(a:context.root, '*', 0, 1), 
       \ { idx, val -> fnamemodify(val, ':p') })
 endfunction "}}}
 
-function! g:stall_source_files._on_ready(context, flags) "{{{
+function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('enter')<CR>
   nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
@@ -398,10 +316,12 @@ function! g:stall_source_files._on_ready(context, flags) "{{{
   call matchadd('Statement', '[\\/]\ze ')
 endfunction "}}}
 
-function! g:stall_source_files.enter(context, flags) "{{{
-  let item = get(a:context._get_target_items(), 0, '')
+function! g:stall_sources.files.enter(context, flags) dict "{{{
+  let item = a:context._get_target_item()
 
-  if isdirectory(item)
+  if empty(item)
+    return
+  elseif isdirectory(item)
     let a:context.root = item
     let a:flags._update = 1
   else
@@ -409,7 +329,7 @@ function! g:stall_source_files.enter(context, flags) "{{{
   endif
 endfunction "}}}
 
-function! g:stall_source_files.up(context, flags) "{{{
+function! g:stall_sources.files.up(context, flags) dict "{{{
   let root = fnamemodify(a:context.root . '..', ':p')
 
   if !empty(root) 
@@ -418,22 +338,11 @@ function! g:stall_source_files.up(context, flags) "{{{
   endif
 endfunction "}}}
 
-function! g:stall_source_files.fopen(cmd, context, flags) "{{{
-  execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
-
-  for cmd in map(a:context._get_target_items(),
-      \ { idx, val -> printf('%s %s', a:cmd, val) })
-    execute cmd
-  endfor
-endfunction "}}}
-
-call Stall_add_source('files', g:stall_source_files)
-
 command! -nargs=? -complete=dir StallFiles Stall files <args>
 
 
 " ****************************************************************
-let g:stall_source_ctags = {
+let g:stall_sources.ctags = {
     \ 'type_option': {
     \  'cpp': '--language-force=c++',
     \  'vim': '--language-force=vim',
@@ -441,7 +350,7 @@ let g:stall_source_ctags = {
     \   }
     \ }
 
-function! g:stall_source_ctags._collection(context, flags) "{{{
+function! g:stall_sources.ctags._collection(context, flags) dict "{{{
   let tmp_source = tempname() . '.' . expand('%:e')
 
   call writefile(getbufline('%', 1, '$'), tmp_source)
@@ -455,14 +364,14 @@ function! g:stall_source_ctags._collection(context, flags) "{{{
   let tags = map(
       \ map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
       \   { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
-      \ { idx, val -> a:context.tag2item(val) })
+      \   { idx, val -> s:stall_source_ctags_tag2item(val) })
 
   call delete(tmp_source)
 
   return tags
 endfunction "}}}
 
-function! g:stall_source_ctags._on_ready(context, flags) "{{{
+function! g:stall_sources.ctags._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('jump')<CR>
 
   call matchadd('SpecialKey', '(.*)$')
@@ -471,13 +380,18 @@ function! g:stall_source_ctags._on_ready(context, flags) "{{{
   call matchadd('SpecialKey', '__anon\w\+\(\.\|::\)')
 endfunction "}}}
 
-function! g:stall_source_ctags.jump(context, flags) "{{{
-  execute win_id2win(get(a:context, '_winid', 0)) . 'wincmd w'
-  execute 'b ' . a:context._bufnr
-  execute '' . get(get(a:context._get_target_items(), 0, {}), 'lnum', line('.'))
+function! s:stall_source_ctags_jump(context, flags) dict "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute 'b ' . a:context._bufnr
+    execute '' . get(item, 'lnum', line('.'))
+  endif
 endfunction "}}}
 
-function! g:stall_source_ctags.tag2item(taginfo) "{{{
+function! g:stall_sources.ctags.tag2item(taginfo) "{{{
   let prefix = ''
   let saffix = ''
 
@@ -497,32 +411,32 @@ function! g:stall_source_ctags.tag2item(taginfo) "{{{
       \ }
 endfunction "}}}
 
-call Stall_add_source('ctags', g:stall_source_ctags)
-
 
 " ****************************************************************
-let g:stall_source_remote = {}
+if has('gui_win32')
+  let g:stall_sources.remote = {}
 
-function! g:stall_source_remote._on_ready(context, flags) "{{{
-  nnoremap <buffer> <silent> c  :call Stall_handle_key('copy')<CR>
-  nnoremap <buffer> <silent> m  :call Stall_handle_key('move')<CR>
-endfunction "}}}
+  function! g:stall_sources.remote._on_ready(context, flags) dict "{{{
+    nnoremap <buffer> <silent> c  :call Stall_handle_key('copy')<CR>
+    nnoremap <buffer> <silent> m  :call Stall_handle_key('move')<CR>
+  endfunction "}}}
 
-function! g:stall_source_remote._collection(context, flags) "{{{
-  return split(serverlist(), '\n')
-endfunction "}}}
+  function! g:stall_sources.remote._collection(context, flags) dict "{{{
+    return split(serverlist(), '\n')
+  endfunction "}}}
 
-function! g:stall_source_remote.copy(context, flags) "{{{
-  call remote_send(get(a:context._get_target_items(), 0, ''),
-      \ '<ESC>:edit ' . a:context._bufname . '<CR>')
-endfunction "}}}
+  function! g:stall_sources.remote.copy(context, flags) dict "{{{
+    let item = a:context._get_target_item()
 
-function! g:stall_source_remote.move(context, flags) "{{{
-  call remote_send(get(a:context._get_target_items(), 0, ''),
-      \ '<ESC>:edit ' . a:context._bufname . '<CR>')
+    if !empty(item)
+      call remote_send(item, '<ESC>:edit ' . a:context._bufname . '<CR>')
+    endif
+  endfunction "}}}
 
-  execute 'bw ' . a:context._bufnr
-endfunction "}}}
+  function! g:stall_sources.remote.move(context, flags) dict "{{{
+    call g:stall_sources.remote.copy(a:context, a:flags)
 
-call Stall_add_source('remote', g:stall_source_remote)
+    execute 'bw ' . a:context._bufnr
+  endfunction "}}}
+endif
 

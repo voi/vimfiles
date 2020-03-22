@@ -2,10 +2,6 @@
 " vim: set et ts=2 sts=2 sw=2
 scriptencoding utf-8
 
-" ----
-so $VIMRUNTIME/gvimrc_example.vim
-
-
 " ***********************************************
 set cmdheight=1
 set cursorline
