@@ -369,6 +369,7 @@ augroup vimrc_auto_commands
 
   " jump and close
   autocmd FileType qf nnoremap <buffer> <CR> :pclose<CR><CR>
+  autocmd FileType qf nnoremap <buffer> <C-j> :pclose<CR><CR><C-w>p<C-w>q
   autocmd FileType qf nnoremap <buffer> <expr> <C-P> printf(":%solder\<CR>",
       \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
   autocmd FileType qf nnoremap <buffer> <expr> <C-N> printf(":%snewer\<CR>",
@@ -873,18 +874,17 @@ command! -nargs=0 Root call <SID>find_repos_dir()
 " *****************************************************************************
 if has('gui_win32')
   function! s:remote_open(is_move, bufname)
+    call job_start('gvim', { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
+    sleep 500m
+
     let bname = get(a:bufname, 0, '')
 
-    if empty(bname) | let bname = fnamemodify(expand('%'), ':p') | endif
+    if empty(bname) | return | endif
 
-    let bufnr = bufnr(bname)
-
-    call job_start('gvim', { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
-
-    call remote_send(get(filter(split(serverlist(), '\n'), { idx, val -> v:servername !=# val }), 0, ''),
+    call remote_send(get(filter(split(serverlist(), '\n'), { idx, val -> v:servername !=# val }), -1, ''),
         \ '<ESC>:tabedit ' . bname . '<CR>')
 
-    if a:is_move | execute 'bw ' . bufnr | endif
+    if a:is_move | execute 'bw ' . bufnr(bname) | endif
   endfunction
 
   command! -nargs=? -complete=buffer RemoteCopy call s:remote_open(0, [<q-args>])

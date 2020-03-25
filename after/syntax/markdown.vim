@@ -110,7 +110,7 @@ syntax match markdownReference /#\@<!#\d\+\>/
 syntax match markdownReference /\<GH-\d\+\>/
 
 " mentions
-syntax match markdownMentions /@\w[[:alnum:]-]\+/
+syntax match markdownMentions /@\w[[:alnum:]_-]\+/
 
 " emoji
 syntax match markdownEmoji /:\w\+:/

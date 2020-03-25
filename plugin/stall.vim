@@ -61,6 +61,7 @@ function! s:stall_open(mods, args) "{{{
   "
   let winsize = ''
   let fitsize = 0
+  let is_vert = (a:mods =~ '\<vert\%(ical\)\?\>')
 
   for opt in filter(copy(a:args), { idx, val -> val =~# '^-' })
     if opt =~# '^-no-quit$' 
@@ -74,11 +75,7 @@ function! s:stall_open(mods, args) "{{{
 
   "
   if winsize =~ '%$'
-    if a:mods =~ '\<vert\%(ical\)\?\>'
-      let winsize = printf('%d', (winwidth(0) * str2nr(winsize)) / 100)
-    else
-      let winsize = printf('%d', (winheight(0) * str2nr(winsize)) / 100)
-    endif
+    let winsize = printf('%d', ((is_vert ? winwidth(0) : winheight(0)) * str2nr(winsize)) / 100)
   endif
 
   " open buffer
@@ -102,8 +99,9 @@ function! s:stall_open(mods, args) "{{{
   call s:stall_update_view(context)
   call s:stall_set_context(context)
 
-  if fitsize
-    execute printf("%dwincmd _", len(context._get_view_items()))
+  if fitsize && !is_vert
+    if empty(winsize) | let winsize = '16' | endif
+    execute printf("%dwincmd _", min([str2nr(winsize), len(context._get_view_items())]))
   endif
 endfunction "}}}
 
@@ -114,7 +112,7 @@ function! s:stall_update_view(context)
   ""
   let pattern = get(a:context, '_filter', '')
   let a:context._view_items = filter(copy(get(a:context, '_items', [])),
-      \ { idx, val -> s:stall_item2line(val[1]) =~ pattern })
+      \ { idx, val -> s:stall_item2line(val) =~ pattern })
   let cur_pos = line('.')
   let item_count = len(a:context._view_items)
 
@@ -282,15 +280,21 @@ endfunction "}}}
 function! s:stall_sources_files_open(cmd, context, flags) "{{{
   let item = a:context._get_target_item()
 
-  if !empty(item) && !isdirectory(item)
+  if empty(item)
+    return
+  elseif isdirectory(item)
+    let a:context.root = item
+    let a:flags._update = 1
+  else
     call win_gotoid(a:context._winid)
 
-    execute printf('%s %s', a:cmd, val)
+    execute printf('%s %s', a:cmd, item)
   endif
 endfunction "}}}
 
 let g:stall_sources.files = {
     \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2  :(\1)', '') },
+    \ 'enter': function('s:stall_sources_files_open', [ 'e' ]),
     \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe' ]),
     \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp' ]),
     \ 'split': function('s:stall_sources_files_open', [ 'sp' ])
@@ -313,20 +317,7 @@ function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
 
   call matchadd('Comment', ':(.*)$')
-  call matchadd('Statement', '[\\/]\ze ')
-endfunction "}}}
-
-function! g:stall_sources.files.enter(context, flags) dict "{{{
-  let item = a:context._get_target_item()
-
-  if empty(item)
-    return
-  elseif isdirectory(item)
-    let a:context.root = item
-    let a:flags._update = 1
-  else
-    call a:context.fopen('e', a:context, a:flags)
-  endif
+  call matchadd('Statement', '^[^\\/]\+[\\/]\ze ')
 endfunction "}}}
 
 function! g:stall_sources.files.up(context, flags) dict "{{{
@@ -342,6 +333,27 @@ command! -nargs=? -complete=dir StallFiles Stall files <args>
 
 
 " ****************************************************************
+function! s:stall_source_ctags_tag2item(tagline) "{{{
+  let taginfo = split(substitute(a:tagline, '[\n\r]$', '', ''), '\t')
+  let prefix = ''
+  let saffix = ''
+
+  for field in taginfo[3:]
+    if field =~# '^kind:'
+      let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
+    elseif field =~# '^signature:'
+      let saffix = substitute(field, '^\w\+:', '', '')
+    elseif field =~# '^\w\+:'
+      let prefix = substitute(field, '^\w\+:', '', '') . '.'
+    endif
+  endfor
+
+  return {
+      \   'text': prefix . get(taginfo, 0, '') . saffix,
+      \   'lnum': str2nr(substitute(get(taginfo, 2, ''), ';"', '', '')),
+      \ }
+endfunction "}}}
+
 let g:stall_sources.ctags = {
     \ 'type_option': {
     \  'cpp': '--language-force=c++',
@@ -355,15 +367,9 @@ function! g:stall_sources.ctags._collection(context, flags) dict "{{{
 
   call writefile(getbufline('%', 1, '$'), tmp_source)
 
-  let force = ''
-
-  if has_key(a:context.type_option, a:context._filetype)
-    let force = a:context.type_option[a:context._filetype]
-  endif
-
+  let force = get(a:context.type_option, a:context._filetype, '')
   let tags = map(
-      \ map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
-      \   { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
+      \ systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
       \   { idx, val -> s:stall_source_ctags_tag2item(val) })
 
   call delete(tmp_source)
@@ -380,7 +386,7 @@ function! g:stall_sources.ctags._on_ready(context, flags) dict "{{{
   call matchadd('SpecialKey', '__anon\w\+\(\.\|::\)')
 endfunction "}}}
 
-function! s:stall_source_ctags_jump(context, flags) dict "{{{
+function! g:stall_sources.ctags.jump(context, flags) dict "{{{
   let item = a:context._get_target_item()
 
   if !empty(item)
@@ -389,26 +395,6 @@ function! s:stall_source_ctags_jump(context, flags) dict "{{{
     execute 'b ' . a:context._bufnr
     execute '' . get(item, 'lnum', line('.'))
   endif
-endfunction "}}}
-
-function! g:stall_sources.ctags.tag2item(taginfo) "{{{
-  let prefix = ''
-  let saffix = ''
-
-  for field in a:taginfo[3:]
-    if field =~# '^kind:'
-      let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
-    elseif field =~# '^signature:'
-      let saffix = substitute(field, '^\w\+:', '', '')
-    elseif field =~# '^\w\+:'
-      let prefix = substitute(field, '^\w\+:', '', '') . '.'
-    endif
-  endfor
-
-  return {
-      \   'text': prefix . get(a:taginfo, 0, '') . saffix,
-      \   'lnum': str2nr(substitute(get(a:taginfo, 2, ''), ';"', '', '')),
-      \ }
 endfunction "}}}
 
 
