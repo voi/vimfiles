@@ -63,8 +63,8 @@ set list
 if has('gui')
   " |¦»▸>￫↲
   let &showbreak="▸ "
-  set listchars=tab:»\ ,trail:.,extends:»,precedes:«,nbsp:%,conceal:￫
-  " set listchars=tab:»\ ,space:.,trail:.,extends:$,precedes:^,nbsp:%,conceal:@
+  set listchars=tab:￫\ ,trail:.,extends:»,precedes:«,nbsp:%,conceal:￫
+  " set listchars=tab:￫\ ,space:.,trail:.,extends:$,precedes:^,nbsp:%,conceal:@
 else
   let &showbreak="> "
   set listchars=tab:>\ ,trail:.,extends:$,precedes:^,nbsp:%,conceal:.
@@ -329,10 +329,11 @@ call <SID>Vimrc_HighlightPlus()
 function! Vimrc_Markdown_IndentExpr() "{{{
   if v:lnum == 1 | return -1 | endif
 
-  let l:baseLineNum = prevnonblank(v:lnum - 1)
-  let l:marker = matchstr(getline(l:baseLineNum), '^\s*\zs\([-+*]\|\d\+[\.)]\)\s\+')
+  let baseLineNum = prevnonblank(v:lnum - 1)
+  let marker = matchstr(getline(baseLineNum), '^\s*\zs\([-+*]\|\d\+[\.)]\)\s\+')
+  let offset = ( &expandtab ? len(marker) : &shiftwidth )
 
-  return (l:marker !=# '' ? indent(l:baseLineNum) + len(l:marker) : -1)
+  return (marker !=# '' ? indent(baseLineNum) + offset : -1)
 endfunction "}}}
 
 function! Vimrc_CLang_IncludeExpr(fname) "{{{
@@ -394,8 +395,8 @@ augroup vimrc_auto_commands
 
   autocmd FileType c,cpp,cs,java,javascript setl
       \ cindent cinoptions=:1s,l1,t0,(0,)0,W1s,u0,+0,g0
-  autocmd FileType html,xhtml,xml,javascript,vim,markdown 
-      \ setl tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+  autocmd FileType html,xhtml,xml,javascript,vim
+      \ setl tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 
   autocmd FileType javascript setl cinoptions+=J1
   autocmd FileType c,cpp      setl path+=./;/
@@ -406,8 +407,9 @@ augroup vimrc_auto_commands
   autocmd FileType vim        setl fenc=utf8 ff=unix
 
   autocmd FileType markdown setl
+      \ tabstop=2 softtabstop=2 shiftwidth=2
       \ nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_Markdown_IndentExpr()
-      \ tabstop=4 commentstring=<!--\ %s\ -->
+      \ commentstring=<!--\ %s\ -->
       \ | inoreabbr <buffer> -[ - [ ]
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
