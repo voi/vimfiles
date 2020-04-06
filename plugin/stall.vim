@@ -50,7 +50,8 @@ function! s:stall_open(mods, args) "{{{
       \ '_get_view_items': funcref('s:stall_get_view_items'),
       \ '_get_target_item': funcref('s:stall_get_target_item'),
       \ '_converter': { val -> val },
-      \ '_no_quit': 0
+      \ '_no_quit': 0,
+      \ '_winsize': 0
       \ }, sources[source_name])
 
   "
@@ -78,6 +79,12 @@ function! s:stall_open(mods, args) "{{{
     let winsize = printf('%d', ((is_vert ? winwidth(0) : winheight(0)) * str2nr(winsize)) / 100)
   endif
 
+  if fitsize && !is_vert
+    if empty(winsize) | let winsize = '16' | endif
+
+    let context._winsize = str2nr(winsize)
+  endif
+
   " open buffer
   call execute(printf('%s noautocmd silent! %snew %s %s',
       \ a:mods, winsize, source_name, join(source_args, ' ')))
@@ -98,11 +105,6 @@ function! s:stall_open(mods, args) "{{{
   call s:stall_call_handler(context, '_on_ready', {})
   call s:stall_update_view(context)
   call s:stall_set_context(context)
-
-  if fitsize && !is_vert
-    if empty(winsize) | let winsize = '16' | endif
-    execute printf("%dwincmd _", min([str2nr(winsize), len(context._get_view_items())]))
-  endif
 endfunction "}}}
 
 function! s:stall_update_view(context)
@@ -125,6 +127,10 @@ function! s:stall_update_view(context)
   call setline(1, map(copy(a:context._view_items),
       \ { idx, val -> a:context._converter(s:stall_item2line(val)) }))
   call setpos('.', cur_pos)
+
+  if a:context._winsize
+    execute printf("%dwincmd _", min([a:context._winsize, len(a:context._view_items)]))
+  endif
 
   ""
   setl readonly nomodifiable
@@ -170,6 +176,10 @@ function! Stall_handle_key(name) "{{{
     let context._items = s:stall_call_handler(context, '_collection', {})
 
     call s:stall_update_view(context)
+  endif
+
+  if get(flags, '_reset_cursor', 0)
+    call setpos('.', [0, 1, 1, 0])
   endif
 
   call s:stall_set_context(context)
@@ -222,7 +232,7 @@ function! s:stall_sources_buffer_open(cmd, close, context, flags) "{{{
   let item = a:context._get_target_item()
 
   if !empty(item)
-    call win_gotoid(a:context._winid)
+    if a:close | call win_gotoid(a:context._winid) | endif
 
     execute printf('%s %s', a:cmd, matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))
   endif
@@ -285,6 +295,7 @@ function! s:stall_sources_files_open(cmd, context, flags) "{{{
   elseif isdirectory(item)
     let a:context.root = item
     let a:flags._update = 1
+    let a:flags._reset_cursor = 1
   else
     call win_gotoid(a:context._winid)
 
@@ -293,7 +304,7 @@ function! s:stall_sources_files_open(cmd, context, flags) "{{{
 endfunction "}}}
 
 let g:stall_sources.files = {
-    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2  :(\1)', '') },
+    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+\)\([\\/]\?\)$', '\3\2  :(\1)', '') },
     \ 'enter': function('s:stall_sources_files_open', [ 'e' ]),
     \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe' ]),
     \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp' ]),
@@ -317,7 +328,7 @@ function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
 
   call matchadd('Comment', ':(.*)$')
-  call matchadd('Statement', '^[^\\/]\+[\\/]\ze ')
+  call matchadd('Statement', '^[\\/][^:]\+\ze\%(  \)')
 endfunction "}}}
 
 function! g:stall_sources.files.up(context, flags) dict "{{{
@@ -326,6 +337,7 @@ function! g:stall_sources.files.up(context, flags) dict "{{{
   if !empty(root) 
     let a:context.root = root
     let a:flags._update = 1
+    let a:flags._reset_cursor = 1
   endif
 endfunction "}}}
 

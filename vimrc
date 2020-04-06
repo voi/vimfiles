@@ -128,6 +128,7 @@ set grepprg=internal
 set ignorecase
 set smartcase
 
+set noincsearch
 set hlsearch
 set tags+=./tags;
 
@@ -179,6 +180,7 @@ nnoremap <silent> <Leader>h :setl hlsearch!  hlsearch?<CR>
 nnoremap <silent> <Leader>r :setl readonly!  modifiable! modifiable?<CR>
 nnoremap <silent> <Leader>w :setl wrap!      wrap?<CR>
 nnoremap <silent> <Leader>s :setl wrapscan!  wrapscan?<CR>
+nnoremap <silent> <Leader>i :setl incsearch! incsearch?<CR>
 
 " error jumps.
 nnoremap <silent> cp :lprevious<CR>zz
