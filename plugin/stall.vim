@@ -341,8 +341,6 @@ function! g:stall_sources.files.up(context, flags) dict "{{{
   endif
 endfunction "}}}
 
-command! -nargs=? -complete=dir StallFiles Stall files <args>
-
 
 " ****************************************************************
 function! s:stall_source_ctags_tag2item(tagline) "{{{
