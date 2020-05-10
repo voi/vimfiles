@@ -1,5 +1,5 @@
 " vim:set sw=2:
-" Vim syntax file
+" Vim syn file
 if exists("b:current_syntax")
   finish
 endif
@@ -13,13 +13,13 @@ syn case ignore
 
 """"""""""""""""""""""""""""""""""""""""""""
 "" 4 Leaf blocks
-syntax cluster maarkdownInline contains=markdownEscape
-syntax cluster markdownBlock   contains=@markdownInline
+syn cluster maarkdownInline contains=markdownEscape
+syn cluster markdownBlock   contains=@markdownInline
 
 if &expandtab
-  syntax match markdownBlockStart /^ */  nextgroup=@markdownBlock display
+  syn match markdownBlockStart /^ */  nextgroup=@markdownBlock display
 else
-  syntax match markdownBlockStart /^\%( \{,3}\|\t*\)/  nextgroup=@markdownBlock display
+  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=@markdownBlock display
 endif
 
 
@@ -57,9 +57,10 @@ hi def link markdownSetext PreProc
 
 "" 4.4 Indented code blocks
 if &expandtab
-  syn match markdownCodeBlock /\t\zs.*/ contained
+  syn match markdownCodeBlock /\t.*/ contained
 else
-  syn match markdownCodeBlock /\(    \)\zs.*/ contained
+  syn match markdownCodeBlock /\%(    \).*/ contained
+  syn match markdownCodeBlock /^\%(    \).*/
 endif
 
 "
@@ -94,11 +95,11 @@ hi def link markdownLinkColon  Typedef
 "" 4.8 Paragraphs
 "" 4.9 Blank lines
 "" 4.10 Tables (extension)
-syntax match markdownTable /|\ze\%(\s\|$\)/
-syntax match markdownTable /|[: ]-\+[: ]\?\s*/
+syn match markdownTable /|\ze\%(\s\|$\)/
+syn match markdownTable /|[: ]-\+[: ]\?\s*/
 
 "
-syntax cluster markdownBlock  add=markdownTable
+syn cluster markdownBlock  add=markdownTable
 
 "
 hi def link markdownTable  Statement
@@ -106,7 +107,7 @@ hi def link markdownTable  Statement
 
 "" 5 Container blocks
 "" 5.1 Block quotes
-syn match markdownBlockquote /\%(>\s\{}\)\+/ contained
+syn match markdownBlockquote /\%(>\s\{}\)\+/ contained nextgroup=@markdownBlock
 
 "
 syn cluster markdownBlock add=markdownBlockquote
@@ -117,8 +118,8 @@ hi def link markdownBlockquote  Comment
 
 "" 5.2 List items
 "" 5.4 Lists
-syntax match markdownListMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownBlock,@markdownInline 
-syntax match markdownListMarker /\([-+*]\)\s\+\%(\1\|[[:space:]]\)\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline
+syn match markdownListMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownBlock,@markdownInline 
+syn match markdownListMarker /\([-+*]\)\s\+\%(\1\|[[:space:]]\)\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline
 
 "
 syn cluster markdownBlock add=markdownListMarker
@@ -128,17 +129,22 @@ hi def link markdownListMarker  Tag
 
 
 "" 5.3 Task list items (extension)
-syntax match markdownTaskTodo /\[ \]/    contained nextgroup=@markdownBlock,@markdownInline
-syntax match markdownTaskDone /\[x\] .*/ contained
+syn match markdownTaskTodo /\[ \]/    contained nextgroup=@markdownBlock,@markdownInline
+syn match markdownTaskDone /\[x\] .*/ contained
 
 "
 hi def link markdownTaskTodo Statement
-hi def link markdownTaskDone SpecialKey
+
+if has('gui_running')
+  hi def markdownTaskDone  gui=strikethrough guifg=#999999
+else
+  hi def link markdownTaskDone  SpecialKey
+endif
 
 
 "" 6 Inlines
 "" 6.1 Backslash escapes
-syntax match markdownEscape /\\[\]\[\\`*_{}()#+.!\-]/ contained
+syn match markdownEscape /\\[\]\[\\`*_{}()#+.!\-]/ contained
 
 "
 hi def link markdownEscape Warning
@@ -146,8 +152,8 @@ hi def link markdownEscape Warning
 
 "" 6.2 Entity and numeric character references
 "" 6.3 Code spans
-syntax region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=`\%([^`]\|\_$\)/  skip=/`\{2,}/ end=/`/ oneline
-syntax region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=``\%([^`]\|\_$\)/ skip=/`\{3,}/ end=/``/ oneline
+syn region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=`\%([^`]\|\_$\)/  skip=/`\{2,}/ end=/`/ oneline
+syn region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=``\%([^`]\|\_$\)/ skip=/`\{3,}/ end=/``/ oneline
 
 "
 hi def link markdownCodeSpan  String
@@ -209,14 +215,10 @@ endif
 
 
 "" 6.5 Strikethrough (extension)
-syntax region markdownStrikeThrough start="\%(\_^\|[^\\\~]\)\@<=\~\{2}\%([^\~]\|\_$\)" end="\~\{2}" oneline
+syn region markdownStrikeThrough start="\%(\_^\|[^\\\~]\)\@<=\~\{2}\%([^\~]\|\_$\)" end="\~\{2}" oneline
 
 "
-if has('gui_running')
-  hi def markdownStrikeThrough  gui=strikethrough guifg=#999999
-else
-  hi def link markdownStrikeThrough  SpecialKey
-endif
+hi def link markdownStrikeThrough markdownTaskDone
 
 
 "" 6.6 Links
