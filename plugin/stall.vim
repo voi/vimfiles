@@ -269,7 +269,7 @@ endfunction "}}}
 
 let g:stall_sources.mru = {
     \ '_collection': 'oldfiles',
-    \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3  :(\2)', '') },
+    \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3\t(\2)', '') },
     \ 'open': function('s:stall_sources_mru_open', [ 'e' ]),
     \ 'tabopen': function('s:stall_sources_mru_open', [ 'tabe' ]),
     \ 'vsplit': function('s:stall_sources_mru_open', [ 'vsp' ]),
@@ -282,13 +282,13 @@ function! g:stall_sources.mru._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
 
-  call matchadd('Comment', ':(.*)$')
+  call matchadd('SpecialKey', '\t(.*)$')
 endfunction "}}}
 
 
 " ****************************************************************
-function! s:stall_sources_files_open(cmd, context, flags) "{{{
-  let item = a:context._get_target_item()
+function! s:stall_sources_files_open(cmd, no_quit, context, flags) "{{{
+  let item = get(a:context._get_target_item(), 1, '')
 
   if empty(item)
     return
@@ -297,6 +297,7 @@ function! s:stall_sources_files_open(cmd, context, flags) "{{{
     let a:flags._update = 1
     let a:flags._reset_cursor = 1
   else
+    let a:flags._no_quit = a:no_quit
     call win_gotoid(a:context._winid)
 
     execute printf('%s %s', a:cmd, item)
@@ -304,11 +305,14 @@ function! s:stall_sources_files_open(cmd, context, flags) "{{{
 endfunction "}}}
 
 let g:stall_sources.files = {
-    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+\)\([\\/]\?\)$', '\3\2  :(\1)', '') },
-    \ 'enter': function('s:stall_sources_files_open', [ 'e' ]),
-    \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe' ]),
-    \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp' ]),
-    \ 'split': function('s:stall_sources_files_open', [ 'sp' ])
+    \ 'enter': function('s:stall_sources_files_open', [ 'e', 0 ]),
+    \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe', 0 ]),
+    \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp', 0 ]),
+    \ 'split': function('s:stall_sources_files_open', [ 'sp', 0 ]),
+    \ 'enter_nq': function('s:stall_sources_files_open', [ 'e', 1 ]),
+    \ 'tabopen_nq': function('s:stall_sources_files_open', [ 'tabe', 1 ]),
+    \ 'vsplit_nq': function('s:stall_sources_files_open', [ 'vsp', 1 ]),
+    \ 'split_nq': function('s:stall_sources_files_open', [ 'sp', 1 ])
     \ }
 
 function! g:stall_sources.files._on_init(context, flags) dict "{{{
@@ -316,8 +320,13 @@ function! g:stall_sources.files._on_init(context, flags) dict "{{{
 endfunction "}}}
 
 function! g:stall_sources.files._collection(context, flags) dict "{{{
-  return map(globpath(a:context.root, '*', 0, 1), 
-      \ { idx, val -> fnamemodify(val, ':p') })
+  let l:root = a:context.root
+
+  return sort(map(globpath(a:context.root, '*', 0, 1),
+      \ { idx, val -> [
+      \   substitute(val, '^\(.\+[/\\]\)\([^/\\]\+\)$', (isdirectory(val) ? '/' : '') . '\2\t(\1)', ''),
+      \   fnamemodify(val, ':p') ] }),
+      \ { i1, i2 -> i1[0] == i2[0] ? 0 : i1[0] > i2[0] ? 1 : -1 })
 endfunction "}}}
 
 function! g:stall_sources.files._on_ready(context, flags) dict "{{{
@@ -325,10 +334,14 @@ function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
+  nnoremap <buffer> <silent> <S-CR> :call Stall_handle_key('enter_nq')<CR>
+  nnoremap <buffer> <silent> T    :call Stall_handle_key('tabopen_nq')<CR>
+  nnoremap <buffer> <silent> V    :call Stall_handle_key('vsplit_nq')<CR>
+  nnoremap <buffer> <silent> S    :call Stall_handle_key('split_nq')<CR>
   nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
 
-  call matchadd('Comment', ':(.*)$')
-  call matchadd('Statement', '^[\\/][^:]\+\ze\%(  \)')
+  call matchadd('SpecialKey', '\t(.*)$')
+  call matchadd('Statement', '^[\\/][^\\/[:space:]]\+')
 endfunction "}}}
 
 function! g:stall_sources.files.up(context, flags) dict "{{{
