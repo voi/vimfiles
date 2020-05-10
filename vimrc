@@ -128,6 +128,7 @@ set grepprg=internal
 set ignorecase
 set smartcase
 
+set nowrapscan
 set noincsearch
 set hlsearch
 set tags+=./tags;
@@ -168,7 +169,6 @@ if has('clipboard')
   vnoremap <silent> gy "*y
   vnoremap <silent> gx "*x
   vnoremap <silent> gp "*p
-  vnoremap <silent> gP "*P
 endif
 
 " visual replace
@@ -315,7 +315,7 @@ function! s:Vimrc_HighlightPlus() abort "{{{
   highlight link TrailingSpace NonText
 
   if &g:background ==# 'dark'
-    highlight SpecialKey   gui=NONE      guifg=#808080  guibg=bg ctermfg=grey 
+    highlight SpecialKey   gui=NONE      guifg=#808080  guibg=NONE ctermfg=grey 
     highlight ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
 
   else
@@ -409,7 +409,7 @@ augroup vimrc_auto_commands
   autocmd FileType vim        setl fenc=utf8 ff=unix
 
   autocmd FileType markdown setl
-      \ tabstop=2 softtabstop=2 shiftwidth=2
+      \ tabstop=2 softtabstop=2 shiftwidth=2 wrap
       \ nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_Markdown_IndentExpr()
       \ commentstring=<!--\ %s\ -->
       \ | inoreabbr <buffer> -[ - [ ]
@@ -606,7 +606,7 @@ function! s:Vimrc_EncloseText(arguments) range abort "{{{
 endfunction "}}}
 
 function! s:Vimrc_Complete_EncloseText(ArgLead, CmdLine, CursorPos) abort "{{{
-  return [ '-a', '-d', '-r', '-g', '-t' ]
+  return [ '-a', '-d', '-r', '-g', '-s', '-t' ]
 endfunction "}}}
 
 command! -range -nargs=* -complete=customlist,<SID>Vimrc_Complete_EncloseText
@@ -615,7 +615,7 @@ command! -range -nargs=* -complete=customlist,<SID>Vimrc_Complete_EncloseText
 
 " *****************************************************************************
 command! -range -nargs=0 GfmTodo call call({ begin, end -> 
-    \ execute(printf('silent %d,%ds/^\s*[-+*] \zs\[[x ]\]/\=(submatch(0) ==# "[x]" ? "[ ]" : "[x]")/', begin, end)) },
+    \ execute(printf('silent %d,%ds/^\s*[-+*]\s\zs\[[x ]\]/\=(submatch(0) ==# "[x]" ? "[ ]" : "[x]")/', begin, end)) },
     \ [ <line1>, <line2> ])
 
 
@@ -848,7 +848,7 @@ function! s:Vimrc_ReadTemplate(files) abort "{{{
   let template_path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
   let template_path = fnamemodify(template_path, ':p') . a:files
 
-  execute '.r ' . template_path
+  execute 'keepalt .-1r ' . template_path
 endfunction "}}}
 
 function! s:Vimrc_ReadTemplatePost() abort "{{{
@@ -877,22 +877,7 @@ command! -nargs=0 Root call <SID>find_repos_dir()
 
 " *****************************************************************************
 if has('gui_win32')
-  function! s:remote_open(is_move, bufname)
-    call job_start('gvim', { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
-    sleep 500m
-
-    let bname = get(a:bufname, 0, '')
-
-    if empty(bname) | return | endif
-
-    call remote_send(get(filter(split(serverlist(), '\n'), { idx, val -> v:servername !=# val }), -1, ''),
-        \ '<ESC>:tabedit ' . bname . '<CR>')
-
-    if a:is_move | execute 'bw ' . bufnr(bname) | endif
-  endfunction
-
-  command! -nargs=? -complete=buffer RemoteCopy call s:remote_open(0, [<q-args>])
-  command! -nargs=? -complete=buffer RemoteMove call s:remote_open(1, [<q-args>])
+  command! GVim silent execute '!start gvim'
 endif
 
 
