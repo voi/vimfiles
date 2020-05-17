@@ -301,6 +301,7 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
+  highlight CussorLine    gui=NONE
   highlight CursorIM  gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
 
   " statusline
@@ -413,6 +414,13 @@ augroup vimrc_auto_commands
       \ nosmartindent indentkeys=!^F,o,O indentexpr=Vimrc_Markdown_IndentExpr()
       \ commentstring=<!--\ %s\ -->
       \ | inoreabbr <buffer> -[ - [ ]
+  autocmd FileType markdown vnoremap <silent> <buffer> _ :s/\%V.*\%V./*&*/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> * :s/\%V.*\%V./**&**/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> ` :s/\%V.*\%V./`&`/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> - :s/\%V.*\%V./\~\~&\~\~/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> < :s/\%V.*\%V./<&>/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> > :s/\%V.*\%V./> &/<CR>
+  autocmd FileType markdown vnoremap <silent> <buffer> <Bar> :s/\%V.*\%V./\| &/<CR>
 
   autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
 
