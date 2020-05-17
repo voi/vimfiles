@@ -118,8 +118,8 @@ hi def link markdownBlockquote  Comment
 
 "" 5.2 List items
 "" 5.4 Lists
-syn match markdownListMarker /\d\{1,9}[.)]\%(\s\+\)\@=/ contained nextgroup=@markdownBlock,@markdownInline 
-syn match markdownListMarker /\([-+*]\)\s\+\%(\1\|[[:space:]]\)\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline
+syn match markdownListMarker /\d\{1,9}[.)]\%(\s\)\@=/ contained nextgroup=@markdownBlock,@markdownInline 
+syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline
 
 "
 syn cluster markdownBlock add=markdownListMarker
@@ -259,7 +259,7 @@ syn match markdownAutoLink /<\a[[:alnum:]+-.]\{1,31}:[^[:cntrl:][:space:]<>]\+>/
 " mail
 syn match markdownAutoLink /<[[:alnum:].!#$%&'*+\/=?^_`{|}~-]\+@\a\%([[:alnum:]]\{0,61}[[:alnum:]]\)\?\%(\.[[:alnum:]]\%([[:alnum:]-]\{0,61}[[:alnum:]]\)\?\)*>/
 " file
-syn match markdownAutoLink /<file:\/\/\%(\/[A-Z]:\)\?[^[:cntrl:][:space:]<>]\+>/
+syn match markdownAutoLink /<file:\/\/\%(\/[A-Z]:\)\?[^>]\+>/
 
 "
 hi def link markdownAutoLink Underlined
