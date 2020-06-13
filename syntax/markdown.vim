@@ -17,9 +17,9 @@ syn cluster maarkdownInline contains=markdownEscape
 syn cluster markdownBlock   contains=@markdownInline
 
 if &expandtab
-  syn match markdownBlockStart /^ */  nextgroup=@markdownBlock display
+  syn match markdownBlockStart /^ */  nextgroup=markdownThematicBreak,@markdownBlock display
 else
-  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=@markdownBlock display
+  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=markdownThematicBreak,@markdownBlock display
 endif
 
 
@@ -27,9 +27,6 @@ endif
 syn match markdownThematicBreak /\%(\*\+\s*\)\{3,}$/ contained
 syn match markdownThematicBreak /\%(_\+\s*\)\{3,}$/  contained
 syn match markdownThematicBreak /\%(-\+\s*\)\{3,}$/  contained
-
-"
-syn cluster markdownBlock add=markdownThematicBreak
 
 "
 hi def link markdownThematicBreak Operator
@@ -95,14 +92,15 @@ hi def link markdownLinkColon  Typedef
 "" 4.8 Paragraphs
 "" 4.9 Blank lines
 "" 4.10 Tables (extension)
-syn match markdownTable /|\ze\%(\s\|$\)/
-syn match markdownTable /|[: ]-\+[: ]\?\s*/
+syn match markdownTable /\%(\S.*\s\)|\%(.*\s|\)*\%(.*\)\?/ transparent contains=markdownTableBorder,@markdownInline
+syn match markdownTableBorder /\%(^\|\s\)\zs|\ze\%(\s\|$\)/ contained
+syn match markdownTableBorder /:\?-\+:\?/ contained
 
 "
 syn cluster markdownBlock  add=markdownTable
 
 "
-hi def link markdownTable  Statement
+hi def link markdownTableBorder  Statement
 
 
 "" 5 Container blocks
@@ -113,13 +111,13 @@ syn match markdownBlockquote /\%(>\s\{}\)\+/ contained nextgroup=@markdownBlock
 syn cluster markdownBlock add=markdownBlockquote
 
 "
-hi def link markdownBlockquote  Comment
+hi def link markdownBlockquote  Directory
 
 
 "" 5.2 List items
 "" 5.4 Lists
-syn match markdownListMarker /\d\{1,9}[.)]\%(\s\)\@=/ contained nextgroup=@markdownBlock,@markdownInline 
-syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline
+syn match markdownListMarker /\d\{1,9}[.)]\%(\s\)\@=/ contained nextgroup=@markdownBlock,@markdownInline,markdownThematicBreak
+syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline,markdownThematicBreak
 
 "
 syn cluster markdownBlock add=markdownListMarker

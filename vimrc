@@ -903,6 +903,9 @@ nnoremap <silent> < :UnIndentLine<CR>
 vnoremap <silent> > :IndentLine<CR>
 vnoremap <silent> < :UnIndentLine<CR>
 
+vnoremap <silent> <Tab> :IndentLine<CR>
+vnoremap <silent> <S-Tab> :UnIndentLine<CR>
+
 nnoremap <silent> <C-q> :CommentIt<CR>
 vnoremap <silent> <C-q> :CommentIt<CR>
 
