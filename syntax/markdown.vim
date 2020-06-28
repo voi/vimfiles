@@ -24,12 +24,16 @@ endif
 
 
 "" 4.1 Thematic breaks
-syn match markdownThematicBreak /\%(\*\+\s*\)\{3,}$/ contained
-syn match markdownThematicBreak /\%(_\+\s*\)\{3,}$/  contained
-syn match markdownThematicBreak /\%(-\+\s*\)\{3,}$/  contained
+syn match markdownThematicBreak /\*\{3,}\s*$/ contained
+syn match markdownThematicBreak /_\{3,}\s*$/  contained
+syn match markdownThematicBreak /-\{3,}\s*$/  contained
+
+syn match markdownThematicBreak /\%(\s\+\*\+\)\{3,}$/ contained
+syn match markdownThematicBreak /\%(\s\+_\+\)\{3,}$/  contained
+syn match markdownThematicBreak /\%(\s\+-\+\)\{3,}$/  contained
 
 "
-hi def link markdownThematicBreak Operator
+hi link markdownThematicBreak Operator
 
 
 "" 4.2 ATX headings
@@ -39,7 +43,7 @@ syn region markdownHeader matchgroup=markdownAtx start=/#\{1,6}\s\@=/ end=/#*\s*
 syn cluster markdownBlock add=markdownHeader
 
 "
-hi def link markdownAtx PreProc
+hi link markdownAtx PreProc
 
 
 "" 4.3 Setext headings
@@ -49,7 +53,7 @@ syn match markdownHeader /^ \{,3}[^\-\*_=>[:space:]].\+\n\s\{,3}\%(-\|=\)\+\s*$/
 syn match markdownSetext /[=-]\+/ contained
 
 "
-hi def link markdownSetext PreProc
+hi link markdownSetext PreProc
 
 
 "" 4.4 Indented code blocks
@@ -64,7 +68,7 @@ endif
 syn cluster markdownBlock add=markdownCodeBlock
 
 "
-hi def link markdownCodeBlock String
+hi link markdownCodeBlock String
 
 
 "" 4.5 Fenced code blocks
@@ -85,33 +89,33 @@ syn region markdownLinkLabel matchgroup=markdownLink start=/\[[^\][:space:]]\@=/
 syn match markdownLinkColon  /:/ nextgroup=markdownLinkDest skipnl skipwhite contained
 
 "
-hi def link markdownLinkLabel  Underlined
-hi def link markdownLinkColon  Typedef
+hi link markdownLinkLabel  Underlined
+hi link markdownLinkColon  Typedef
 
 
 "" 4.8 Paragraphs
 "" 4.9 Blank lines
 "" 4.10 Tables (extension)
 syn match markdownTable /\%(\S.*\s\)|\%(.*\s|\)*\%(.*\)\?/ transparent contains=markdownTableBorder,@markdownInline
-syn match markdownTableBorder /\%(^\|\s\)\zs|\ze\%(\s\|$\)/ contained
+syn match markdownTableBorder /\%(^\|\s\)\@<=|\ze\%(\s\|$\)/ contained
 syn match markdownTableBorder /:\?-\+:\?/ contained
 
 "
 syn cluster markdownBlock  add=markdownTable
 
 "
-hi def link markdownTableBorder  Statement
+hi link markdownTableBorder  Statement
 
 
 "" 5 Container blocks
 "" 5.1 Block quotes
-syn match markdownBlockquote /\%(>\s\{}\)\+/ contained nextgroup=@markdownBlock
+syn match markdownBlockquote /\%(>\s\{}\)\+/ contained nextgroup=markdownThematicBreak,@markdownBlock
 
 "
 syn cluster markdownBlock add=markdownBlockquote
 
 "
-hi def link markdownBlockquote  Directory
+hi link markdownBlockquote  Directory
 
 
 "" 5.2 List items
@@ -123,7 +127,7 @@ syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTask
 syn cluster markdownBlock add=markdownListMarker
 
 "
-hi def link markdownListMarker  Tag
+hi link markdownListMarker  Tag
 
 
 "" 5.3 Task list items (extension)
@@ -131,12 +135,12 @@ syn match markdownTaskTodo /\[ \]/    contained nextgroup=@markdownBlock,@markdo
 syn match markdownTaskDone /\[x\] .*/ contained
 
 "
-hi def link markdownTaskTodo Statement
+hi link markdownTaskTodo Statement
 
 if has('gui_running')
-  hi def markdownTaskDone  gui=strikethrough guifg=#999999
+  hi markdownTaskDone  gui=strikethrough guifg=#999999
 else
-  hi def link markdownTaskDone  SpecialKey
+  hi link markdownTaskDone  SpecialKey
 endif
 
 
@@ -145,7 +149,7 @@ endif
 syn match markdownEscape /\\[\]\[\\`*_{}()#+.!\-]/ contained
 
 "
-hi def link markdownEscape Warning
+hi link markdownEscape Warning
 
 
 "" 6.2 Entity and numeric character references
@@ -154,7 +158,7 @@ syn region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=`\%([^`]\|\_$\)/  skip=/`
 syn region markdownCodeSpan start=/\%(\_^\|[^\\`]\)\@<=``\%([^`]\|\_$\)/ skip=/`\{3,}/ end=/``/ oneline
 
 "
-hi def link markdownCodeSpan  String
+hi link markdownCodeSpan  String
 
 
 "" 6.4 Emphasis and strong emphasis
@@ -202,13 +206,13 @@ call s:EmphasisAndStrongUnderline('StrongEmphasis', 3)
 
 "
 if has('gui_running')
-  hi def markdownEmphasis  gui=undercurl
-  hi def markdownStrong  gui=bold
-  hi def markdownStrongEmphasis  gui=standout
+  hi markdownEmphasis  gui=undercurl
+  hi markdownStrong  gui=bold
+  hi markdownStrongEmphasis  gui=standout
 else
-  hi def markdownEmphasis  term=underline cterm=underline
-  hi def markdownStrong  term=bold cterm=bold
-  hi def markdownStrongEmphasis  term=bold,underline cterm=bold,underline
+  hi markdownEmphasis  term=underline cterm=underline
+  hi markdownStrong  term=bold cterm=bold
+  hi markdownStrongEmphasis  term=bold,underline cterm=bold,underline
 endif
 
 
@@ -216,7 +220,7 @@ endif
 syn region markdownStrikeThrough start="\%(\_^\|[^\\\~]\)\@<=\~\{2}\%([^\~]\|\_$\)" end="\~\{2}" oneline
 
 "
-hi def link markdownStrikeThrough markdownTaskDone
+hi link markdownStrikeThrough markdownTaskDone
 
 
 "" 6.6 Links
@@ -230,11 +234,11 @@ syn region markdownLinkTitle start=/(/ skip=/(\S.{})\|\\[()]/ end=/)/ oneline co
 syn region markdownLinkReference matchgroup=markdownLink start=/\[/ skip=/\[.{}\]\|\\[\[\]]/ end=/\]/ oneline contained
 
 "
-hi def link markdownLinkDest  SpecialKey
-hi def link markdownLinkTitle  String
-hi def link markdownLinkReference SpecialKey
+hi link markdownLinkDest  SpecialKey
+hi link markdownLinkTitle  String
+hi link markdownLinkReference SpecialKey
 
-hi def link markdownLink  Typedef
+hi link markdownLink  Typedef
 
 
 "" 6.7 Images
@@ -244,9 +248,9 @@ syn region markdownLinkUrl matchgroup=markdownLink start=/(/ skip=/(\S.{})\|\\[(
 
 
 "
-hi def link markdownImage Tag
-hi def link markdownImageLabel Underlined
-hi def link markdownLinkUrl  SpecialKey
+hi link markdownImage Tag
+hi link markdownImageLabel Underlined
+hi link markdownLinkUrl  SpecialKey
 
 
 "" 6.8 Autolinks
@@ -260,7 +264,7 @@ syn match markdownAutoLink /<[[:alnum:].!#$%&'*+\/=?^_`{|}~-]\+@\a\%([[:alnum:]]
 syn match markdownAutoLink /<file:\/\/\%(\/[A-Z]:\)\?[^>]\+>/
 
 "
-hi def link markdownAutoLink Underlined
+hi link markdownAutoLink Underlined
 
 
 "" 6.9 Autolinks (extension)
@@ -272,7 +276,7 @@ syn match markdownAutoLinkEx /\%(^\|[[:space:](]\)\@<=[[:alpha:]][[:alnum:].\-_+
 syn match markdownAutoLinkEx /\%(^\|[[:space:](]\)\@<=https\?:[^[:cntrl:][:space:]<>]\+\%([[[:space:];<]\|$\)\@=/
 
 "
-hi def link markdownAutoLinkEx Underlined
+hi link markdownAutoLinkEx Underlined
 
 
 "" 6.10 Raw HTML
@@ -293,7 +297,7 @@ syn clear xmlError
 syn match markdownLineBreak /  $/ containedin=ALL
 
 "
-hi def link markdownLineBreak  EndOfBuffer
+hi link markdownLineBreak  EndOfBuffer
 
 
 "" 6.13 Soft line breaks
@@ -306,20 +310,20 @@ syn match markdownIssueRef /\%(^\|\s\)\@<=#\d\+\%(\s\|$\)\@=/
 syn match markdownIssueRef /\%(^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\s\|$\)\@=/
 
 "
-hi def link markdownIssueRef Tag
+hi link markdownIssueRef Tag
 
 
 "" Username @mentions
 syn match markdownMentions /\%(^\|\s\)\@<=@[[:alnum:]-_]\+\%(\s\|$\)\@=/
 
 "
-hi def link markdownMentions Identifier
+hi link markdownMentions Identifier
 
 "" Emoji
 syn match markdownEmoji /\%(^\|\s\)\@<=:\a\w\+\a:\%(\s\|$\)\@=/
 
 "
-hi def link markdownEmoji Constant
+hi link markdownEmoji Constant
 
 
 """"""""""""""""""""""""""""""""""""""""""""
