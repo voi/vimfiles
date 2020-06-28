@@ -15,7 +15,7 @@ if has('multi_byte_ime') || has('xim')
   highlight CursorIM guibg=#9900FF guifg=NONE
 
   inoremap <silent> <Esc> <ESC>:set iminsert=0<CR>
-  " inoremap <silent> <C-j> <C-^>
+  inoremap <silent> <C-j> <C-^>
 
   set iminsert=0 imsearch=0
 endif
@@ -46,16 +46,16 @@ augroup END
 
 " ***********************************************
 if has('win32')
-  set columns=100
+  set columns=110
   set lines=45
   set linespace=1
-  " set guifont=NasuM:h11
-  " set guifont=CamingoCode:h11
-  set guifont=Hack:h11
-  " set guifont=Cica:h12,Consolas:h11
-  set guifontwide=Cica:h11,HGGothicM:h11
-  " set guifontwide=UD_デジタル_教科書体_N-R:h11
-  " set guifontwide=BIZ_UDゴシック:h11
+  set guifont=MyricaM_M:h12,Consolas:h12
+  set guifontwide=MyricaM_M:h12,UD_デジタル_教科書体_N-R:h12
+  " HGGothicM
+  " NasuM
+  " MyricaM_M
+  " UD_デジタル_教科書体_N-R
+  " BIZ_UDゴシック
   set rop=type:directx,renmode:5,taamode:1,contrast:3
   " winpos 372 55
 endif
