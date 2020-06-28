@@ -234,7 +234,8 @@ nnoremap <expr> <Leader>@  Vimrc_Register_hints('@', 'registers')
 " ***********************************************
 inoreabbr -d <C-r>=strftime('%Y-%m-%d')<CR>
 inoreabbr /d <C-r>=strftime('%Y/%m/%d')<CR>
-inoreabbr -t <C-r>=strftime('%H:%M:%s')<CR>
+inoreabbr -t <C-r>=strftime('%H:%M')<CR>
+inoreabbr -f <C-r>=strftime('%Y-%m-%d %H:%M')<CR>
 
 
 " ***********************************************
