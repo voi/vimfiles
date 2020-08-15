@@ -72,7 +72,7 @@ endif
 
 if has('conceal') | set conceallevel=1 | endif 
 
-set colorcolumn=120
+" set colorcolumn=120
 set formatoptions+=jnmM2
 set formatoptions-=l
 set display=lastline
@@ -93,6 +93,7 @@ set copyindent preserveindent
 set breakindent breakindentopt=shift:2
 
 set complete=.,b,k
+set completeopt=menuone,noinsert
 set wildignorecase
 set wildmode=list:full
 set pumheight=32
@@ -139,6 +140,12 @@ set cryptmethod=blowfish
 
 " ***********************************************
 "" key mappings
+for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",'\zs')
+  exec "imap <expr> " . k . " pumvisible() ? '" . k . "' : '" . k . "\<C-X>\<C-P>\<C-N>'"
+endfor
+
+inoremap <expr> <CR> pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
+
 " a"/a'/a` trim whitespaces, a(/a{/a[ don't trim whitespaces.
 vnoremap a" 2i"
 vnoremap a' 2i'
@@ -151,9 +158,6 @@ onoremap a` 2i`
 "" blackhole
 nnoremap <silent> d "_d
 vnoremap <silent> d "_d
-
-"" home-key del
-inoremap <silent> <C-l> <Del>
 
 "" compatible D
 nnoremap <silent> Y y$

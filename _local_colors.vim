@@ -3,13 +3,8 @@ if has('gui_win32')
       \ g:colors_name,
       \ 'spring-night',
       \ 'fruchtig',
-      \ 'artesanal',
-      \ 'atomic',
-      \ 'mojave',
-      \ 'desert-warm-256',
-      \ 'disco',
-      \ 'tango-desert',
-      \ 'tango-morning'
+      \ 'wombat256grf',
+      \ 'tango'
       \ ]
   execute 'colorscheme ' . colors[(len(split(serverlist(), '\n')) -1) % len(colors)]
 endif
