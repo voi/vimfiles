@@ -92,7 +92,7 @@ set autoindent smartindent
 set copyindent preserveindent
 set breakindent breakindentopt=shift:2
 
-set complete=.,b,k
+set complete=.,b,k,w
 set completeopt=menuone,noinsert
 set wildignorecase
 set wildmode=list:full
@@ -140,11 +140,17 @@ set cryptmethod=blowfish
 
 " ***********************************************
 "" key mappings
+function! Vimrc_AutoComplete_Key(chr) "{{{
+  return a:chr . ( pumvisible() ? '' : "\<C-X>\<C-P>\<C-N>")
+endfunction "}}}
+
 for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",'\zs')
-  exec "imap <expr> " . k . " pumvisible() ? '" . k . "' : '" . k . "\<C-X>\<C-P>\<C-N>'"
+  exec printf("imap <silent> <expr> %s Vimrc_AutoComplete_Key('%s')", k, k)
 endfor
 
-inoremap <expr> <CR> pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
+inoremap <expr> <CR>  pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
+inoremap <expr> <C-n> pumvisible() ? "\<Down>" : "\<C-n>"
+inoremap <expr> <C-p> pumvisible() ? "\<Up>" : "\<C-p>"
 
 " a"/a'/a` trim whitespaces, a(/a{/a[ don't trim whitespaces.
 vnoremap a" 2i"
@@ -239,7 +245,7 @@ nnoremap <expr> <Leader>@  Vimrc_Register_hints('@', 'registers')
 inoreabbr -d <C-r>=strftime('%Y-%m-%d')<CR>
 inoreabbr /d <C-r>=strftime('%Y/%m/%d')<CR>
 inoreabbr -t <C-r>=strftime('%H:%M')<CR>
-inoreabbr -f <C-r>=strftime('%Y-%m-%d %H:%M')<CR>
+inoreabbr -f <C-r>=strftime('%Y-%m-%dT%H:%M')<CR>
 
 
 " ***********************************************
@@ -306,27 +312,27 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
-  highlight CussorLine    gui=NONE
-  highlight CursorIM  gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
+  hi CursorLine gui=NONE
+  hi CursorIM   gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
 
   " statusline
-  highlight StatusLine_Modes      guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
-  highlight StatusLine_CursorPos  guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
+  hi StatusLine_Modes      guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
+  hi StatusLine_CursorPos  guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
 
-  highlight StatusLine_Normal     guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
-  highlight StatusLine_Insert     guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
-  highlight StatusLine_Replace    guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
-  highlight StatusLine_Visual     guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
+  hi StatusLine_Normal     guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
+  hi StatusLine_Insert     guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
+  hi StatusLine_Replace    guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
+  hi StatusLine_Visual     guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
 
-  highlight link TrailingSpace NonText
+  hi link TrailingSpace NonText
 
   if &g:background ==# 'dark'
-    highlight SpecialKey   gui=NONE      guifg=#808080  guibg=NONE ctermfg=grey 
-    highlight ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
+    hi SpecialKey   gui=NONE      guifg=#808080  guibg=NONE ctermfg=grey 
+    hi ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
 
   else
-    highlight SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
-    highlight ZenkakuSpace gui=underline guifg=grey cterm=underline ctermfg=grey
+    hi SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
+    hi ZenkakuSpace gui=underline guifg=grey cterm=underline ctermfg=grey
 
   endif
 endfunction "}}}
@@ -364,10 +370,6 @@ endfunction "}}}
 augroup vimrc_auto_commands
   autocmd!
 
-  " ** filetype
-  autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setf xml
-  autocmd BufRead,BufNewFile *.cas setf casl2
-
   if has('win32')
     autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setl fenc=cp932 ff=dos
   endif
@@ -391,7 +393,6 @@ augroup vimrc_auto_commands
       \ | call matchadd('Identifier', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
       \ | call matchadd('Identifier', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
       \ | call matchadd('Identifier', '\%(2[0-3]\|1[0-9]\|0[1-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
-      \ | call matchadd('Bold', '[{}]')
 
   " additional colors
   autocmd VimEnter,ColorScheme * call <SID>Vimrc_HighlightPlus()
@@ -431,6 +432,7 @@ augroup vimrc_auto_commands
 
   autocmd FileType casl2 setl sw=10 ts=10 sts=10
   autocmd FileType changelog setl textwidth=0
+  autocmd FileType todotxt setl concealcursor=n conceallevel=1
 augroup END
 
 
@@ -826,13 +828,14 @@ augroup vimrc_additional_syntax
 
   autocmd FileType c,cpp,java,javascript 
       \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
-      \ | syn match Operator /;;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
+      \ | syn match Operator /;\|[<>!=~+\-\*\/]=\|||\|&&\|++\|--/
       \ | syn match Operator /::\ze\w/
       \ | syn match Operator /\>[\*&]/
       \ | syn match Operator /\*\</
       \ | syn match Statement /[!&]\</
       \ | syn match Statement /[!&]\ze(/
       \ | syn match Statement /\%(->\|\.\)\</
+      \ | syn match Bold /[{}]/
 
   autocmd FileType log 
       \ | syn match LogDumpNonZero /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/

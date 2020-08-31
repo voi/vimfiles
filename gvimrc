@@ -48,11 +48,11 @@ augroup END
 if has('win32')
   set columns=110
   set lines=45
-  " set linespace=1
+  set linespace=2
   " let userFONT='IPAゴシック'
   " let userFONT='NasuM'
-  let userFONT='MyricaM_M'
-  " let userFONT='Cica'
+  " let userFONT='MyricaM_M'
+  let userFONT='Cica'
   " let userFONT='UD_デジタル_教科書体_N-R'
   " let userFONT='BIZ_UDゴシック'
   let &guifont=userFONT . ':h12,Consolas:h12'
