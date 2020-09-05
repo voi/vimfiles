@@ -125,7 +125,6 @@ set switchbuf=useopen,usetab
 set hidden
 
 "" word search.
-set grepprg=internal
 set ignorecase
 set smartcase
 
@@ -133,6 +132,7 @@ set nowrapscan
 set noincsearch
 set hlsearch
 set tags+=./tags;
+set grepprg=findstr\ /NSR
 
 "" encrypt file.
 set cryptmethod=blowfish
@@ -369,6 +369,9 @@ endfunction "}}}
 " {{{
 augroup vimrc_auto_commands
   autocmd!
+
+  autocmd QuickFixCmdPost grep,grepadd,vimgrep topleft copen
+  autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep topleft lopen
 
   if has('win32')
     autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setl fenc=cp932 ff=dos
@@ -898,12 +901,6 @@ endif
 
 
 " *****************************************************************************
-""
-let g:changelog_spacing_errors = 0
-let g:changelog_dateformat = '%Y-%m-%d'
-let g:changelog_username = '<localhost>'
-
-
 ""
 nnoremap <silent> > :IndentLine<CR>
 nnoremap <silent> < :UnIndentLine<CR>
