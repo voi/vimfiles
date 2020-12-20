@@ -339,6 +339,7 @@ function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> V    :call Stall_handle_key('vsplit_nq')<CR>
   nnoremap <buffer> <silent> S    :call Stall_handle_key('split_nq')<CR>
   nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
+  nnoremap <buffer> <silent> -    :call Stall_handle_key('up')<CR>
 
   call matchadd('SpecialKey', '\t(.*)$')
   call matchadd('Statement', '^[\\/][^\\/[:space:]]\+')

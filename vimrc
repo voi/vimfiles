@@ -59,6 +59,7 @@ set guioptions+=cM
 
 set number
 set list
+set cursorline
 
 if has('gui')
   " |¦»▸>￫↲
@@ -79,8 +80,10 @@ set display=lastline
 set nofixendofline
 set showtabline=2
 set textwidth=0
-set scrolloff=0
+" set scrolloff=0
 set nowrap
+set breakindent
+set breakindentopt=shift:2
 
 set whichwrap+=h,l,<,>,[,]
 set virtualedit+=block
@@ -96,7 +99,7 @@ set complete=.,b,k,w
 set completeopt=menuone,noinsert
 set wildignorecase
 set wildmode=list:full
-set pumheight=32
+set pumheight=16
 
 if has('win32')
   set wildignore+=*\\.git\\*,*\\.hg\\*,*\\.svn\\*  " Windows ('noshellslash')
@@ -170,6 +173,7 @@ nnoremap <silent> Y y$
 
 "" clipboard
 if has('clipboard')
+  " g@ operatorfunc
   nnoremap <silent> gy "*y
   nnoremap <silent> gY "*y$
   nnoremap <silent> gx "*x
@@ -312,7 +316,7 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
-  hi CursorLine gui=NONE
+  hi clear CursorLine
   hi CursorIM   gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
 
   " statusline
@@ -440,384 +444,21 @@ augroup END
 
 
 " *****************************************************************************
-function! s:calc_padding_tabs(token, align_width) abort "{{{
-  let l:ts = &tabstop
-  let l:align_width = (a:align_width % l:ts == 0) ? a:align_width :
-      \ ((a:align_width + l:ts) / l:ts) * l:ts
-  let l:mergin = l:align_width - strdisplaywidth(a:token)
-
-  return repeat("\t", ((l:mergin + (l:mergin % l:ts ? l:ts : 0)) / l:ts))
-endfunction "}}}
-
-function! s:calc_padding_space(token, align_width) abort "{{{
-  return repeat(' ', a:align_width - strdisplaywidth(a:token))
-endfunction "}}}
-
-function! s:align_token(tokens, align_width, ctx) abort "{{{
-  if len(a:tokens) > 1
-    let l:token = substitute(remove(a:tokens, 0), '\s*$', '', '')
-
-    let a:tokens[0] = l:token
-        \ . a:ctx.filler(l:token, a:align_width)
-        \ . a:tokens[0]
-  endif
-
-  return a:tokens
-endfunction "}}}
-
-function! s:align_parse(arguments) abort "{{{
-  let l:ctx = {
-      \ 'pattern': '',
-      \ 'global': '',
-      \ 'filler': function('<SID>calc_padding_space'),
-      \ 'sub': '\n&',
-      \ 'delim': '\n'
-      \ }
-  let l:use_regexp = 0
-  let l:case = ''
-
-  for l:opt in a:arguments
-    if     l:opt ==# '-g' | let l:ctx.global = 'g'
-    elseif l:opt ==# '-t' | let l:ctx.filler = function('<SID>calc_padding_tabs')
-    elseif l:opt ==# '-a' | let l:ctx.sub = '&\n' | let l:ctx.delim = '\n\s*'
-    elseif l:opt ==# '-r' | let l:use_regexp = 1
-    elseif l:opt ==# '-c' | let l:case = '\C'
-    else                  | let l:ctx.pattern = l:opt
-    endif
-  endfor
-
-  if l:use_regexp
-    let l:ctx.pattern = l:case . l:ctx.pattern
-  else
-    let l:ctx.pattern = '\V' . l:case . escape(l:ctx.pattern, '\')
-  endif
-
-  return l:ctx
-endfunction "}}}
-
-function! s:Vimrc_Alignment(startl, endl, arguments) abort "{{{
-  if empty(a:arguments)
-    return
-  endif
-
-  let l:ctx = s:align_parse(a:arguments)
-  let l:line_tokens = map(getline(a:startl, a:endl),
-      \ { key, val -> split(substitute(val, l:ctx.pattern, l:ctx.sub, l:ctx.global), l:ctx.delim, 1) })
-  let l:width = 0
-
-  while max(map(copy(l:line_tokens), { key, val -> (len(val) > 1) }))
-    " 
-    let l:width = max(map(filter(copy(l:line_tokens),
-        \   { idx, val -> (len(val) > 1) }),
-        \ { key, val -> strdisplaywidth(val[0]) }))
-    " 
-    let l:line_tokens = map(l:line_tokens,
-        \ { key, val -> s:align_token(val, l:width, l:ctx) })
-  endwhile
-
-  if l:width > 0
-    call setline(a:startl, map(l:line_tokens, 'v:val[0]'))
-  endif
-endfunction "}}}
-
-function! s:Vimrc_Complete_Alignment(ArgLead, CmdLine, CursorPos) abort "{{{
-  return [ '-g', '-t', '-a', '-r', '-c' ]
-endfunction "}}}
-
-command! -range -nargs=+ -complete=customlist,<SID>Vimrc_Complete_Alignment Align
-    \ call <SID>Vimrc_Alignment(<line1>, <line2>, [<f-args>])
-
-
-" *****************************************************************************
-function! s:Vimrc_ToggleComment(first_line, last_line) abort "{{{
-  let [cbegin, cend] = split(escape(&commentstring, '/?'), '\s*%s\s*', 1)
-  let pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
-
-  for ln in range(a:first_line, a:last_line)
-    let line = getline(ln)
-    if line =~# pattern
-      execute printf('%ds/%s/\1\2/', ln, pattern)
-    elseif line !=# ''
-      execute printf('%ds/\v^(\s*)(\S.*)/\1%s%s\2%s%s/',
-          \ ln, cbegin, (empty(cbegin) ? '' : ' '), (empty(cend) ? '' : ' '), cend)
-    endif
-  endfor
-endfunction "}}}
-
-command! -range -nargs=0 CommentIt call <SID>Vimrc_ToggleComment(<line1>, <line2>) 
-
-
-" *****************************************************************************
-function! s:EncloseText_Parse(arguments) abort "{{{
-  let l:command = '-a'
-  let l:Escape = { val -> '\V' . escape(val, '\') }
-  let l:trim_ptn = ''
-  let l:spacing = ''
-  let l:tokens = []
-
-  for l:arg in a:arguments
-    if     l:arg =~# '^-[adr]$' | let l:command = l:arg
-    elseif l:arg ==# '-g'       | let l:Escape = { val -> val }
-    elseif l:arg ==# '-s'       | let l:spacing = ' '
-    elseif l:arg ==# '-t'       | let l:trim_ptn = '\v\s*'
-    else                        | call add(l:tokens, l:arg)
-    endif
-  endfor
-
-  let l:tokens += [ '', '', '', '' ]
-
-  if     l:command ==# '-a'
-    return {
-        \ 'fo': '^' . l:trim_ptn,
-        \ 'fc': l:trim_ptn . '$',
-        \ 'to': l:tokens[0] . l:spacing,
-        \ 'tc': l:spacing . l:tokens[1]
-        \ }
-  elseif l:command ==# '-d'
-    return {
-        \ 'fo': '^' . l:Escape(l:tokens[0]) . l:trim_ptn,
-        \ 'fc': l:trim_ptn . l:Escape(l:tokens[1]) . '\v$',
-        \ 'to': '',
-        \ 'tc': ''
-        \ }
-  elseif l:command ==# '-r'
-    return {
-        \ 'fo': '^' . l:Escape(l:tokens[0]) . l:trim_ptn,
-        \ 'fc': l:trim_ptn . l:Escape(l:tokens[1]) . '\v$',
-        \ 'to': l:tokens[2] . l:spacing,
-        \ 'tc': l:spacing . l:tokens[3]
-        \ }
-  endif
-
-  return {}
-endfunction "}}}
-
-function! s:EncloseText_Edit(text, pattern, type) abort "{{{
-  let l:edit_text = a:text
-
-  if and(a:type, 0x01)
-    let l:edit_text = substitute(l:edit_text, a:pattern.fo, a:pattern.to, '')
-  endif
-
-  if and(a:type, 0x02)
-    let l:edit_text = substitute(l:edit_text, a:pattern.fc, a:pattern.tc, '')
-  endif
-
-  return l:edit_text
-endfunction "}}}
-
-function! s:Vimrc_EncloseText(arguments) range abort "{{{
-  let l:pattern = s:EncloseText_Parse(a:arguments)
-
-  if !empty(l:pattern)
-    let l:is_multi_line = (getpos("'<")[1] != getpos("'>")[1])
-
-    if visualmode() ==# 'v' && is_multi_line
-      keepjumps execute "'<s/\\%V.*/\\=<SID>EncloseText_Edit(submatch(0), l:pattern, 0x01)/e"
-      keepjumps execute "'>s/.*\\%V.\\?/\\=<SID>EncloseText_Edit(submatch(0), l:pattern, 0x02)/e"
-    else
-      keepjumps execute "'<,'>s/\\%V.*\\%V./\\=<SID>EncloseText_Edit(submatch(0), l:pattern, 0x03)/e"
-    endif
-
-    execute "normal `<"
-  endif
-endfunction "}}}
-
-function! s:Vimrc_Complete_EncloseText(ArgLead, CmdLine, CursorPos) abort "{{{
-  return [ '-a', '-d', '-r', '-g', '-s', '-t' ]
-endfunction "}}}
-
-command! -range -nargs=* -complete=customlist,<SID>Vimrc_Complete_EncloseText
-    \ EncloseText call <SID>Vimrc_EncloseText([ <f-args> ])
-
-
-" *****************************************************************************
+"
 command! -range -nargs=0 GfmTodo call call({ begin, end -> 
     \ execute(printf('silent %d,%ds/^\s*[-+*]\s\zs\[[x ]\]/\=(submatch(0) ==# "[x]" ? "[ ]" : "[x]")/', begin, end)) },
     \ [ <line1>, <line2> ])
 
 
 " *****************************************************************************
-command! -range -nargs=0 IndentLine call call({ begin, end -> 
+"
+command! -range -nargs=0 IndentAtHead call call({ begin, end -> 
     \ execute(printf('silent %d,%ds/^\ze./%s/', begin, end, (&expandtab ? repeat(' ',&sw) : '\t'))) },
     \ [ <line1>, <line2> ])
 
-command! -range -nargs=0 UnIndentLine call call({ begin, end -> 
+command! -range -nargs=0 UnIndentAtHead call call({ begin, end -> 
     \ execute(printf('silent %d,%ds/^%s//', begin, end, (&expandtab ? repeat(' ',&sw) : '\t'))) },
     \ [ <line1>, <line2> ])
-
-
-" *****************************************************************************
-function! s:do_command(cmdline) abort "{{{
-  if has('iconv') && (&termencoding != &encoding)  
-    return iconv(system(iconv(a:cmdline, &encoding, &termencoding)), &termencoding, &encoding)
-  else  
-    return system(a:cmdline)
-  endif  
-endfunction
-
-function! s:set_and_open_quickfix(what, colors, is_loc) "{{{
-  if a:is_loc
-    call setloclist(0, [], ' ', a:what)
-    execute 'topleft lopen'
-  else
-    call setqflist([], ' ', a:what)
-    execute 'topleft copen'
-  endif
-
-  if &filetype ==# 'qf' && !empty(a:colors)
-    for [ syn, hi ] in items(a:colors)
-      call matchadd(hi, syn)
-    endfor
-
-    setl concealcursor=n
-    setl conceallevel=3
-  endif
-endfunction "}}}
-
-function! s:quickfix_command(is_loc, commands, errformat) abort "{{{
-  call s:set_and_open_quickfix(
-      \ {
-      \   'efm': a:errformat,
-      \   'lines': split(s:do_command(join(a:commands, ' ')), '\n'),
-      \   'title': join(a:commands, ' ')
-      \ }, {}, a:is_loc)
-endfunction "}}}
-
-
-" *****************************************************************************
-"
-command! -bang -nargs=* GTag  call <SID>quickfix_command(
-    \ <bang>0, [ '(', 'global -qax', <q-args>, '&', 'global -qax -s -r', <q-args>, ')' ],
-    \ '%*\S%*\s%l%\s%f%\s%m')
-command! -nargs=* LGTag GTag! <args>
-
-if has('win32')
-  command! -bang -nargs=? -complete=dir Ls  call <SID>quickfix_command(
-      \ <bang>0, [ 'dir /B /A:-D ', <q-args> ], '%f')
-else
-  command! -bang -nargs=? -complete=dir Ls  call <SID>quickfix_command(
-      \ <bang>0, [ 'ls -1 -F | grep -v /', <q-args> ], '%f')
-endif
-
-
-" *****************************************************************************
-"
-command! -bang BufList  call <SID>set_and_open_quickfix(
-    \ {
-    \   'items': call({ -> map(filter(range(1, bufnr('$')),
-    \     { idx, val -> bufexists(val) && buflisted(val) && bufloaded(val) }),
-    \     { idx, val -> { 'bufnr':val, 'filename':bufname(val) } }) },
-    \     []),
-    \   'title': 'buffers: <q-args>'
-    \ },
-    \ { '|| $': 'Conceal' },
-    \ <bang>0)
-
-command! -bang Mru call <SID>set_and_open_quickfix(
-    \ {
-    \   'items': call({ -> map(copy(v:oldfiles),
-    \     { idx, val -> { 'filename':fnamemodify(expand(val), ':p') } }) },
-    \     []),
-    \   'title': 'oldfiles: <q-args>'
-    \ },
-    \ { '|| $': 'Conceal' },
-    \ <bang>0)
-
-
-" *****************************************************************************
-"
-function! s:tag2qfitem(bufnr, fname, taginfo) "{{{
-  let prefix = ''
-  let saffix = ''
-
-  for field in a:taginfo[3:]
-    if field =~# '^kind:'
-      let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
-    elseif field =~# '^signature:'
-      let saffix = substitute(field, '^\w\+:', '', '')
-    elseif field =~# '^\w\+:'
-      let prefix = substitute(field, '^\w\+:', '', '') . '.'
-    endif
-  endfor
-
-  return {
-      \   'bufnr': a:bufnr,
-      \   'filename': a:fname,
-      \   'text': prefix . get(a:taginfo, 0, '') . saffix,
-      \   'lnum': str2nr(substitute(get(a:taginfo, 2, ''), ';"', '', '')),
-      \ }
-endfunction "}}}
-
-function! s:simple_outline(is_loc) "{{{
-  let tmp_source = tempname() . '.' . expand('%:e')
-
-  call writefile(getbufline('%', 1, '$'), tmp_source)
-
-
-  let force = '' " ' --jcode=utf8 '
-
-  if &filetype ==# 'cpp' | let force .= '--language-force=c++' | endif
-  if &filetype ==# 'vim' | let force .= '--language-force=vim' | endif
-  if &filetype ==# 'markdown' | let force .= '--language-force=markdown' | endif
-
-  let bufnr = bufnr('%')
-  let fname = expand('%')
-  let tags = map(map(systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
-      \ { idx, val -> split(substitute(val, '[\n\r]$', '', ''), '\t') }),
-      \ { idx, val -> s:tag2qfitem(bufnr, fname, val) })
-
-  call delete(tmp_source)
-  call s:set_and_open_quickfix(
-      \ { 'items': tags, 'title': printf('ctags %s', tmp_source)},
-      \ {
-      \   '^.\+|\d\+\%(\s*col\s*\d\+\)\?|': 'Conceal',
-      \   '(.*)$': 'SpecialKey',
-      \   ' : \w\+$': 'SpecialKey',
-      \   ' \.\.\+': 'SpecialKey',
-      \   '__anon\w\+\(\.\|::\)': 'SpecialKey'
-      \ },
-      \ a:is_loc)
-endfunction "}}}
-
-command! -bang Outline  call <SID>simple_outline(<bang>0)
-
-
-" *****************************************************************************
-"
-function! s:buffer_command_get_output(command, arguments, ext) abort "{{{
-  let l:output = s:do_command(a:command . ' ' . join(a:arguments, ' '))
-  let l:output_tmp = fnamemodify(tempname() . a:ext, ':p')
-
-  call writefile(split(l:output, '\n'), l:output_tmp)
-
-  execute printf('silent! tabe +set\ ro %s', l:output_tmp)
-endfunction "}}}
-
-function! s:buffer_command_do(command, arguments) abort "{{{
-  echomsg s:do_command(a:command . ' ' . join(a:arguments, ' '))
-endfunction "}}}
-
-command! -nargs=? -complete=dir  SvnLs     call <SID>quickfix_command(1, [ 'svn ls ', <q-args> ], '%f')
-
-command! -nargs=? -complete=file SvnLog    call <SID>buffer_command_get_output('svn log', [ <q-args> ], '.log')
-command! -nargs=? -complete=file SvnDiff   call <SID>buffer_command_get_output('svn diff', [ <q-args> ], '.diff')
-command! -nargs=? -complete=file SvnBlame  call <SID>buffer_command_get_output('svn blame', [ <q-args> ], '.blame')
-
-command! -nargs=? -complete=file SvnAdd       call <SID>buffer_command_do('svn add', [ <q-args> ])
-command! -nargs=? -complete=file SvnRevert    call <SID>buffer_command_do('svn revert', [ <q-args> ])
-command! -nargs=? -complete=file SvnResolved  call <SID>buffer_command_do('svn resolved', [ <q-args> ])
-
-
-command! -nargs=? -complete=dir  GitLs     call <SID>quickfix_command(1, [ 'git ls-files ', <q-args> ], '%f')
-
-command! -nargs=? -complete=file GitLog    call <SID>buffer_command_get_output('git log', [ <q-args> ], '.log')
-command! -nargs=? -complete=file GitDiff   call <SID>buffer_command_get_output('git diff', [ <q-args> ], '.diff')
-command! -nargs=? -complete=file GitBlame  call <SID>buffer_command_get_output('git blame', [ <q-args> ], '.blame')
-
-command! -nargs=? -complete=file GitAdd       call <SID>buffer_command_do('git add', [ <q-args> ])
-command! -nargs=? -complete=file GitRevert    call <SID>buffer_command_do('git revert', [ <q-args> ])
-command! -nargs=? -complete=file GitResolved  call <SID>buffer_command_do('git resolved', [ <q-args> ])
 
 
 " *****************************************************************************
@@ -895,21 +536,12 @@ endfunction "}}}
 command! -nargs=0 Root call <SID>find_repos_dir()
 
 " *****************************************************************************
-if has('gui_win32')
-  command! GVim silent execute '!start gvim'
-endif
-
-
-" *****************************************************************************
 ""
-nnoremap <silent> > :IndentLine<CR>
-nnoremap <silent> < :UnIndentLine<CR>
+nnoremap <silent> > :IndentAtHead<CR>
+nnoremap <silent> < :UnIndentAtHead<CR>
 
-vnoremap <silent> > :IndentLine<CR>
-vnoremap <silent> < :UnIndentLine<CR>
-
-vnoremap <silent> <Tab> :IndentLine<CR>
-vnoremap <silent> <S-Tab> :UnIndentLine<CR>
+vnoremap <silent> > :IndentAtHead<CR>
+vnoremap <silent> < :UnIndentAtHead<CR>
 
 nnoremap <silent> <C-q> :CommentIt<CR>
 vnoremap <silent> <C-q> :CommentIt<CR>

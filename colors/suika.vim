@@ -12,49 +12,49 @@ hi! link Conceal      Comment
 hi       Cursor       guifg=#FFFFFF guibg=#FF0000 gui=NONE 
 hi       CursorIM     guifg=#FFFFFF guibg=#8000ff gui=NONE
 hi! link CursorColumn Cursor
-hi       CursorLine   gui=Underline guibg=NONE
-hi! link CursorLineNr LineNr
+hi       CursorLine                 guibg=NONE    gui=Underline 
+hi       CursorLineNr guifg=#FFFFC6 guibg=#438EC3 gui=bold
 hi! link lCursor      Cursor
 
-hi! link Directory    Identifier
+hi! link Directory  Identifier
 
-hi       DiffAdd      guifg=NONE    guibg=#CCE7FD gui=NONE
-hi       DiffChange   guifg=NONE    guibg=#FFCCE7 gui=NONE
-hi! link DiffDelete   Comment
-hi       DiffText     guifg=#0086F7 guibg=#99D1FF gui=NONE
+hi       DiffAdd    guifg=NONE    guibg=#CCE7FD gui=NONE
+hi       DiffChange guifg=NONE    guibg=#FFCCE7 gui=NONE
+hi! link DiffDelete Comment
+hi       DiffText   guifg=#0086F7 guibg=#99D1FF gui=NONE
 
-hi       ErrorMsg    guifg=#FFFFFF guibg=#FF0007 gui=NONE
+hi       ErrorMsg   guifg=#FFFFFF guibg=#FF0007 gui=NONE
 
-hi       VertSplit   guifg=#3687A2 guibg=#3687A2 gui=NONE
+hi       VertSplit  guifg=#3687A2 guibg=#3687A2 gui=NONE
 
-hi       Folded      guifg=#3C78A2 guibg=#B5D0E3 gui=NONE
-hi! link FoldColumn  Folded
+hi       Folded     guifg=#3C78A2 guibg=#B5D0E3 gui=NONE
+hi! link FoldColumn Folded
 
-hi       SignColumn   guifg=NONE    guibg=NONE    gui=NONE
+hi       SignColumn guifg=NONE    guibg=NONE    gui=NONE
 
-hi       IncSearch    guifg=NONE    guibg=NONE    gui=INVERSE
+hi       IncSearch  guifg=NONE    guibg=NONE    gui=INVERSE
 
-hi       LineNr       guifg=#438EC3 guibg=#FFFFC6 gui=bold
+hi       LineNr     guifg=#438EC3 guibg=#FFFFC6 gui=bold
 
-hi       MatchParen   guifg=#001217 guibg=#B1FF00 gui=NONE
+hi       MatchParen guifg=#001217 guibg=#B1FF00 gui=NONE
 
-hi       ModeMsg      guifg=#FFFFFF guibg=#1B5C8A gui=NONE
-hi! link MoreMsg      ModeMsg
+hi       ModeMsg    guifg=#FFFFFF guibg=#1B5C8A gui=NONE
+hi! link MoreMsg    ModeMsg
 
-hi       NonText      guifg=#438EC3 guibg=NONE    gui=NONE
-hi       Normal       guifg=#001217 guibg=#FFFFFF gui=NONE
+hi       NonText    guifg=#438EC3 guibg=NONE    gui=NONE
+hi       Normal     guifg=#001217 guibg=#FFFFFF gui=NONE
 
-hi       Pmenu        guifg=#001217 guibg=#EFADA9 gui=NONE
-hi! link PmenuSel     WildMenu
-hi! link PmenuSbar    PmenuSel
-hi       PmenuThumb   guifg=NONE    guibg=#0086D2 gui=NONE
+hi       Pmenu      guifg=#001217 guibg=#EFADA9 gui=NONE
+hi! link PmenuSel   WildMenu
+hi! link PmenuSbar  PmenuSel
+hi       PmenuThumb guifg=NONE    guibg=#0086D2 gui=NONE
 
-hi! link Question     ModeMsg
+hi! link Question   ModeMsg
 
-hi! link Search       WildMenu
+hi! link Search     WildMenu
 
-hi       SpecialKey   guifg=#B1D0E7 guibg=NONE    gui=NONE
-hi       SpecialKey   guifg=#9EC5E0 guibg=NONE    gui=NONE
+hi       SpecialKey guifg=#B1D0E7 guibg=NONE    gui=NONE
+hi       SpecialKey guifg=#9EC5E0 guibg=NONE    gui=NONE
 
 hi       SpellBad   guifg=#FF0007 guibg=NONE    gui=UNDERCURL, guisp=#FF0007
 hi! link SpellCap   SpellBad
