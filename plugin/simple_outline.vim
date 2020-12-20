@@ -1,11 +1,12 @@
 " *****************************************************************************
 if executable('ctags')
   ""
-  function! s:outline_tag2line(bufnr, fname, taginfo) "{{{
+  function! s:outline_tag2line(bufnr, fname, line) "{{{
+    let taginfo = split(substitute(a:line, '[\n\r]$', '', ''), '\t')
     let prefix = ''
     let saffix = ''
 
-    for field in a:taginfo[3:]
+    for field in taginfo[3:]
       if field =~# '^kind:'
         let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
       elseif field =~# '^signature:'
@@ -15,7 +16,12 @@ if executable('ctags')
       endif
     endfor
 
-    return printf('%s\t%s\t%s', a:fname, get(a:taginfo, 2, '1'), prefix . get(a:taginfo, 0, '') . saffix)
+    return {
+        \ 'bufnr': a:bufnr,
+        \ 'filename': a:fname,
+        \ 'lnum': str2nr(substitute(get(taginfo, 2, '1'), ';"', '', '')),
+        \ 'text': prefix . get(taginfo, 0, '') . saffix
+        \ }
   endfunction "}}}
 
   ""
@@ -25,7 +31,7 @@ if executable('ctags')
     topleft lwindow
 
     call matchadd('Conceal', '^.\+|\d\+\%(\s*col\s*\d\+\)\?|')
-    call matchadd('SpecialKey', '(.*)$')
+    call matchadd('SpecialKey', '(.*)')
     call matchadd('SpecialKey', ' : \w\+$')
     call matchadd('SpecialKey', ' \.\.\+')
     call matchadd('SpecialKey', '__anon\w\+\(\.\|::\)')
@@ -37,8 +43,8 @@ if executable('ctags')
   ""
   function! s:outline_job_out_cb(msg, bufnr, fname) "{{{
     call setloclist(0, [], 'a', {
-        \ 'lines': split(a:msg, '\n')->map({ idx, val -> s:outline_tag2line(a:bufnr, a:fname, val) }),
-        \ 'efm': '%f\t%l\t%m', 'title': 'ctags ' . a:fname })
+        \ 'items': map(split(a:msg, '\n'), { idx, val -> s:outline_tag2line(a:bufnr, a:fname, val) }),
+        \ 'title': 'ctags ' . a:fname })
   endfunction "}}}
 
   ""
@@ -60,7 +66,7 @@ if executable('ctags')
 
     call job_start(
         \ printf('ctags -n -f - %s %s', force, tmp_source), {
-        \   'out_cb': { ch, msg -> s:outline_job_out_cb(msg, fname) },
+        \   'out_cb': { ch, msg -> s:outline_job_out_cb(msg, bufnr, fname) },
         \   'close_cb': { ch -> s:outline_job_close_cb(tmp_source) }
         \ })
   endfunction "}}}
