@@ -80,7 +80,7 @@ set display=lastline
 set nofixendofline
 set showtabline=2
 set textwidth=0
-" set scrolloff=0
+set scrolloff=0
 set nowrap
 set breakindent
 set breakindentopt=shift:2
@@ -121,7 +121,7 @@ endif
 " ***********************************************
 "" history files.
 set noswapfile
-" set viminfo=
+set viminfo=
 
 "" switch buffer
 set switchbuf=useopen,usetab
@@ -279,12 +279,14 @@ command! -nargs=1 -complete=dir LcdX
 " ***********************************************
 "" other options
 "" *ft-c-syntax* spedial syntax
-let g:c_gnu = 1
-let g:c_comment_strings = 1
-let g:c_space_errors = 1
-let g:c_no_bracket_error = 1  " []の中の{}をエラーとして表示しない
-let g:c_no_curly_error = 1  " { と } が第1桁にあるときを除き、[] と () の内側の {}をエラーとして表示しない。
+let c_gnu = 1  " GNU gcc固有の要素
+let c_comment_strings = 1  " コメント内の文字列と数値
+let c_space_errors = 1  " 行末の空白文字とタブ文字前のスペース文字
+let c_no_tab_space_error = 1  "  ... 但しタブ文字前のスペース文字は除外
+let c_no_bracket_error = 1  " []の中の{}をエラーとして表示しない
+let c_no_curly_error = 1  " { と } が第1桁にあるときを除き、[] と () の内側の {} をエラーとして表示しない。 デフォルトでエラーとして表示される。欠落した ')' を見つけられないため。
 
+"" menu
 let did_install_default_menus = 1
 let did_install_syntax_menu = 1
 
@@ -340,8 +342,6 @@ function! s:Vimrc_HighlightPlus() abort "{{{
 
   endif
 endfunction "}}}
-
-call <SID>Vimrc_HighlightPlus()
 
 " markdown indentexpr
 function! Vimrc_Markdown_IndentExpr() "{{{
