@@ -7,9 +7,20 @@
 "" 
 if executable('global.exe') || executable('global')
   ""
+  function! s:gtags_job_out_cb(msg) "{{{
+    if has('iconv') && &termencoding != &encoding
+      let out = iconv(a:msg, &termencoding, &encoding)
+    else
+      let out = a:msg
+    endif
+
+    setloclist(0, [], 'a', { 'efm': "%f\t%l\t%m", 'lines': split(out, '\n') })
+  endfunction "}}}
+
+  ""
   function! s:gtags_job_start(args) abort "{{{
     let ctx = {
-        \ 'out_cb': { ch, msg -> setloclist(0, [], 'a', { 'efm': '%f\t%l\t%m', 'lines': split(msg, '\n') }) },
+        \ 'out_cb': { ch, msg -> s:gtags_job_out_cb(msg) },
         \ 'close_cb': { ch -> execute('topleft lwindow') }
         \ }
 
