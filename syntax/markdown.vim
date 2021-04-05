@@ -37,7 +37,7 @@ hi link markdownThematicBreak Operator
 
 
 "" 4.2 ATX headings
-syn region markdownHeader matchgroup=markdownAtx start=/#\{1,6}\s\@=/ end=/#*\s*$/ contains=@markdownInline keepend transparent oneline contained
+syn region markdownHeader matchgroup=markdownAtx start=/#\{1,6}\s\@=/ end=/#*\s*$/ keepend transparent oneline contained
 
 "
 syn cluster markdownBlock add=markdownHeader
@@ -47,7 +47,7 @@ hi link markdownAtx PreProc
 
 
 "" 4.3 Setext headings
-syn match markdownHeader /^ \{,3}[^\-\*_=>[:space:]].\+\n\s\{,3}\%(-\|=\)\+\s*$/ transparent contains=@markdownInline,markdownSetext
+syn match markdownHeader /^ \{,3}[^\-\*_=>[:space:]].\+\n\s\{,3}\%(-\|=\)\+\s*$/ transparent contains=markdownSetext
 
 "
 syn match markdownSetext /[=-]\+/ contained
@@ -96,7 +96,7 @@ hi link markdownLinkColon  Typedef
 "" 4.8 Paragraphs
 "" 4.9 Blank lines
 "" 4.10 Tables (extension)
-syn match markdownTable /\%(\S.*\s\)|\%(.*\s|\)*\%(.*\)\?/ transparent contains=markdownTableBorder,@markdownInline
+syn match markdownTable /\%(\S.*\s\)|\%(.*\s|\)*\%(.*\)\?/ transparent contains=markdownTableBorder
 syn match markdownTableBorder /\%(^\|\s\)\@<=|\ze\%(\s\|$\)/ contained
 syn match markdownTableBorder /:\?-\+:\?/ contained
 
@@ -120,8 +120,8 @@ hi link markdownBlockquote  Directory
 
 "" 5.2 List items
 "" 5.4 Lists
-syn match markdownListMarker /\d\{1,9}[.)]\%(\s\)\@=/ contained nextgroup=@markdownBlock,@markdownInline,markdownThematicBreak
-syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,@markdownInline,markdownThematicBreak
+syn match markdownListMarker /\d\{1,9}[.)]\%(\s\)\@=/ contained nextgroup=@markdownBlock,markdownThematicBreak
+syn match markdownListMarker /\([-+*]\)\s\1\@!/ contained nextgroup=markdownTaskTodo,markdownTaskDone,@markdownBlock,markdownThematicBreak
 
 "
 syn cluster markdownBlock add=markdownListMarker
@@ -131,7 +131,7 @@ hi link markdownListMarker  Tag
 
 
 "" 5.3 Task list items (extension)
-syn match markdownTaskTodo /\[ \]/    contained nextgroup=@markdownBlock,@markdownInline
+syn match markdownTaskTodo /\[ \]/    contained nextgroup=@markdownBlock
 syn match markdownTaskDone /\[x\] .*/ contained
 
 "
