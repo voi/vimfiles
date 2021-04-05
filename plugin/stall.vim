@@ -96,7 +96,7 @@ function! s:stall_open(mods, args) "{{{
   setlocal winfixwidth winfixheight
 
   " buffer autocmd
-  doautocmd BufEnter,BufWinEnter
+  " doautocmd BufEnter,BufWinEnter
 
   " default keys
   nnoremap <buffer> <silent> q :bw!<CR>
@@ -165,6 +165,7 @@ endfunction "}}}
 let g:stall_sources = {}
 
 function! Stall_handle_key(name) "{{{
+  "
   let context = s:stall_get_context()
   let context._cursor_index = line('.') - 1
   let bufnr = bufnr('%')
@@ -203,6 +204,8 @@ function! Stall_command_complete(argLead, cmdLine, cursorPos) "{{{
   endif
 endfunction "}}}
 
+
+" ********************************
 command! -nargs=+ -complete=customlist,Stall_command_complete Stall call s:stall_open('<mods>', [ <f-args> ])
 
 
@@ -227,24 +230,34 @@ endfunction "}}}
 
 
 " ****************************************************************
-function! s:stall_sources_buffer_open(cmd, close, context, flags) "{{{
+function! s:stall_sources_buffer_open(cmd, context, flags) "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('%s %s', a:cmd, 
+        \ fnamemodify(expand(bufname(matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))), ':p'))
+  endif
+endfunction "}}}
+
+function! s:stall_sources_buffer_wipe(context, flags) "{{{
   let a:flags._update = !a:close
   let item = a:context._get_target_item()
 
   if !empty(item)
-    if a:close | call win_gotoid(a:context._winid) | endif
-
-    execute printf('%s %s', a:cmd, matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))
+    execute printf('wipe %s', matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))
   endif
 endfunction "}}}
 
+" ********
 let g:stall_sources.buffer = {
     \ '_collection': 'ls',
-    \ 'open': function('s:stall_sources_buffer_open', [ 'b', 1 ]),
-    \ 'tabopen': function('s:stall_sources_buffer_open', [ 'tab new | b', 1 ]),
-    \ 'vsplit': function('s:stall_sources_buffer_open', [ 'vs | b', 1 ]),
-    \ 'split': function('s:stall_sources_buffer_open', [ 'sp | b', 1 ]),
-    \ 'wipe': function('s:stall_sources_buffer_open', [ 'bw', 0 ])
+    \ 'open': function('s:stall_sources_buffer_open', [ 'b' ]),
+    \ 'tabopen': function('s:stall_sources_buffer_open', [ 'tab sp | b' ]),
+    \ 'vsplit': function('s:stall_sources_buffer_open', [ 'vs | b' ]),
+    \ 'split': function('s:stall_sources_buffer_open', [ 'sp | b' ]),
+    \ 'wipe': function('s:stall_sources_buffer_wipe', [])
     \ }
 
 function! g:stall_sources.buffer._on_ready(context, flags) dict "{{{
@@ -267,6 +280,7 @@ function! s:stall_sources_mru_open(cmd, context, flags) "{{{
   endif
 endfunction "}}}
 
+" ********
 let g:stall_sources.mru = {
     \ '_collection': 'oldfiles',
     \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3\t(\2)', '') },
@@ -304,6 +318,7 @@ function! s:stall_sources_files_open(cmd, no_quit, context, flags) "{{{
   endif
 endfunction "}}}
 
+" ********
 let g:stall_sources.files = {
     \ 'enter': function('s:stall_sources_files_open', [ 'e', 0 ]),
     \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe', 0 ]),
@@ -359,25 +374,72 @@ endfunction "}}}
 " ****************************************************************
 function! s:stall_source_ctags_tag2item(tagline) "{{{
   let taginfo = split(substitute(a:tagline, '[\n\r]$', '', ''), '\t')
-  let prefix = ''
-  let saffix = ''
+  let name = get(taginfo, 0, '')
+  let item = {
+      \   'text': name,
+      \   'lnum': str2nr(substitute(get(taginfo, 2, ''), ';"', '', '')),
+      \   'name': name,
+      \   'path': []
+      \ }
+  let signature = ''
+  let kind = ''
 
   for field in taginfo[3:]
     if field =~# '^kind:'
-      let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
+      let kind = ' : ' . substitute(field, '^\w\+:', '', '')
     elseif field =~# '^signature:'
-      let saffix = substitute(field, '^\w\+:', '', '')
+      let signature = substitute(field, '^\w\+:', '', '')
     elseif field =~# '^\w\+:'
-      let prefix = substitute(field, '^\w\+:', '', '') . '.'
+      let item.path = split(substitute(field, '^\w\+:', '', ''), '::\|\.')
     endif
   endfor
 
-  return {
-      \   'text': prefix . get(taginfo, 0, '') . saffix,
-      \   'lnum': str2nr(substitute(get(taginfo, 2, ''), ';"', '', '')),
-      \ }
+  let item.text .= signature . kind
+  let item.name .= signature
+
+  return item
 endfunction "}}}
 
+function! s:stall_source_ctags_append_node(root, item) "{{{
+  "
+  if empty(a:item.path)
+    "
+    let name = remove(a:item, 'name')
+
+    let a:item.nodes = get(get(a:root, name, {}), 'nodes', {})
+    let a:root[name] = a:item
+
+    call remove(a:item, 'path')
+  else
+    "
+    let name = remove(a:item.path, 0)
+    let node = get(a:root, name, { 'text': name })
+    let node.lnum = min([ get(node, 'lnum', a:item.lnum), a:item.lnum ])
+    let node.nodes = get(node, 'nodes', {})
+
+    let a:root[name] = node
+
+    call s:stall_source_ctags_append_node(node.nodes, a:item)
+  endif
+endfunction "}}}
+
+function! s:stall_source_ctags_flatton_node(root, depth, list) "{{{
+  "
+  for node in sort(values(a:root), { obj1, obj2 -> obj1.lnum - obj2.lnum })
+    "
+    let node.text = repeat('  ', a:depth) . node.text
+
+    call add(a:list, node)
+
+    if has_key(node, 'nodes')
+      call s:stall_source_ctags_flatton_node(remove(node, 'nodes'), a:depth + 1, a:list)
+    endif
+  endfor
+
+  return a:list
+endfunction "}}}
+
+" ********
 let g:stall_sources.ctags = {
     \ 'type_option': {
     \  'cpp': '--language-force=c++',
@@ -387,27 +449,37 @@ let g:stall_sources.ctags = {
     \ }
 
 function! g:stall_sources.ctags._collection(context, flags) dict "{{{
+  "
   let tmp_source = tempname() . '.' . expand('%:e')
 
   call writefile(getbufline('%', 1, '$'), tmp_source)
 
-  let force = get(a:context.type_option, a:context._filetype, '')
-  let tags = map(
-      \ systemlist(printf('ctags -n -f - %s %s', force, tmp_source)),
-      \   { idx, val -> s:stall_source_ctags_tag2item(val) })
+  "
+  let root = {}
 
+  for item in map(
+      \ systemlist(printf('ctags -n -f - %s %s',
+      \   get(a:context.type_option, a:context._filetype, ''), tmp_source)),
+      \ { idx, val -> s:stall_source_ctags_tag2item(val) })
+    " 
+    call s:stall_source_ctags_append_node(root, item)
+  endfor
+
+  "
   call delete(tmp_source)
 
-  return tags
+  "
+  let candidates = []
+
+  return s:stall_source_ctags_flatton_node(root, 0, candidates)
 endfunction "}}}
 
 function! g:stall_sources.ctags._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('jump')<CR>
 
-  call matchadd('SpecialKey', '(.*)$')
-  call matchadd('SpecialKey', ' : \w\+$')
-  call matchadd('SpecialKey', ' \.\.\+')
-  call matchadd('SpecialKey', '__anon\w\+\(\.\|::\)')
+  call matchadd('SpecialKey', '(.*)\ze\%( : \w\+\)$')
+  call matchadd('Define', ' : \w\+$')
+  call matchadd('SpecialKey', '__anon\w\+')
 endfunction "}}}
 
 function! g:stall_sources.ctags.jump(context, flags) dict "{{{
@@ -426,6 +498,7 @@ endfunction "}}}
 if has('gui_win32')
   let g:stall_sources.remote = {}
 
+  " ********
   function! g:stall_sources.remote._on_ready(context, flags) dict "{{{
     nnoremap <buffer> <silent> c  :call Stall_handle_key('copy')<CR>
     nnoremap <buffer> <silent> m  :call Stall_handle_key('move')<CR>
@@ -449,4 +522,53 @@ if has('gui_win32')
     execute 'bw ' . a:context._bufnr
   endfunction "}}}
 endif
+
+
+" ****************************************************************
+function! s:stall_sources_bookmark_filepath() "{{{
+  return fnamemodify(expand(get(g:, 'stall_source_bookmark_save_file', '~/.stall.bookmark')), ':p')
+endfunction "}}}
+
+function! s:stall_sources_bookmark_add(filepathes) "{{{
+  call writefile(
+      \ map(a:filepathes, { idx, val -> fnamemodify(expand(val), ':p') }),
+      \ s:stall_sources_bookmark_filepath(), 'a')
+endfunction "}}}
+
+function! s:stall_sources_bookmark_open(cmd, context, flags) "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    execute printf('%s %s', a:cmd, item)
+  endif
+endfunction "}}}
+
+" ********
+let g:stall_sources.bookmark = {
+    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2\t(\1)', '') },
+    \ 'open': function('s:stall_sources_bookmark_open', [ 'e' ]),
+    \ 'tabopen': function('s:stall_sources_bookmark_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_sources_bookmark_open', [ 'vsp' ]),
+    \ 'split':function('s:stall_sources_bookmark_open', [ 'sp' ]) 
+    \ }
+
+function! g:stall_sources.bookmark._collection(context, flags) dict "{{{
+  let filepath = s:stall_sources_bookmark_filepath()
+
+  return filereadable(filepath) ? readfile(filepath) : []
+endfunction "}}}
+
+function! g:stall_sources.bookmark._on_ready(context, flags) dict "{{{
+  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
+  nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
+  nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
+  nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
+
+  call matchadd('SpecialKey', '\t(.*)$')
+endfunction "}}}
+
+" ********
+command! -nargs=+ -complete=file StallBookmarkAdd call s:stall_sources_bookmark_add([ <f-args> ])
 
