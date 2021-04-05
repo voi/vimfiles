@@ -30,75 +30,90 @@ let s:highlight_table = [
     \ "gui=bold ctermfg=7   ctermbg=56  guibg=#a0b0c0 guifg=#000000",
     \ ]
 
-" key = count
-let s:entry_count = 0
+" id-count
+let s:total_entry_cont = 0
 
-" { key:, pattern; }
-let s:entry_table = {}
+" { id-count:, pattern; }
+let s:global_entries = {}
 
-" { key:, id; }
-" let w:match_table
+" { id-count:, match-id; }
+" let w:current_entries
 
 " }}}
 
 
 " **************************************************************
 " {{{
+"" 
+function! s:word_highlight_update() abort "{{{
+  let tabnr = tabpagenr()
+  let winnr = tabpagewinnr(tabnr)
+  execute printf( 'tabdo windo call WordHighlight_Update() | tabn %d | %d wincmd w', tabnr, winnr)
+endfunction "}}}
+
+"" 
 function! s:WordHighlight_Add(word) abort "{{{
   if a:word ==# '' | return | endif
 
-  for l:pattern in values( s:entry_table )
-    if l:pattern ==# a:word | return | endif
+  " check duplicated
+  for pattern in values( s:global_entries )
+    if pattern ==# a:word | return | endif
   endfor
 
-  let s:entry_table[ s:entry_count ] = a:word
-  let s:entry_count += 1
+  let s:global_entries[ s:total_entry_cont ] = a:word
+  let s:total_entry_cont += 1
 
-  execute printf( 'tabdo windo call WordHighlight_Update() | tabn %d', tabpagenr())
+  call s:word_highlight_update()
 endfunction "}}}
 
+"" 
 function! s:WordHighlight_Delete() abort "{{{
-  " selector
-  for [ l:key, l:pattern ] in items( s:entry_table )
+  " select
+  for [ key, l:pattern ] in items( s:global_entries )
     execute printf( 'echohl %s | echo %s | echohl None',
-        \ printf( 'WordHighlight%d', l:key ),
-        \ printf( '"%4d: %s"', l:key, escape( l:pattern, '\\' )))
+        \ printf( 'WordHighlight%d', key ),
+        \ printf( '"%4d: %s"', key, escape( l:pattern, '\\' )))
   endfor
 
-  let l:key = str2nr( input('no > '), 10 )
+  let key = str2nr( input('no > '), 10 )
 
-  if has_key( s:entry_table, l:key )
-    call remove(s:entry_table, l:key)
+  "
+  if has_key( s:global_entries, key )
+    call remove(s:global_entries, key)
 
-    execute printf( 'tabdo windo call WordHighlight_Update() | tabn %d', tabpagenr())
+    call s:word_highlight_update()
   endif
 endfunction "}}}
 
+"" 
 function! WordHighlight_Update() abort "{{{
-  for l:hi in map( copy( s:highlight_table ),
-      \ { idx, val -> printf( 'hi! WordHighlight%d %s', idx, val ) })
-    execute l:hi
+  " hi
+  for [key, val] in map(copy(s:highlight_table), { idx, val -> [ idx, val ] })
+    execute printf( 'hi! WordHighlight%d %s', key, val )
   endfor
 
-  let w:match_table = get( w:, 'match_table', {})
-
-  for l:key in filter( keys( w:match_table ),
-      \ { idx, val -> !has_key( s:entry_table, val ) })
-    call matchdelete( w:match_table[ l:key ] )
-    call remove( w:match_table, l:key )
+  " remove current syntax
+  for id in values(get( w:, 'current_entries', {}))
+    call matchdelete( id )
   endfor
 
-  for l:key in filter( keys( s:entry_table ),
-      \ { idx, val -> !has_key( w:match_table, val ) })
-    let w:match_table[ l:key ] = matchadd( printf( 'WordHighlight%d',
-        \ l:key % len( s:highlight_table )), s:entry_table[ l:key ] )
+  let w:current_entries = {}
+
+  " update syntax from global syntax
+  let len = len( s:highlight_table )
+
+  for [ key, pattern ] in items( s:global_entries )
+    let w:current_entries[ key ] = matchadd(
+        \ printf( 'WordHighlight%d', key % len ),
+        \ s:global_entries[ key ] )
   endfor
 endfunction "}}}
 
+"" 
 function! s:WordHighlight_Clear() "{{{
-  let s:entry_table = {}
+  let s:global_entries = {}
 
-  execute printf( 'tabdo windo call WordHighlight_Update() | tabn %d', tabpagenr())
+  call s:word_highlight_update()
 endfunction "}}}
 
 " }}}
