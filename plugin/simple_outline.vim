@@ -1,50 +1,121 @@
 " *****************************************************************************
 if executable('ctags')
-  ""
-  function! s:outline_tag2line(bufnr, fname, line) "{{{
-    let taginfo = split(substitute(a:line, '[\n\r]$', '', ''), '\t')
-    let prefix = ''
-    let saffix = ''
+  "
+  function! s:outline_tag2item(tagline) "{{{
+    let taginfo = split(substitute(a:tagline, '[\n\r]$', '', ''), '\t')
+    let name = get(taginfo, 0, '')
+    let item = {
+        \   'text': name,
+        \   'lnum': str2nr(substitute(get(taginfo, 2, ''), ';"', '', '')),
+        \   'name': name,
+        \   'path': []
+        \ }
+    let signature = ''
+    let kind = ''
 
     for field in taginfo[3:]
       if field =~# '^kind:'
-        let saffix = ' : ' . substitute(field, '^\w\+:', '', '')
+        let kind = ' : ' . substitute(field, '^\w\+:', '', '')
       elseif field =~# '^signature:'
-        let saffix = substitute(field, '^\w\+:', '', '')
+        let signature = substitute(field, '^\w\+:', '', '')
       elseif field =~# '^\w\+:'
-        let prefix = substitute(field, '^\w\+:', '', '') . '.'
+        let item.path = split(substitute(field, '^\w\+:', '', ''), '::\|\.')
       endif
     endfor
 
+    let item.text .= signature . kind
+    let item.name .= signature
+
+    return item
+  endfunction "}}}
+
+  function! s:outline_append_node(root, item) "{{{
+    "
+    if empty(a:item.path)
+      "
+      let name = remove(a:item, 'name')
+
+      let a:item.nodes = get(get(a:root, name, {}), 'nodes', {})
+      let a:root[name] = a:item
+
+      call remove(a:item, 'path')
+    else
+      "
+      let name = remove(a:item.path, 0)
+      let node = get(a:root, name, { 'text': name })
+      let node.lnum = min([ get(node, 'lnum', a:item.lnum), a:item.lnum ])
+      let node.nodes = get(node, 'nodes', {})
+
+      let a:root[name] = node
+
+      call s:outline_append_node(node.nodes, a:item)
+    endif
+  endfunction "}}}
+
+  function! s:outline_flatton_node(root, depth, list) "{{{
+    "
+    for node in sort(values(a:root), { obj1, obj2 -> obj1.lnum - obj2.lnum })
+      "
+      let node.text = repeat('..', a:depth) . node.text
+
+      call add(a:list, node)
+
+      if has_key(node, 'nodes')
+        call s:outline_flatton_node(remove(node, 'nodes'), a:depth + 1, a:list)
+      endif
+    endfor
+
+    return a:list
+  endfunction "}}}
+
+  ""
+  function! s:outline_qfinfo(bufnr, fname, candidate) "{{{
     return {
         \ 'bufnr': a:bufnr,
         \ 'filename': a:fname,
-        \ 'lnum': str2nr(substitute(get(taginfo, 2, '1'), ';"', '', '')),
-        \ 'text': prefix . get(taginfo, 0, '') . saffix
+        \ 'lnum': a:candidate.lnum,
+        \ 'text': a:candidate.text
         \ }
   endfunction "}}}
 
   ""
-  function! s:outline_job_close_cb(tmp_source) "{{{
+  function! s:outline_job_close_cb(tmp_source, bufnr, fname, root) "{{{
     call delete(a:tmp_source)
+
+    "
+    let candidates = []
+
+    call s:outline_flatton_node(a:root, 0, candidates)
+
+    call setloclist(0, [], 'a', {
+        \ 'items': map(candidates, { idx, val -> s:outline_qfinfo(a:bufnr, a:fname, val) }),
+        \ 'title': 'ctags ' . a:fname })
 
     topleft lwindow
 
     call matchadd('Conceal', '^.\+|\d\+\%(\s*col\s*\d\+\)\?|')
-    call matchadd('SpecialKey', '(.*)')
-    call matchadd('SpecialKey', ' : \w\+$')
-    call matchadd('SpecialKey', ' \.\.\+')
-    call matchadd('SpecialKey', '__anon\w\+\(\.\|::\)')
+    call matchadd('Ignore', '\.\.')
+    call matchadd('SpecialKey', '(.*)\ze\%( : \w\+\)$')
+    call matchadd('Define', ' : \w\+$')
+    call matchadd('SpecialKey', '__anon\w\+')
 
     setl concealcursor=n
     setl conceallevel=3
   endfunction "}}}
 
   ""
-  function! s:outline_job_out_cb(msg, bufnr, fname) "{{{
-    call setloclist(0, [], 'a', {
-        \ 'items': map(split(a:msg, '\n'), { idx, val -> s:outline_tag2line(a:bufnr, a:fname, val) }),
-        \ 'title': 'ctags ' . a:fname })
+  function! s:outline_job_out_cb(msg, fenc, root) "{{{
+    if &encoding != a:fenc
+      let out = iconv(a:msg, a:fenc, &encoding)
+    else
+      let out = a:msg
+    endif
+
+    "
+    for item in map(split(out, '\n'), { idx, val -> s:outline_tag2item(val) })
+      " 
+      call s:outline_append_node(a:root, item)
+    endfor
   endfunction "}}}
 
   ""
@@ -61,13 +132,15 @@ if executable('ctags')
 
     let bufnr = bufnr('%')
     let fname = expand('%')
+    let fenc = &fileencoding
+    let root = {}
 
     call setloclist(0, [])
 
     call job_start(
         \ printf('ctags -n -f - %s %s', force, tmp_source), {
-        \   'out_cb': { ch, msg -> s:outline_job_out_cb(msg, bufnr, fname) },
-        \   'close_cb': { ch -> s:outline_job_close_cb(tmp_source) }
+        \   'out_cb': { ch, msg -> s:outline_job_out_cb(msg, fenc, root) },
+        \   'close_cb': { ch -> s:outline_job_close_cb(tmp_source, bufnr, fname, root) }
         \ })
   endfunction "}}}
 
