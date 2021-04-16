@@ -335,10 +335,12 @@ function! s:Vimrc_HighlightPlus() abort "{{{
   if &g:background ==# 'dark'
     hi SpecialKey   gui=NONE      guifg=#808080  guibg=NONE ctermfg=grey 
     hi ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
+    hi NormalNC                   guifg=#808080  guibg=#606060
 
   else
     hi SpecialKey   gui=NONE      guifg=#cccccc  guibg=NONE ctermfg=grey 
     hi ZenkakuSpace gui=underline guifg=grey cterm=underline ctermfg=grey
+    hi NormalNC                   guifg=#cccccc  guibg=#dddddd
 
   endif
 endfunction "}}}
@@ -374,9 +376,15 @@ endfunction "}}}
 augroup vimrc_auto_commands
   autocmd!
 
+  "
   autocmd QuickFixCmdPost grep,grepadd,vimgrep topleft copen
   autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep topleft lopen
 
+  "
+  autocmd WinEnter,BufWinEnter * setlocal wincolor=
+  autocmd WinLeave             * setlocal wincolor=NormalNC
+
+  "
   if has('win32')
     autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setl fenc=cp932 ff=dos
   endif
