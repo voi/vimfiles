@@ -230,34 +230,36 @@ endfunction "}}}
 
 
 " ****************************************************************
-function! s:stall_sources_buffer_open(cmd, context, flags) "{{{
+function! s:stall_source_buffer_command(cmd, item) "{{{
+  execute printf('%s %s', a:cmd, matchstr(a:item, '\%(^\s*\)\zs\d\+\ze\s'))
+endfunction "}}}
+
+function! s:stall_source_buffer_open(cmd, context, flags) "{{{
   let item = a:context._get_target_item()
 
   if !empty(item)
     call win_gotoid(a:context._winid)
-
-    execute printf('%s %s', a:cmd, 
-        \ fnamemodify(expand(bufname(matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))), ':p'))
+    call s:stall_source_buffer_command(a:cmd, item)
   endif
 endfunction "}}}
 
-function! s:stall_sources_buffer_wipe(context, flags) "{{{
-  let a:flags._update = !a:close
+function! s:stall_source_buffer_wipe(context, flags) "{{{
+  let a:flags._update = 1
   let item = a:context._get_target_item()
 
   if !empty(item)
-    execute printf('wipe %s', matchstr(item, '\%(^\s*\)\zs\d\+\ze\s'))
+    call s:stall_source_buffer_command('bw', item)
   endif
 endfunction "}}}
 
 " ********
 let g:stall_sources.buffer = {
     \ '_collection': 'ls',
-    \ 'open': function('s:stall_sources_buffer_open', [ 'b' ]),
-    \ 'tabopen': function('s:stall_sources_buffer_open', [ 'tab sp | b' ]),
-    \ 'vsplit': function('s:stall_sources_buffer_open', [ 'vs | b' ]),
-    \ 'split': function('s:stall_sources_buffer_open', [ 'sp | b' ]),
-    \ 'wipe': function('s:stall_sources_buffer_wipe', [])
+    \ 'open': function('s:stall_source_buffer_open', [ 'b' ]),
+    \ 'tabopen': function('s:stall_source_buffer_open', [ 'tab sp | b' ]),
+    \ 'vsplit': function('s:stall_source_buffer_open', [ 'vs | b' ]),
+    \ 'split': function('s:stall_source_buffer_open', [ 'sp | b' ]),
+    \ 'wipe': function('s:stall_source_buffer_wipe', [])
     \ }
 
 function! g:stall_sources.buffer._on_ready(context, flags) dict "{{{
@@ -270,7 +272,7 @@ endfunction "}}}
 
 
 " ****************************************************************
-function! s:stall_sources_mru_open(cmd, context, flags) "{{{
+function! s:stall_source_oldfiles_open(cmd, context, flags) "{{{
   let item = a:context._get_target_item()
 
   if !empty(item)
@@ -281,16 +283,16 @@ function! s:stall_sources_mru_open(cmd, context, flags) "{{{
 endfunction "}}}
 
 " ********
-let g:stall_sources.mru = {
+let g:stall_sources.oldfiles = {
     \ '_collection': 'oldfiles',
     \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3\t(\2)', '') },
-    \ 'open': function('s:stall_sources_mru_open', [ 'e' ]),
-    \ 'tabopen': function('s:stall_sources_mru_open', [ 'tabe' ]),
-    \ 'vsplit': function('s:stall_sources_mru_open', [ 'vsp' ]),
-    \ 'split':function('s:stall_sources_mru_open', [ 'sp' ]) 
+    \ 'open': function('s:stall_source_oldfiles_open', [ 'e' ]),
+    \ 'tabopen': function('s:stall_source_oldfiles_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_source_oldfiles_open', [ 'vsp' ]),
+    \ 'split':function('s:stall_source_oldfiles_open', [ 'sp' ]) 
     \ }
 
-function! g:stall_sources.mru._on_ready(context, flags) dict "{{{
+function! g:stall_sources.oldfiles._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
   nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
@@ -301,7 +303,7 @@ endfunction "}}}
 
 
 " ****************************************************************
-function! s:stall_sources_files_open(cmd, no_quit, context, flags) "{{{
+function! s:stall_source_files_open(cmd, no_quit, context, flags) "{{{
   let item = get(a:context._get_target_item(), 1, '')
 
   if empty(item)
@@ -320,14 +322,14 @@ endfunction "}}}
 
 " ********
 let g:stall_sources.files = {
-    \ 'enter': function('s:stall_sources_files_open', [ 'e', 0 ]),
-    \ 'tabopen': function('s:stall_sources_files_open', [ 'tabe', 0 ]),
-    \ 'vsplit': function('s:stall_sources_files_open', [ 'vsp', 0 ]),
-    \ 'split': function('s:stall_sources_files_open', [ 'sp', 0 ]),
-    \ 'enter_nq': function('s:stall_sources_files_open', [ 'e', 1 ]),
-    \ 'tabopen_nq': function('s:stall_sources_files_open', [ 'tabe', 1 ]),
-    \ 'vsplit_nq': function('s:stall_sources_files_open', [ 'vsp', 1 ]),
-    \ 'split_nq': function('s:stall_sources_files_open', [ 'sp', 1 ])
+    \ 'enter': function('s:stall_source_files_open', [ 'e', 0 ]),
+    \ 'tabopen': function('s:stall_source_files_open', [ 'tabe', 0 ]),
+    \ 'vsplit': function('s:stall_source_files_open', [ 'vsp', 0 ]),
+    \ 'split': function('s:stall_source_files_open', [ 'sp', 0 ]),
+    \ 'enter_nq': function('s:stall_source_files_open', [ 'e', 1 ]),
+    \ 'tabopen_nq': function('s:stall_source_files_open', [ 'tabe', 1 ]),
+    \ 'vsplit_nq': function('s:stall_source_files_open', [ 'vsp', 1 ]),
+    \ 'split_nq': function('s:stall_source_files_open', [ 'sp', 1 ])
     \ }
 
 function! g:stall_sources.files._on_init(context, flags) dict "{{{
@@ -525,17 +527,17 @@ endif
 
 
 " ****************************************************************
-function! s:stall_sources_bookmark_filepath() "{{{
+function! s:stall_source_bookmark_filepath() "{{{
   return fnamemodify(expand(get(g:, 'stall_source_bookmark_save_file', '~/.stall.bookmark')), ':p')
 endfunction "}}}
 
-function! s:stall_sources_bookmark_add(filepathes) "{{{
+function! s:stall_source_bookmark_add(filepathes) "{{{
   call writefile(
       \ map(a:filepathes, { idx, val -> fnamemodify(expand(val), ':p') }),
-      \ s:stall_sources_bookmark_filepath(), 'a')
+      \ s:stall_source_bookmark_filepath(), 'a')
 endfunction "}}}
 
-function! s:stall_sources_bookmark_open(cmd, context, flags) "{{{
+function! s:stall_source_bookmark_open(cmd, context, flags) "{{{
   let item = a:context._get_target_item()
 
   if !empty(item)
@@ -548,14 +550,14 @@ endfunction "}}}
 " ********
 let g:stall_sources.bookmark = {
     \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2\t(\1)', '') },
-    \ 'open': function('s:stall_sources_bookmark_open', [ 'e' ]),
-    \ 'tabopen': function('s:stall_sources_bookmark_open', [ 'tabe' ]),
-    \ 'vsplit': function('s:stall_sources_bookmark_open', [ 'vsp' ]),
-    \ 'split':function('s:stall_sources_bookmark_open', [ 'sp' ]) 
+    \ 'open': function('s:stall_source_bookmark_open', [ 'e' ]),
+    \ 'tabopen': function('s:stall_source_bookmark_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_source_bookmark_open', [ 'vsp' ]),
+    \ 'split':function('s:stall_source_bookmark_open', [ 'sp' ]) 
     \ }
 
 function! g:stall_sources.bookmark._collection(context, flags) dict "{{{
-  let filepath = s:stall_sources_bookmark_filepath()
+  let filepath = s:stall_source_bookmark_filepath()
 
   return filereadable(filepath) ? readfile(filepath) : []
 endfunction "}}}
@@ -570,5 +572,57 @@ function! g:stall_sources.bookmark._on_ready(context, flags) dict "{{{
 endfunction "}}}
 
 " ********
-command! -nargs=+ -complete=file StallBookmarkAdd call s:stall_sources_bookmark_add([ <f-args> ])
+command! -nargs=+ -complete=file StallBookmarkAdd call s:stall_source_bookmark_add([ <f-args> ])
+
+
+" ****************************************************************
+let s:stall_source_history_records = []
+
+function! s:stall_history_record_file() "{{{
+  if getbufvar('%', '&buftype') ==# 'nofile'
+    return
+  endif
+
+  let filepath = fnamemodify(expand(bufname('%')), ':p')
+
+  if isdirectory(filepath) || !filereadable(filepath)
+    return
+  endif
+
+  if index(s:stall_source_history_records, filepath) >= 0
+    call remove(s:stall_source_history_records, filepath)
+  endif
+
+  call insert(s:stall_source_history_records, filepath)
+endfunction "}}}
+
+" ********
+let g:stall_sources.history = {
+    \ '_converter': { val -> substitute(val, '^\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\2\t(\1)', '') },
+    \ 'open': function('s:stall_source_bookmark_open', [ 'e' ]),
+    \ 'tabopen': function('s:stall_source_bookmark_open', [ 'tabe' ]),
+    \ 'vsplit': function('s:stall_source_bookmark_open', [ 'vsp' ]),
+    \ 'split':function('s:stall_source_bookmark_open', [ 'sp' ]) 
+    \ }
+
+function! g:stall_sources.history._collection(context, flags) dict "{{{
+  let filepath = s:stall_source_bookmark_filepath()
+
+  return extend((filereadable(filepath) ? readfile(filepath) : []), s:stall_source_history_records)
+endfunction "}}}
+
+function! g:stall_sources.history._on_ready(context, flags) dict "{{{
+  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
+  nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
+  nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
+  nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
+
+  call matchadd('SpecialKey', '\t(.*)$')
+endfunction "}}}
+
+" ********
+augroup stall_source_history_augroup
+  autocmd!
+  autocmd BufReadPost,BufWritePost * call s:stall_history_record_file()
+augroup END
 
