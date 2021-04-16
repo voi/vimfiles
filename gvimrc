@@ -22,23 +22,28 @@ endif
 
 " ***********************************************
 if has('win32')
+  function! s:set_guifont(font_name) "{{{
+    let height=11
+    let name=a:font_name
+    let &guifont=printf('Consolas:h%d,%s:h%d', height, name, height)
+    let &guifontwide=printf('%s:h%d,UD_デジタル_教科書体_N-R:h%d', name, height, height)
+  endfunction "}}}
+
   set columns=110
   set lines=45
   set linespace=2
-  " let userFONT='IPAゴシック'
-  " let userFONT='NasuM'
-  " let userFONT='MyricaM_M'
-  let userFONT='Cica'
-  " let userFONT='UD_デジタル_教科書体_N-R'
-  " let userFONT='BIZ_UDゴシック'
-  let &guifont=userFONT . ':h12,Consolas:h12'
-  let &guifontwide=userFONT . ':h12,UD_デジタル_教科書体_N-R:h12'
   set rop=type:directx,renmode:5,taamode:1,contrast:3
   " winpos 372 55
+  " call s:set_guifont('IPAゴシック')
+  " call s:set_guifont('NasuM')
+  " call s:set_guifont('MyricaM_M')
+  call s:set_guifont('Cica')
+  " call s:set_guifont('UD_デジタル_教科書体_N-R')
+  " call s:set_guifont('BIZ_UDゴシック')
 endif
 
-colorscheme delek
-" colorscheme desert
+" colorscheme delek
+colorscheme desert
 " colorscheme suika
 " colorscheme sabaku
 
