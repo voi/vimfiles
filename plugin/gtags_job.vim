@@ -14,7 +14,7 @@ if executable('global.exe') || executable('global')
       let out = a:msg
     endif
 
-    setloclist(0, [], 'a', { 'efm': "%f\t%l\t%m", 'lines': split(out, '\n') })
+    call setloclist(0, [], 'a', { 'efm': "%f\t%l\t%m", 'lines': split(out, '\n') })
   endfunction "}}}
 
   ""
