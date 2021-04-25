@@ -1139,11 +1139,44 @@ let s:emoji_table = [
     \ { 'word':'🧀',	'abbr':'🧀 :CHEESE WEDGE' }
     \ ]
 
+function! s:vimrc_get_emoji() "{{{
+  return copy(s:emoji_table)->filter({ idx, val -> strdisplaywidth( val.word ) > 1 } )
+endfunction "}}}
+
 function! Vimrc_Emoji_Complete() abort "{{{
-  call complete( col( '.' ), filter( s:emoji_table, { idx, val -> strdisplaywidth( val.word ) > 1 } ))
+  call complete( col( '.' ), s:vimrc_get_emoji())
 
   return ''
 endfunction "}}}
 
 inoremap <silent> <M-e> <C-r>=Vimrc_Emoji_Complete()<CR>
+
+
+" ****************************************************************
+let g:stall_sources = get(g:, 'stall_sources', {})
+let g:stall_sources.emoji = {}
+
+function! g:stall_sources.emoji._collection(context, flags) dict "{{{
+  return s:vimrc_get_emoji()->map({ idx, val -> [ val.abbr, val.word ] })
+endfunction "}}}
+
+function! g:stall_sources.emoji._on_ready(context, flags) dict "{{{
+  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('paste')<CR>
+endfunction "}}}
+
+function! g:stall_sources.emoji.paste(context, flags) dict "{{{
+  let item = a:context._get_target_item()
+
+  if !empty(item)
+    call win_gotoid(a:context._winid)
+
+    let reg_ = getreg('0')
+
+    call setreg('0', get(item, 1, ''))
+
+    execute 'normal "0p'
+
+    call setreg('0', reg_)
+  endif
+endfunction "}}}
 

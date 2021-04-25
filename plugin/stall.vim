@@ -17,14 +17,10 @@ function! s:stall_call_handler(context, name, flags) "{{{
   elseif type(Handler) == v:t_string 
     let result = split(execute(Handler), '\n') 
   else
-    let result = []
-  endif
-
-  if type(result) != v:t_list
     return []
   endif
 
-  return result
+  return type(result) == v:t_list ? result : []
 endfunction "}}}
 
 function! s:stall_open(mods, args) "{{{
@@ -162,7 +158,7 @@ endfunction "}}}
 
 
 " ****************************************************************
-let g:stall_sources = {}
+let g:stall_sources = get(g:, 'stall_sources', {})
 
 function! Stall_handle_key(name) "{{{
   "
@@ -527,13 +523,16 @@ endif
 
 
 " ****************************************************************
+let s:stall_source_bookmark_cache = []
+
 function! s:stall_source_bookmark_filepath() "{{{
   return fnamemodify(expand(get(g:, 'stall_source_bookmark_save_file', '~/.stall.bookmark')), ':p')
 endfunction "}}}
 
 function! s:stall_source_bookmark_add(filepathes) "{{{
-  call writefile(
-      \ map(a:filepathes, { idx, val -> fnamemodify(expand(val), ':p') }),
+  call writefile(a:filepathes
+      \ ->filter({ idx, val -> 0 > index(s:stall_source_bookmark_cache, val) })
+      \ ->map({ idx, val -> fnamemodify(expand(val), ':p') }),
       \ s:stall_source_bookmark_filepath(), 'a')
 endfunction "}}}
 
