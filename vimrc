@@ -82,8 +82,6 @@ set showtabline=2
 set textwidth=0
 set scrolloff=0
 set nowrap
-set breakindent
-set breakindentopt=shift:2
 
 set whichwrap+=h,l,<,>,[,]
 set virtualedit+=block
@@ -96,7 +94,7 @@ set copyindent preserveindent
 set breakindent breakindentopt=shift:2
 
 set complete=.,b,k,w
-set completeopt=menuone,noinsert
+set completeopt=menuone
 set wildignorecase
 set wildmode=list:full
 set pumheight=16
@@ -543,13 +541,31 @@ endfunction "}}}
 
 command! -nargs=0 Root call <SID>find_repos_dir()
 
+
 " *****************************************************************************
 ""
-nnoremap <silent> > :IndentAtHead<CR>
-nnoremap <silent> < :UnIndentAtHead<CR>
+function! s:Vimrc_ShowCmdLine(height) "{{{
+  let h_ = str2nr(a:height)
 
-vnoremap <silent> > :IndentAtHead<CR>
-vnoremap <silent> < :UnIndentAtHead<CR>
+  if h_ <= 0 || ((&lines * 8) / 10) < h_
+    let h_ = 3
+  endif
+
+  call popup_create(
+    \ term_start([&shell], #{ hidden: 1, term_finish: 'close'}),
+    \ #{ border: [], minwidth: ((&columns * 9) / 10), minheight: h_ })
+endfunction "}}}
+
+command! -nargs=? Cmdline call <SID>Vimrc_ShowCmdLine(<q-args>)
+
+
+" *****************************************************************************
+""
+nnoremap <silent> g> :IndentAtHead<CR>
+vnoremap <silent> g> :IndentAtHead<CR>
+
+nnoremap <silent> g< :UnIndentAtHead<CR>
+vnoremap <silent> g< :UnIndentAtHead<CR>
 
 nnoremap <silent> <C-q> :CommentIt<CR>
 vnoremap <silent> <C-q> :CommentIt<CR>
