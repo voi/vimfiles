@@ -82,9 +82,4 @@ endfunction "}}}
 command! -range -nargs=* -complete=customlist,<SID>enclose_text_complete_arguments
     \ EncloseText call <SID>enclose_text_apply([ <f-args> ])
 
-"
-vnoremap syy :EncloseText -a 
-vnoremap sdd :EncloseText -d 
-vnoremap srr :EncloseText -r 
-
 

@@ -1149,7 +1149,8 @@ function! Vimrc_Emoji_Complete() abort "{{{
   return ''
 endfunction "}}}
 
-inoremap <silent> <M-e> <C-r>=Vimrc_Emoji_Complete()<CR>
+""
+" inoremap <silent> <M-e> <C-r>=Vimrc_Emoji_Complete()<CR>
 
 
 " ****************************************************************

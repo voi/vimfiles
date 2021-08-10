@@ -72,5 +72,5 @@ augroup plugin-snippet-file-vim-event
 augroup END
 
 "
-inoremap <silent> ; <C-r>=SnippetFile_TriggerKey(';')<CR>
+" inoremap <silent> ; <C-r>=SnippetFile_TriggerKey(';')<CR>
 
