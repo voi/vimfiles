@@ -1,0 +1,152 @@
+" vim: ft=vim
+let s:snippets = {} " { language or '*' : [ { [ prefix ], body, description } ] }
+let s:global_char = '*'
+
+function! s:SnippetVSCode_ParseScope(snip) "{{{
+  let scopes = split(get(a:snip, 'scope', s:global_char), ',')
+
+  return ( empty(scopes) ? [fnamemodify(filepath, ':t:r')] : scopes )
+endfunction "}}}
+
+function! s:SnippetVSCode_ParseTextOrList(snip, prop_name) "{{{
+  let scope = get(a:snip, a:prop_name, '')
+
+  return ( type(scope) ==# v:t_string ?
+      \ [scope] : ( type(scope) ==# v:t_list ? scope : []))
+endfunction "}}}
+
+function! s:SnippetVSCode_LoadSnippet(file_path) "{{{
+  "
+  let snippets = json_decode(
+      \ join(filter(readfile(a:file_path), { idx, val -> val !~# '^\s*\/\/.*$' }), ' '))
+
+  if type(snippets) !=# v:t_dict
+    return
+  endif
+
+  "
+  for snip in snippets->values()->filter({ idx, val -> type(val) ==# v:t_dict })
+    "
+    let contents = {
+        \ 'prefix': s:SnippetVSCode_ParseTextOrList(snip, 'prefix'),
+        \ 'body': s:SnippetVSCode_ParseTextOrList(snip, 'body'),
+        \ 'description': get(snip, 'description', '')
+        \ }
+
+    for ft in s:SnippetVSCode_ParseScope(snip)
+      let s:snippets[ft] = add(get(s:snippets, ft, []), contents)
+    endfor
+  endfor
+endfunction "}}}
+
+function! s:SnippetVSCode_OnInitialize() "{{{
+  " Single-language user-defined snippets are defined in a specific language's
+  " snippet file (for example javascript.json),
+  for file_path in globpath(&rtp, 'snippet/*.json', 0, 1)
+    call s:SnippetVSCode_LoadSnippet(file_path)
+  endfor
+
+  " Multi-language and global user-defined snippets are all defined in
+  " "global" snippet files (JSON with the file suffix .code-snippets),
+  for file_path in globpath(&rtp, 'snippet/*.code-snippets', 0, 1)
+    call s:SnippetVSCode_LoadSnippet(file_path)
+  endfor
+endfunction "}}}
+
+function! SnippetVSCode_ExpandVarious(var) "{{{
+  if    (a:var ==# '$TM_SELECTED_TEXT')         | return @0
+  elseif(a:var ==# '$TM_CURRENT_LINE')          | return getline('.')
+  elseif(a:var ==# '$TM_CURRENT_WORD')          | return expand('<cword>')
+  elseif(a:var ==# '$TM_LINE_INDEX')            | return line('.') - 1
+  elseif(a:var ==# '$TM_LINE_NUMBER')           | return line('.')
+  elseif(a:var ==# '$TM_FILENAME')              | return expand('%:t')
+  elseif(a:var ==# '$TM_FILENAME_BASE')         | return expand('%:t:r')
+  elseif(a:var ==# '$TM_DIRECTORY')             | return expand('%:p:h')
+  elseif(a:var ==# '$TM_FILEPATH')              | return expand('%:p')
+  elseif(a:var ==# '$RELATIVE_FILEPATH')        | return expand('%:p')
+  elseif(a:var ==# '$CLIPBOARD')                | return @*
+  elseif(a:var ==# '$WORKSPACE_NAME')           | return expand('%:p')
+  elseif(a:var ==# '$WORKSPACE_FOLDER')         | return expand('%:p:h')
+  elseif(a:var ==# '$CURRENT_YEAR')             | return strftime('%Y')
+  elseif(a:var ==# '$CURRENT_YEAR_SHORT')       | return strftime('%y')
+  elseif(a:var ==# '$CURRENT_MONTH')            | return strftime('%m')
+  elseif(a:var ==# '$CURRENT_MONTH_NAME')       | return strftime('%B')
+  elseif(a:var ==# '$CURRENT_MONTH_NAME_SHORT') | return strftime('%b')
+  elseif(a:var ==# '$CURRENT_DATE')             | return strftime('%d')
+  elseif(a:var ==# '$CURRENT_DAY_NAME')         | return strftime('%A')
+  elseif(a:var ==# '$CURRENT_DAY_NAME_SHORT')   | return strftime('%a')
+  elseif(a:var ==# '$CURRENT_HOUR')             | return strftime('%H')
+  elseif(a:var ==# '$CURRENT_MINUTE')           | return strftime('%M')
+  elseif(a:var ==# '$CURRENT_SECOND')           | return strftime('%S')
+  elseif(a:var ==# '$CURRENT_SECONDS_UNIX')     | return strftime('%s')
+  else
+    return a:var
+  endif
+endfunction "}}}
+
+function! s:SnippetVSCode_MakeBody(body) "{{{
+  return substitute(join(a:body, "\<CR>"), '\$[A-Z_]\+', '\=SnippetVSCode_ExpandVarious(submatch(1))', 'g')
+endfunction "}}}
+
+function! s:SnippetVSCode_OnCompleteDone() "{{{
+  if empty(v:completed_item)
+    return
+  endif
+
+  "
+  let snip = get(v:completed_item, 'user_data', {})
+
+  if type(snip) !=# v:t_dict
+    return
+  endif
+
+  "
+  let body = get(snip, 'body', [])
+  let info = [ line('.'), len(body), matchstr(getline('.'), '^\s*') ]
+  let olds = [ @0, &paste ]
+  let @0 = s:SnippetVSCode_MakeBody(body)
+
+  set paste
+  execute printf("normal v%dh\"0gp", len(substitute(v:completed_item.word, '.', '.', 'g')))
+
+  if info[1] > 1
+    execute printf('%d,%ds/^/%s/', info[0] + 1, info[0] + info[1] - 1, info[2])
+  endif
+
+  let [ @0, &paste ] = olds
+endfunction "}}}
+
+function! SnippetVSCode_TriggerKey(key) "{{{
+  let comp = [{ 'word': a:key }]
+
+  for snip in (
+      \ get(s:snippets, getbufvar('%', '&filetype'), []) +
+      \ get(s:snippets, s:global_char, []))
+
+    for pf in snip.prefix
+      call add(comp, {
+          \ 'word': pf,
+          \ 'menu': snip.description,
+          \ 'kind': '*',
+          \ 'user_data': snip
+          \ })
+    endfor
+  endfor
+
+  call complete(col('.'), comp)
+
+  return ''
+endfunction "}}}
+
+"
+call s:SnippetVSCode_OnInitialize()
+
+"
+augroup vscode-snippet-vim-events
+  autocmd!
+  autocmd CompleteDone * call <SID>SnippetVSCode_OnCompleteDone()
+augroup END
+
+"
+inoremap <silent> ; <C-r>=SnippetVSCode_TriggerKey(';')<CR>
+

@@ -1,0 +1,16 @@
+--sort=no
+--fields=SsKz
+--with-list-header=no
+--langmap=asm:+.cas
+--asm-kinds=dlmt
+--c++-kinds=dfghstuxcn
+--c#-kinds=cdEfgimns
+--vim-kinds=acfmv
+--regex-markdown=/^\s\*\[ \]\s\+(.*):/..[]\1/
+--langdef=changelog
+--langmap=changelog:.chalow.changelog
+--regex-changelog=/^([0-9]{,4}-[0-9]{,2}-[0-9]{,2}) .*/\1/h,header/
+--regex-changelog=/^\t\*[ \t](.*):/..\1/i,item/
+--langdef=dosini
+--langmap=dosini:.ini
+--regex-dosini=/^\[([^]]+)\]/\1/h,header/
