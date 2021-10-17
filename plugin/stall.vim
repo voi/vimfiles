@@ -211,26 +211,6 @@ command! -nargs=+ -complete=customlist,Stall_command_complete Stall call s:stall
 
 
 " ****************************************************************
-let g:stall_sources.registers = {
-    \ '_collection': 'registers'
-    \ }
-
-function! g:stall_sources.registers._on_ready(context, flags) dict "{{{
-  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('paste')<CR>
-endfunction "}}}
-
-function! g:stall_sources.registers.paste(context, flags) dict "{{{
-  let item = a:context._get_target_item()
-
-  if !empty(item)
-    call win_gotoid(a:context._winid)
-
-    execute printf('normal %sp', matchstr(item, '"\S'))
-  endif
-endfunction "}}}
-
-
-" ****************************************************************
 function! s:stall_source_buffer_command(cmd, item) "{{{
   execute printf('%s %s', a:cmd, matchstr(a:item, '\%(^\s*\)\zs\d\+\ze\s'))
 endfunction "}}}
@@ -269,37 +249,6 @@ function! g:stall_sources.buffer._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
   nnoremap <buffer> <silent> d    :call Stall_handle_key('wipe')<CR>
-endfunction "}}}
-
-
-" ****************************************************************
-function! s:stall_source_oldfiles_open(cmd, context, flags) "{{{
-  let item = a:context._get_target_item()
-
-  if !empty(item)
-    call win_gotoid(a:context._winid)
-
-    execute printf('%s %s', a:cmd, substitute(item, '^\d\+:\s*', '', ''))
-  endif
-endfunction "}}}
-
-" ********
-let g:stall_sources.oldfiles = {
-    \ '_collection': 'oldfiles',
-    \ '_converter': { val -> substitute(val, '^\(\d\+:\s*\)\(.*\)[\\/]\([^\\/]\+[\\/]\?\)$', '\3\t(\2)', '') },
-    \ 'open': function('s:stall_source_oldfiles_open', [ 'e' ]),
-    \ 'tabopen': function('s:stall_source_oldfiles_open', [ 'tabe' ]),
-    \ 'vsplit': function('s:stall_source_oldfiles_open', [ 'vsp' ]),
-    \ 'split':function('s:stall_source_oldfiles_open', [ 'sp' ]) 
-    \ }
-
-function! g:stall_sources.oldfiles._on_ready(context, flags) dict "{{{
-  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('open')<CR>
-  nnoremap <buffer> <silent> t    :call Stall_handle_key('tabopen')<CR>
-  nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
-  nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
-
-  call matchadd('SpecialKey', '\t(.*)$')
 endfunction "}}}
 
 
@@ -495,36 +444,6 @@ function! g:stall_sources.ctags.jump(context, flags) dict "{{{
     execute '' . get(item, 'lnum', line('.'))
   endif
 endfunction "}}}
-
-
-" ****************************************************************
-if has('gui_win32')
-  let g:stall_sources.remote = {}
-
-  " ********
-  function! g:stall_sources.remote._on_ready(context, flags) dict "{{{
-    nnoremap <buffer> <silent> c  :call Stall_handle_key('copy')<CR>
-    nnoremap <buffer> <silent> m  :call Stall_handle_key('move')<CR>
-  endfunction "}}}
-
-  function! g:stall_sources.remote._collection(context, flags) dict "{{{
-    return split(serverlist(), '\n')
-  endfunction "}}}
-
-  function! g:stall_sources.remote.copy(context, flags) dict "{{{
-    let item = a:context._get_target_item()
-
-    if !empty(item)
-      call remote_send(item, '<ESC>:edit ' . a:context._bufname . '<CR>')
-    endif
-  endfunction "}}}
-
-  function! g:stall_sources.remote.move(context, flags) dict "{{{
-    call g:stall_sources.remote.copy(a:context, a:flags)
-
-    execute 'bw ' . a:context._bufnr
-  endfunction "}}}
-endif
 
 
 " ****************************************************************
