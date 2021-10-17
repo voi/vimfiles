@@ -164,6 +164,7 @@ onoremap a` 2i`
 
 "" blackhole
 nnoremap <silent> d "_d
+nnoremap <silent> D "_D
 vnoremap <silent> d "_d
 
 "" compatible D
@@ -172,16 +173,6 @@ nnoremap <silent> Y y$
 "" clipboard
 if has('clipboard')
   set clipboard+=unnamed,unnamedplus
-  " g@ operatorfunc
-  " nnoremap <silent> gy "*y
-  " nnoremap <silent> gY "*y$
-  " nnoremap <silent> gx "*x
-  " nnoremap <silent> gp "*p
-  " nnoremap <silent> gP "*P
-
-  " vnoremap <silent> gy "*y
-  " vnoremap <silent> gx "*x
-  " vnoremap <silent> gp "*p
 endif
 
 " visual replace
@@ -195,13 +186,6 @@ nnoremap <silent> <Leader>w :setl wrap!      wrap?<CR>
 nnoremap <silent> <Leader>s :setl wrapscan!  wrapscan?<CR>
 nnoremap <silent> <Leader>i :setl incsearch! incsearch?<CR>
 nnoremap <silent> <Leader>l :setl relativenumber! relativenumber?<CR>
-
-" error jumps.
-nnoremap <silent> cp :lprevious<CR>zz
-nnoremap <silent> cn :lnext<CR>zz
-
-nnoremap <silent> ck :cprevious<CR>zz
-nnoremap <silent> cj :cnext<CR>zz
 
 " buffer
 nnoremap <silent> [b :bprev<CR>
@@ -330,8 +314,11 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
-  " hi clear CursorLine
-  hi CursorIM   gui=NONE  guifg=#FFFFFF  guibg=#8000ff ctermfg=White ctermbg=Red
+
+  if !has('gui_running')
+    hi clear CursorLine
+    hi CursorLine term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE
+  endif
 
   " statusline
   hi StatusLine_Modes      guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
@@ -346,7 +333,7 @@ function! s:Vimrc_HighlightPlus() abort "{{{
 
   if &g:background ==# 'dark'
     hi SpecialKey   gui=NONE      guifg=#808080  guibg=NONE ctermfg=grey 
-    hi ZenkakuSpace gui=underline guifg=darkgrey term=underline ctermfg=darkgrey
+    hi ZenkakuSpace gui=underline guifg=darkgrey cterm=underline ctermfg=darkgrey
     hi NormalNC                   guifg=#808080  guibg=#606060
 
   else
