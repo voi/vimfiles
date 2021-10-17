@@ -23,7 +23,7 @@ endif
 " ***********************************************
 if has('win32')
   function! s:set_guifont(font_name) "{{{
-    let height=12
+    let height=11
     let name=a:font_name
     let &guifont=printf('%s:h%d,Consolas:h%d', name, height, height)
     let &guifontwide=printf('%s:h%d,BIZ_UDゴシック:h%d', name, height, height)
@@ -38,14 +38,12 @@ if has('win32')
   " call s:set_guifont('UD_デジタル_教科書体_N-R')
   " call s:set_guifont('BIZ_UDゴシック')
   " ----
-  " call s:set_guifont('Ricty_Diminished_Discord')
-  " call s:set_guifont('Cica')
-  " call s:set_guifont('IPAゴシック')
-  call s:set_guifont('Migu_1M')
+  call s:set_guifont('Cica')
   " call s:set_guifont('NasuM')
 endif
 
-colorscheme desert-kai
+" colorscheme desert-kai
+colorscheme delek-kai
 
 
 " ***********************************************
