@@ -408,9 +408,10 @@ function! g:stall_sources.ctags._collection(context, flags) dict "{{{
 
   "
   let root = {}
+  let ctagsbin = get(g:, 'Vimrc_ctags_bin_name', 'ctags')
 
   for item in map(
-      \ systemlist(printf('ctags -n -f - %s %s',
+      \ systemlist(printf('%s -n -f - %s %s', ctagsbin,
       \   get(a:context.type_option, a:context._filetype, ''), tmp_source)),
       \ { idx, val -> s:stall_source_ctags_tag2item(val) })
     " 
