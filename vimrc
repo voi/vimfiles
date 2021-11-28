@@ -149,10 +149,6 @@ for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",'\zs')
   exec printf("imap <silent> <expr> %s Vimrc_AutoComplete_Key('%s')", k, k)
 endfor
 
-inoremap <expr> <CR>  pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
-inoremap <expr> <C-n> pumvisible() ? "\<Down>" : "\<C-n>"
-inoremap <expr> <C-p> pumvisible() ? "\<Up>" : "\<C-p>"
-
 " a"/a'/a` trim whitespaces, a(/a{/a[ don't trim whitespaces.
 vnoremap a" 2i"
 vnoremap a' 2i'
@@ -301,10 +297,10 @@ let g:loaded_vimballPlugin = 1
 let g:loaded_getscript = 1
 let g:loaded_getscriptPlugin = 1
 
-let g:loaded_netrw = 1 
-let g:loaded_netrwPlugin = 1 
-let g:loaded_netrwSettings = 1
-let g:loaded_netrwFileHandlers = 1
+" let g:loaded_netrw = 1 
+" let g:loaded_netrwPlugin = 1 
+" let g:loaded_netrwSettings = 1
+" let g:loaded_netrwFileHandlers = 1
 
 " let g:loaded_matchparen = 1 
 
