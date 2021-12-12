@@ -3,6 +3,19 @@ function! s:SnippetFile_Expand(path, item) "{{{
   "
   let info = [ line('.'), matchstr(getline('.'), '^\s*'), &paste ]
 
+  "    0123456789A12***3456789B1234567
+  "     ↓
+  "    " delete snippet word and split line
+  "    0123456789A12
+  "    3456789B1234567
+  "     ↓
+  "    " insert snippet file content
+  "    0123456789A12
+  "    snippet-file
+  "    3456789B1234567
+  "     ↓
+  "    " join snippet content
+  "    0123456789A12snippet-file3456789B1234567
   set paste
   execute printf("normal hv%dhc\<CR>", len(substitute(a:item.word, '.', '.', 'g')) -1)
   execute printf('keepalt %dr %s', info[0], a:path)

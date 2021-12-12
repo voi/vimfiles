@@ -6,7 +6,7 @@ let g:colors_name="suika"
 
 " -------------------------------------------------------------
 """"
-hi       Comment      guifg=#646C60 guibg=#E5E7E4 gui=NONE
+hi       Comment      guifg=#646C60 guibg=NONE    gui=NONE
 hi       Constant     guifg=#006199 guibg=#CCECFF gui=NONE
 hi! link String       Constant
 hi! link Charactor    Constant

@@ -42,6 +42,7 @@ set statusline+=%#StatusLine_Normal#%{(mode()=='n')?'\ \ NO\ ':''}
 set statusline+=%#StatusLine_Insert#%{(mode()=='i')?'\ \ IN\ ':''}
 set statusline+=%#StatusLine_Replace#%{(mode()=='r')?'\ \ RE\ ':''}
 set statusline+=%#StatusLine_Visual#%{(mode()=='v')?'\ \ VI\ ':''}
+set statusline+=%#StatusLine_Visual#%{(mode()=='s')?'\ \ SE\ ':''}
 set statusline+=%#StatusLine_Modes#
 set statusline+=%{(&modified?'⚡':'')}
 set statusline+=%{(&readonly?'❎':'')}
@@ -111,10 +112,6 @@ set autowrite autowriteall
 set autoread
 set autochdir
 
-if has('clipboard')
-  set clipboard=
-endif
-
 
 " ***********************************************
 "" history files.
@@ -130,10 +127,13 @@ set ignorecase
 set smartcase
 
 set nowrapscan
-set noincsearch
+" set noincsearch
 set hlsearch
 set tags+=./tags;
-set grepprg=findstr\ /NSR
+
+if has('win32')
+  set grepprg=findstr\ /NSR
+endif
 
 "" encrypt file.
 set cryptmethod=blowfish
@@ -167,8 +167,22 @@ vnoremap <silent> d "_d
 nnoremap <silent> Y y$
 
 "" clipboard
-if has('clipboard')
+if has('clipboard') && 0
+  set clipboard&
   set clipboard+=unnamed,unnamedplus
+else
+  nnoremap <silent> gp "*p
+  nnoremap <silent> gP "*P
+
+  nnoremap <silent> gy "*y
+  nnoremap <silent> gY "*y$
+
+  nnoremap <silent> gx "*x
+  nnoremap <silent> gX "*X
+
+  vnoremap <silent> gp "*p
+  vnoremap <silent> gy "*y
+  vnoremap <silent> gx "*x
 endif
 
 " visual replace
@@ -219,8 +233,6 @@ endfunction
 nnoremap <expr> <Leader>m  Vimrc_Register_hints('m', 'marks')
 " マーク位置へのジャンプ
 nnoremap <expr> <Leader>`  Vimrc_Register_hints('`', 'marks')
-" マーク位置へのジャンプ
-nnoremap <expr> <Leader>'  Vimrc_Register_hints("'", 'marks')
 " レジスタ参照（ヤンクや削除）
 nnoremap <expr> <Leader>"  Vimrc_Register_hints('"', 'registers')
 " マクロ記録
@@ -324,6 +336,7 @@ function! s:Vimrc_HighlightPlus() abort "{{{
   hi StatusLine_Insert     guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
   hi StatusLine_Replace    guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
   hi StatusLine_Visual     guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
+  hi StatusLine_Select     guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
 
   hi link TrailingSpace NonText
 
@@ -351,20 +364,6 @@ function! Vimrc_Markdown_IndentExpr() "{{{
   return (marker !=# '' ? indent(baseLineNum) + offset : -1)
 endfunction "}}}
 
-function! Vimrc_CLang_IncludeExpr(fname) "{{{
-  return get(split(system('global -P -a ' . a:fname), '\n'), 0, a:fname)
-endfunction "}}}
-
-function! Vimrc_CLang_TagFunc(pattern, flag, info) "{{{
-  let cmd = (a:flag ==# 'i') ?
-      \ printf('global -qat -g %s', a:pattern) :
-      \ printf('global -qat %s & global -qat -rs %s', a:pattern, a:pattern)
-  let lines = split(system(cmd), '\n')
-  let lines = map(lines, { idx, val -> split(substitute(val, '^\(\w\+\)\s\+\(\S.*\S\)\s\+\(\d\+\)$', '\1\t\2\t\3', ''), '\t') })
-
-  return map(lines, { idx, val -> { 'name': get(val, 0, ''), 'filename': get(val, 1, ''), 'cmd':get(val, 2, '') } })
-endfunction "}}}
-
 
 " ***********************************************
 " {{{
@@ -390,14 +389,6 @@ augroup vimrc_auto_commands
   autocmd FileType help,qf nnoremap <buffer> q :pclose<CR><C-w>c
   autocmd CmdwinEnter *    nnoremap <buffer> q <C-w>c
 
-  " jump and close
-  autocmd FileType qf nnoremap <buffer> <CR> :pclose<CR><CR>
-  autocmd FileType qf nnoremap <buffer> <C-j> :pclose<CR><CR><C-w>p<C-w>q
-  autocmd FileType qf nnoremap <buffer> <expr> <C-P> printf(":%solder\<CR>",
-      \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
-  autocmd FileType qf nnoremap <buffer> <expr> <C-N> printf(":%snewer\<CR>",
-      \ getwininfo(win_getid())[0].loclist ? 'l' : 'c')
-
   " additional colors
   autocmd VimEnter,ColorScheme * call <SID>Vimrc_HighlightPlus()
 
@@ -420,9 +411,6 @@ augroup vimrc_auto_commands
       \ setl tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 
   autocmd FileType javascript setl cinoptions+=J1
-  autocmd FileType c,cpp      setl path+=./;/
-      \ includeexpr=Vimrc_CLang_IncludeExpr(v:fname)
-      \ tagfunc=Vimrc_CLang_TagFunc
   autocmd FileType cpp        setl commentstring=//\ %s
   autocmd FileType dosbatch   setl commentstring=@rem\ %s
   autocmd FileType vim        setl fenc=utf8 ff=unix
@@ -457,6 +445,25 @@ command! -range -nargs=0 IndentAtHead call call({ begin, end ->
 command! -range -nargs=0 UnIndentAtHead call call({ begin, end -> 
     \ execute(printf('silent! %d,%ds/^%s//', begin, end, (&expandtab ? repeat(' ',&sw) : '\t'))) },
     \ [ <line1>, <line2> ])
+
+
+" *****************************************************************************
+function! s:vimrc_comment_toggle(first_line, last_line) abort "{{{
+  let [cbegin, cend] = split(escape(&commentstring, '/?'), '\s*%s\s*', 1)
+  let pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
+
+  for ln in range(a:first_line, a:last_line)
+    let line = getline(ln)
+    if line =~# pattern
+      execute printf('%ds/%s/\1\2/', ln, pattern)
+    elseif line !=# ''
+      execute printf('%ds/\v^(\s*)(\S.*)/\1%s%s\2%s%s/',
+          \ ln, cbegin, (empty(cbegin) ? '' : ' '), (empty(cend) ? '' : ' '), cend)
+    endif
+  endfor
+endfunction "}}}
+
+command! -range -nargs=0 CommentToggleLine call <SID>vimrc_comment_toggle(<line1>, <line2>) 
 
 
 " *****************************************************************************
@@ -509,7 +516,7 @@ command! -nargs=0 Root call <SID>find_repos_dir()
 
 " *****************************************************************************
 ""
-function! s:Vimrc_ShowCmdLine(height) "{{{
+function! s:vimrc_ShowCmdLine(height) "{{{
   let h_ = max([ 3, min([ str2nr(a:height), ((&lines * 9) / 10) ]) ])
   let w_ = (&columns * 9) / 10
 
@@ -518,7 +525,7 @@ function! s:Vimrc_ShowCmdLine(height) "{{{
     \ #{ border: [], fixed: 1, minwidth: w_, minheight: h_, maxwidth: w_, maxheight: h_ })
 endfunction "}}}
 
-command! -nargs=? Cmdline call <SID>Vimrc_ShowCmdLine(<q-args>)
+command! -nargs=? Cmdline call <SID>vimrc_ShowCmdLine(<q-args>)
 
 
 " *****************************************************************************
@@ -529,13 +536,13 @@ vnoremap <silent> g> :IndentAtHead<CR>
 nnoremap <silent> g< :UnIndentAtHead<CR>
 vnoremap <silent> g< :UnIndentAtHead<CR>
 
-nnoremap <silent> <C-q> :CommentIt<CR>
-vnoremap <silent> <C-q> :CommentIt<CR>
+nnoremap <silent> <C-q> :CommentToggleLine<CR>
+vnoremap <silent> <C-q> :CommentToggleLine<CR>
 
 nnoremap <silent> <Leader>x :GfmTodo<CR>
 vnoremap <silent> <Leader>x :GfmTodo<CR>
 
-nnoremap <silent> <Leader><Space> :LcdX %:h<CR>
+nnoremap <silent> <Leader><Space>  :LcdX %:h<CR>
 nnoremap <silent> <Leader><Leader> :up<CR>
 
 

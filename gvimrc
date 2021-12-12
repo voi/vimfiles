@@ -32,14 +32,15 @@ if has('win32')
   set columns=110
   set lines=45
   set linespace=2
-  " set rop=type:directx,renmode:5,taamode:1,contrast:3
-  set rop=type:directx,renmode:3,taamode:1,contrast:1
+  set rop=type:directx,renmode:5,taamode:1,contrast:3
+  " set rop=type:directx,renmode:3,taamode:1,contrast:1
 
   " call s:set_guifont('UD_デジタル_教科書体_N-R')
   " call s:set_guifont('BIZ_UDゴシック')
   " ----
-  call s:set_guifont('Cica')
-  " call s:set_guifont('NasuM')
+  " call s:set_guifont('Cica')
+  " call s:set_guifont('HackGen')
+  call s:set_guifont('PlemolJP')
 endif
 
 " colorscheme desert-kai

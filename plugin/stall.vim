@@ -35,6 +35,7 @@ function! s:stall_open(mods, args) "{{{
   if type(sources[source_name]) != v:t_dict | return | endif
 
   "
+  let is_vert = (a:mods =~ '\<vert\%(ical\)\?\>')
   let context = extend({
       \ '_cwd': getcwd(),
       \ '_bufnr': bufnr('%'),
@@ -46,9 +47,10 @@ function! s:stall_open(mods, args) "{{{
       \ '_redraw_view': funcref('s:stall_redraw_view'),
       \ '_get_view_items': funcref('s:stall_get_view_items'),
       \ '_get_target_item': funcref('s:stall_get_target_item'),
+      \ '_switch_no_quit': funcref('s:stall_switch_no_quit'),
       \ '_converter': { val -> val },
       \ '_no_quit': 0,
-      \ '_winsize': 0
+      \ '_winsize': is_vert ? 0 : 16
       \ }, sources[source_name])
 
   "
@@ -56,35 +58,10 @@ function! s:stall_open(mods, args) "{{{
 
   "
   let context._items = s:stall_call_handler(context, '_collection', {})
-  "
-  let winsize = ''
-  let fitsize = 0
-  let is_vert = (a:mods =~ '\<vert\%(ical\)\?\>')
-
-  for opt in filter(copy(a:args), { idx, val -> val =~# '^-' })
-    if opt =~# '^-no-quit$' 
-      let context._no_quit = 1
-    elseif opt =~# '^-winsize=\d\+%\?$'
-      let winsize = matchstr(opt, '\d\+%\?$')
-    elseif opt =~# '^-fitsize$'
-      let fitsize = 1
-    endif
-  endfor
-
-  "
-  if winsize =~ '%$'
-    let winsize = printf('%d', ((is_vert ? winwidth(0) : winheight(0)) * str2nr(winsize)) / 100)
-  endif
-
-  if fitsize && !is_vert
-    if empty(winsize) | let winsize = '16' | endif
-
-    let context._winsize = str2nr(winsize)
-  endif
 
   " open buffer
   call execute(printf('%s noautocmd silent! %snew %s %s',
-      \ a:mods, winsize, source_name . context._bufnr, join(source_args, ' ')))
+      \ a:mods, (is_vert ? '' : '16'), source_name . context._bufnr, join(source_args, ' ')))
 
   " buffer option
   setlocal filetype=stall buftype=nofile bufhidden=hide
@@ -92,13 +69,11 @@ function! s:stall_open(mods, args) "{{{
   setlocal nolist nobuflisted
   setlocal winfixwidth winfixheight
 
-  " buffer autocmd
-  " doautocmd BufEnter,BufWinEnter
-
   " default keys
   nnoremap <buffer> <silent> q :bw!<CR>
   nnoremap <buffer> <silent> r :call Stall_handle_key('_redraw_view')<CR>
   nnoremap <buffer> <silent> i :call Stall_handle_key('_do_filtering')<CR>
+  nnoremap <buffer> <silent> Q :call Stall_handle_key('_switch_no_quit')<CR>
 
   call s:stall_call_handler(context, '_on_ready', {})
   call s:stall_update_view(context)
@@ -148,6 +123,13 @@ function! s:stall_apply_filter(context, flags) "{{{
   let a:context._filter = input('> ', get(a:context, '_filter', ''))
 endfunction "}}}
 
+function! s:stall_switch_no_quit(context, flags) "{{{
+  let a:flags._no_quit = 1
+  let a:context._no_quit = !a:context._no_quit
+
+  echo printf('stall: %squit', (a:context._no_quit ? 'no-' : ''))
+endfunction "}}}
+
 function! s:stall_redraw_view(context, flags) "{{{
   let a:flags._update = 1
 endfunction "}}}
@@ -180,10 +162,6 @@ function! Stall_handle_key(name) "{{{
     call s:stall_update_view(context)
   endif
 
-  if get(flags, '_reset_cursor', 0)
-    call setpos('.', [0, 1, 1, 0])
-  endif
-
   call s:stall_set_context(context)
 
   if get(flags, '_no_quit', 0) || get(flags, '_update', 0)
@@ -194,20 +172,8 @@ function! Stall_handle_key(name) "{{{
 endfunction "}}}
 
 
-" ****************************************************************
-function! Stall_command_complete(argLead, cmdLine, cursorPos) "{{{
-  let l:pattern = '^' . a:argLead
-
-  if a:argLead =~# '^-'
-    return filter([ '-winsize=', '-fitsize', '-no-quit' ], 'v:val =~# l:pattern')
-  else
-    return filter(keys(get(g:, 'stall_sources', {})), 'v:val =~# l:pattern')
-  endif
-endfunction "}}}
-
-
 " ********************************
-command! -nargs=+ -complete=customlist,Stall_command_complete Stall call s:stall_open('<mods>', [ <f-args> ])
+command! -nargs=+ Stall call s:stall_open('<mods>', [ <f-args> ])
 
 
 " ****************************************************************
@@ -261,7 +227,6 @@ function! s:stall_source_files_open(cmd, no_quit, context, flags) "{{{
   elseif isdirectory(item)
     let a:context.root = item
     let a:flags._update = 1
-    let a:flags._reset_cursor = 1
   else
     let a:flags._no_quit = a:no_quit
     call win_gotoid(a:context._winid)
@@ -273,13 +238,10 @@ endfunction "}}}
 " ********
 let g:stall_sources.files = {
     \ 'enter': function('s:stall_source_files_open', [ 'e', 0 ]),
-    \ 'tabopen': function('s:stall_source_files_open', [ 'tabe', 0 ]),
-    \ 'vsplit': function('s:stall_source_files_open', [ 'vsp', 0 ]),
-    \ 'split': function('s:stall_source_files_open', [ 'sp', 0 ]),
+    \ 'tabopen': function('s:stall_source_files_open', [ 'tabe', 1 ]),
+    \ 'vsplit': function('s:stall_source_files_open', [ 'vsp', 1 ]),
+    \ 'split': function('s:stall_source_files_open', [ 'sp', 1 ]),
     \ 'enter_nq': function('s:stall_source_files_open', [ 'e', 1 ]),
-    \ 'tabopen_nq': function('s:stall_source_files_open', [ 'tabe', 1 ]),
-    \ 'vsplit_nq': function('s:stall_source_files_open', [ 'vsp', 1 ]),
-    \ 'split_nq': function('s:stall_source_files_open', [ 'sp', 1 ])
     \ }
 
 function! g:stall_sources.files._on_init(context, flags) dict "{{{
@@ -302,10 +264,6 @@ function! g:stall_sources.files._on_ready(context, flags) dict "{{{
   nnoremap <buffer> <silent> v    :call Stall_handle_key('vsplit')<CR>
   nnoremap <buffer> <silent> s    :call Stall_handle_key('split')<CR>
   nnoremap <buffer> <silent> <S-CR> :call Stall_handle_key('enter_nq')<CR>
-  nnoremap <buffer> <silent> T    :call Stall_handle_key('tabopen_nq')<CR>
-  nnoremap <buffer> <silent> V    :call Stall_handle_key('vsplit_nq')<CR>
-  nnoremap <buffer> <silent> S    :call Stall_handle_key('split_nq')<CR>
-  nnoremap <buffer> <silent> u    :call Stall_handle_key('up')<CR>
   nnoremap <buffer> <silent> -    :call Stall_handle_key('up')<CR>
 
   call matchadd('SpecialKey', '\t(.*)$')
@@ -318,7 +276,6 @@ function! g:stall_sources.files.up(context, flags) dict "{{{
   if !empty(root) 
     let a:context.root = root
     let a:flags._update = 1
-    let a:flags._reset_cursor = 1
   endif
 endfunction "}}}
 
@@ -408,7 +365,7 @@ function! g:stall_sources.ctags._collection(context, flags) dict "{{{
 
   "
   let root = {}
-  let ctagsbin = get(g:, 'Vimrc_ctags_bin_name', 'ctags')
+  let ctagsbin = get(g:, 'Vimrc_ctags_command', 'ctags')
 
   for item in map(
       \ systemlist(printf('%s -n -f - %s %s', ctagsbin,

@@ -3,7 +3,7 @@ if has('win32') && executable('TortoiseProc.exe')
   "" 
   function! s:tsvn_command_do(command, arguments) abort "{{{
     if a:arguments ==# ''
-      let l:path = finddir('.svn', getcwd()->fnamemodify(':p:h') . ';')->fnamemodify(':h')
+      let l:path = finddir('.svn', getcwd() . ';')->fnamemodify(':h')->fnamemodify(':p')
     else
       let l:path = a:arguments
     endif

@@ -135,7 +135,7 @@ function! s:outline_show() "{{{
   let fname = expand('%')
   let fenc = &fileencoding
   let root = {}
-  let ctagsbin = get(g:, 'Vimrc_ctags_bin_name', 'ctags')
+  let ctagsbin = get(g:, 'Vimrc_ctags_command', 'ctags')
 
   call setloclist(0, [])
 

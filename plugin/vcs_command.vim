@@ -1,13 +1,17 @@
 " *****************************************************************************
 ""
-function! s:vcs_job_out_cb(msg, efm) "{{{
+function! s:vcs_job_out_cb(pwd, msg, efm) "{{{
   if has('iconv') && &termencoding != &encoding
     let out = iconv(a:msg, &termencoding, &encoding)
   else
     let out = a:msg
   endif
 
-  call setloclist(0, [], 'a', { 'efm': a:efm, 'lines': split(out, '\n') })
+  call setloclist(0, [], 'a', {
+      \ 'efm': a:efm, 'lines': split(out, '\n')
+      \   ->map({ idx, val -> fnamemodify(a:pwd . '/' . val, ':p' ) })
+      \   ->filter({ idx, val -> !isdirectory(val) })
+      \ })
 endfunction "}}}
 
 ""
@@ -19,15 +23,25 @@ function! s:vcs_job_close_cb() "{{{
   setl concealcursor=n
   setl conceallevel=3
 endfunction "}}}
+
 ""
-function! s:vcs_get_list(arguments, errorformat) "{{{
-    call setloclist(0, [])
-    call job_start(
-        \ a:arguments,
-        \ {
-        \   'out_cb': { ch, msg -> s:vcs_job_out_cb(msg, a:errorformat) },
-        \   'close_cb': { ch -> s:vcs_job_close_cb() }
-        \ } )
+function! s:vcs_get_list(pwd, arguments, errorformat) "{{{
+  call setloclist(0, [])
+  call job_start(
+      \ a:arguments,
+      \ {
+      \   'out_cb': { ch, msg -> s:vcs_job_out_cb(a:pwd, msg, a:errorformat) },
+      \   'close_cb': { ch -> s:vcs_job_close_cb() }
+      \ })
+endfunction "}}}
+
+""
+function! s:vcs_get_list_from_root(repo, arguments, errorformat) "{{{
+  let root = empty(a:repo) ?  '' : 
+      \ substitute(finddir('.svn', getcwd() . ';')->fnamemodify(':h')->fnamemodify(':p'), '\\$', '', '')
+  echomsg join(a:arguments, ' ') . ' listing ...'
+
+  call s:vcs_get_list(root, add(a:arguments, root), a:errorformat)
 endfunction "}}}
 
 ""
@@ -53,6 +67,7 @@ endfunction "}}}
 
 "" subversion
 if executable('svn')
+  command! -nargs=0                SvnLsRoot call <SID>vcs_get_list_from_root('.svn', [ 'svn', 'ls', '-R' ], '%f')
   command! -nargs=? -complete=dir  SvnLs     call <SID>vcs_get_list([ 'svn', 'ls', <q-args> ], '%f')
   command! -nargs=? -complete=dir  SvnStatus call <SID>vcs_get_list([ 'svn', 'status', <q-args> ], '%m\t%f')
   command! -nargs=? -complete=dir  SvnUpdate call <SID>vcs_get_list([ 'svn', 'update', <q-args> ], '%m\t%f')
@@ -78,16 +93,6 @@ if executable('git')
   command! -nargs=? -complete=file GitAdd       call <SID>vcs_command(['git', 'add', <q-args> ])
   command! -nargs=? -complete=file GitRevert    call <SID>vcs_command(['git', 'revert', <q-args> ])
   command! -nargs=? -complete=file GitResolved  call <SID>vcs_command(['git', 'resolved', <q-args> ])
-endif
-
-"" bzr
-if executable('bzr')
-  "" TODO: 
-endif
-
-"" mercurial
-if executable('hg')
-  "" TODO: 
 endif
 
 "" fossil
