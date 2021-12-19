@@ -10,8 +10,8 @@ let g:netrw_winsize=30
 
 
 """"""""""""""""""""""""""""""""
-let g:vimrc_template_path = expand('~/vimfiles/template')
-let g:Vimrc_ctags_command = expand('~') . '\scoop\apps\universal-ctags\current\ctags.exe --options=' . expand('~/vimfiles')
+let g:vimrc_template_path = expand('~/vimfiles/templates')
+let g:vimrc_ctags_command = expand('~') . '\scoop\apps\universal-ctags\current\ctags.exe --options=' . expand('~/vimfiles')
 let g:vimrc_gtags_command = expand('~') . '\scoop\apps\global\current\bin\global.exe'
 let g:stall_source_bookmark_save_file = expand('~/vimfiles/.stall.bookmark')
 
