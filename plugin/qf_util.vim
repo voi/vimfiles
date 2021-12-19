@@ -6,11 +6,13 @@ endfunction "}}}
 function! s:qf_util_open(command) "{{{
   let winid = win_getid()
   let list = s:qf_util_is_location(winid) ? getloclist(winid) : getqflist()
-  let bufnr = get(get(list, line('.') -1, {}), 'bufnr', -1)
+  let item = get(list, line('.') -1, {})
+  let bufnr = get(item, 'bufnr', -1)
 
   if bufnr > 0
     wincmd p
     execute printf('%s %% | b %d', a:command, bufnr)
+    call cursor(get(item, 'lnum', 1), get(item, 'col', 1))
   endif
 endfunction "}}}
 
