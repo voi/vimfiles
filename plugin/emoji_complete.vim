@@ -1157,27 +1157,23 @@ endfunction "}}}
 let g:stall_sources = get(g:, 'stall_sources', {})
 let g:stall_sources.emoji = {}
 
-function! g:stall_sources.emoji._collection(context, flags) dict "{{{
-  return s:vimrc_get_emoji()->map({ idx, val -> [ val.abbr, val.word ] })
+function! g:stall_sources.emoji._collection(context, item, flags) dict "{{{
+  return s:vimrc_get_emoji()->map({ idx, val -> #{ text: val.abbr, word: val.word } })
 endfunction "}}}
 
-function! g:stall_sources.emoji._on_ready(context, flags) dict "{{{
+function! g:stall_sources.emoji._on_ready(context, item, flags) dict "{{{
   nnoremap <buffer> <silent> <CR> :call Stall_handle_key('paste')<CR>
 endfunction "}}}
 
-function! g:stall_sources.emoji.paste(context, flags) dict "{{{
-  let item = a:context._get_target_item()
+function! g:stall_sources.emoji.paste(context, item, flags) dict "{{{
+  call win_gotoid(a:context._winid)
 
-  if !empty(item)
-    call win_gotoid(a:context._winid)
+  let reg_ = getreg('0')
 
-    let reg_ = getreg('0')
+  call setreg('0', get(a:item, 'word', ''))
 
-    call setreg('0', get(item, 1, ''))
+  execute 'normal "0p'
 
-    execute 'normal "0p'
-
-    call setreg('0', reg_)
-  endif
+  call setreg('0', reg_)
 endfunction "}}}
 
