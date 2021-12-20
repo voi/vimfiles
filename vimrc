@@ -141,6 +141,9 @@ set cryptmethod=blowfish
 
 " ***********************************************
 "" key mappings
+"
+let maplocalleader="\<Space>"
+
 function! Vimrc_AutoComplete_Key(chr) "{{{
   return a:chr . ( pumvisible() ? '' : "\<C-X>\<C-P>\<C-N>")
 endfunction "}}}
@@ -189,13 +192,13 @@ endif
 vnoremap <silent> _ "0p`<
 
 "" switch modes.
-nnoremap <silent> <Leader>e :setl expandtab! expandtab?<CR>
-nnoremap <silent> <Leader>h :setl hlsearch!  hlsearch?<CR>
-nnoremap <silent> <Leader>r :setl readonly!  modifiable! modifiable?<CR>
-nnoremap <silent> <Leader>w :setl wrap!      wrap?<CR>
-nnoremap <silent> <Leader>s :setl wrapscan!  wrapscan?<CR>
-nnoremap <silent> <Leader>i :setl incsearch! incsearch?<CR>
-nnoremap <silent> <Leader>l :setl relativenumber! relativenumber?<CR>
+nnoremap <silent> <LocalLeader>e :setl expandtab! expandtab?<CR>
+nnoremap <silent> <LocalLeader>h :setl hlsearch!  hlsearch?<CR>
+nnoremap <silent> <LocalLeader>r :setl readonly!  modifiable! modifiable?<CR>
+nnoremap <silent> <LocalLeader>w :setl wrap!      wrap?<CR>
+nnoremap <silent> <LocalLeader>s :setl wrapscan!  wrapscan?<CR>
+nnoremap <silent> <LocalLeader>i :setl incsearch! incsearch?<CR>
+nnoremap <silent> <LocalLeader>l :setl relativenumber! relativenumber?<CR>
 
 " buffer
 nnoremap <silent> [b :bprev<CR>
@@ -213,8 +216,8 @@ inoremap <silent> <C-Left>  <C-o><C-w>h
 inoremap <silent> <C-Right> <C-o><C-w>l
 
 " text operations
-nnoremap <silent> <Leader>d :copy .-1<CR>
-vnoremap <silent> <Leader>d :'<,'>copy '<-1<CR>gv
+nnoremap <silent> <LocalLeader>d :copy .-1<CR>
+vnoremap <silent> <LocalLeader>d :'<,'>copy '<-1<CR>gv
 
 nnoremap <silent> <C-k> :move .-2<CR>
 nnoremap <silent> <C-j> :move .+1<CR>
@@ -230,15 +233,15 @@ function! Vimrc_Register_hints(prefix, cmd) abort
 endfunction
 
 " カーソル位置のマーク
-nnoremap <expr> <Leader>m  Vimrc_Register_hints('m', 'marks')
+nnoremap <expr> <LocalLeader>m  Vimrc_Register_hints('m', 'marks')
 " マーク位置へのジャンプ
-nnoremap <expr> <Leader>`  Vimrc_Register_hints('`', 'marks')
+nnoremap <expr> <LocalLeader>`  Vimrc_Register_hints('`', 'marks')
 " レジスタ参照（ヤンクや削除）
-nnoremap <expr> <Leader>"  Vimrc_Register_hints('"', 'registers')
+nnoremap <expr> <LocalLeader>"  Vimrc_Register_hints('"', 'registers')
 " マクロ記録
-nnoremap <expr> <Leader>q  Vimrc_Register_hints('q', 'registers')
+nnoremap <expr> <LocalLeader>q  Vimrc_Register_hints('q', 'registers')
 " マクロ再生
-nnoremap <expr> <Leader>@  Vimrc_Register_hints('@', 'registers')
+nnoremap <expr> <LocalLeader>@  Vimrc_Register_hints('@', 'registers')
 
 
 " ***********************************************
@@ -539,11 +542,8 @@ vnoremap <silent> g< :UnIndentAtHead<CR>
 nnoremap <silent> <C-q> :CommentToggleLine<CR>
 vnoremap <silent> <C-q> :CommentToggleLine<CR>
 
-nnoremap <silent> <Leader>x :GfmTodo<CR>
-vnoremap <silent> <Leader>x :GfmTodo<CR>
-
-nnoremap <silent> <Leader><Space>  :LcdX %:h<CR>
-nnoremap <silent> <Leader><Leader> :up<CR>
+nnoremap <silent> <LocalLeader>x :GfmTodo<CR>
+vnoremap <silent> <LocalLeader>x :GfmTodo<CR>
 
 
 " *****************************************************************************

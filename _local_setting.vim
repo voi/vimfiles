@@ -25,12 +25,13 @@ vnoremap srr :EncloseText -r
 ""
 command! -nargs=? -complete=dir StallFiles Stall files <args>
 
-nnoremap <Leader>b :Stall buffer<CR>
-nnoremap <Leader>u :Stall history<CR>
-nnoremap <Leader>f :Stall files<CR>
-nnoremap <Leader>F :StallFiles 
+nnoremap <LocalLeader>b :Stall buffer<CR>
+nnoremap <LocalLeader>u :Stall history<CR>
+nnoremap <LocalLeader>f :Stall files<CR>
+nnoremap <LocalLeader>F :StallFiles 
 
 ""
+nnoremap <silent> <Leader><Space>  :LcdX %:h<CR>
 nnoremap <silent> <Leader><Leader> :up<CR>
 
 
