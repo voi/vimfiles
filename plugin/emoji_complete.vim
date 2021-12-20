@@ -1162,7 +1162,7 @@ function! g:stall_sources.emoji._collection(context, item, flags) dict "{{{
 endfunction "}}}
 
 function! g:stall_sources.emoji._on_ready(context, item, flags) dict "{{{
-  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('paste')<CR>
+  nnoremap <buffer> <silent> <CR> :call stall#api_handle_key('paste')<CR>
 endfunction "}}}
 
 function! g:stall_sources.emoji.paste(context, item, flags) dict "{{{

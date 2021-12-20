@@ -156,7 +156,7 @@ let g:stall_sources.ctags = {}
 function! g:stall_sources.ctags._collection(context, item, flags) dict "{{{
   "
   let root = {}
-  let [ tmp_source, cmd ] = s:ctags_outline_make_command('%')
+  let [ tmp_source, cmd ] = s:ctags_outline_make_command(a:context._bufnr)
 
   call s:ctags_outline_parse_tags(system(cmd), &fileencoding, root)
   call delete(tmp_source)
@@ -168,7 +168,7 @@ endfunction "}}}
 
 ""
 function! g:stall_sources.ctags._on_ready(context, item, flags) dict "{{{
-  nnoremap <buffer> <silent> <CR> :call Stall_handle_key('jump')<CR>
+  nnoremap <buffer> <silent> <CR> :call stall#api_handle_key('jump')<CR>
 
   call matchadd('SpecialKey', '(.*)\ze\%( : \w\+\)$')
   call matchadd('Define', ' : \w\+$')
