@@ -15,7 +15,7 @@ if has('multi_byte_ime') || has('xim')
   highlight CursorIM guibg=#9900FF guifg=NONE
 
   inoremap <silent> <Esc> <ESC>:set iminsert=0<CR>
-  inoremap <silent> <C-j> <C-^>
+  " inoremap <silent> <C-j> <C-^>
 
   set iminsert=0 imsearch=0
 endif
@@ -39,8 +39,8 @@ if has('win32')
   " call s:set_guifont('BIZ_UDゴシック')
   " ----
   " call s:set_guifont('Cica')
-  " call s:set_guifont('HackGen')
-  call s:set_guifont('PlemolJP')
+  call s:set_guifont('HackGen')
+  " call s:set_guifont('PlemolJP')
 endif
 
 " colorscheme desert-kai
