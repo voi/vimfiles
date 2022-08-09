@@ -141,9 +141,7 @@ set cryptmethod=blowfish
 
 " ***********************************************
 "" key mappings
-"
-let maplocalleader="\<Space>"
-
+" 
 function! Vimrc_AutoComplete_Key(chr) "{{{
   return a:chr . ( pumvisible() ? '' : "\<C-X>\<C-P>\<C-N>")
 endfunction "}}}
@@ -151,6 +149,13 @@ endfunction "}}}
 for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",'\zs')
   exec printf("imap <silent> <expr> %s Vimrc_AutoComplete_Key('%s')", k, k)
 endfor
+
+""
+let maplocalleader="\<Space>"
+
+inoremap <expr> <CR>  pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
+inoremap <expr> <C-n> pumvisible() ? "\<Down>" : "\<C-n>"
+inoremap <expr> <C-p> pumvisible() ? "\<Up>" : "\<C-p>"
 
 " a"/a'/a` trim whitespaces, a(/a{/a[ don't trim whitespaces.
 vnoremap a" 2i"
@@ -217,13 +222,13 @@ inoremap <silent> <C-Right> <C-o><C-w>l
 
 " text operations
 nnoremap <silent> <LocalLeader>d :copy .-1<CR>
-vnoremap <silent> <LocalLeader>d :'<,'>copy '<-1<CR>gv
+vnoremap <silent> <LocalLeader>d :copy '<-1<CR>gv
 
 nnoremap <silent> <C-k> :move .-2<CR>
 nnoremap <silent> <C-j> :move .+1<CR>
 
-vnoremap <silent> <C-k> :'<,'>move '<-2<CR>gv
-vnoremap <silent> <C-j> :'<,'>move '>+1<CR>gv
+vnoremap <silent> <C-k> :move '<-2<CR>gv
+vnoremap <silent> <C-j> :move '>+1<CR>gv
 
 " hints
 function! Vimrc_Register_hints(prefix, cmd) abort
@@ -325,6 +330,7 @@ let g:vim_indent_cont = 4
 "" utility functions
 function! s:Vimrc_HighlightPlus() abort "{{{
   " ime
+  hi CursorIM gui=NONE guifg=#FFFFFF guibg=#8000FF ctermbg=White ctermbg=Red
 
   if !has('gui_running')
     hi clear CursorLine
@@ -397,11 +403,12 @@ augroup vimrc_auto_commands
 
   " visualize wide-space (need scriptencoding == fenc on vimrc)
   autocmd VimEnter,WinEnter * hi def Bold gui=bold
+      \ | hi def DateTime gui=bold,underline
       \ | call matchadd('ZenkakuSpace', '　')
       \ | call matchadd('TrailingSpace', '\s\{2,\}$')
-      \ | call matchadd('Identifier', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
-      \ | call matchadd('Identifier', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
-      \ | call matchadd('Identifier', '\%(2[0-3]\|[0-1][0-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
+      \ | call matchadd('DateTime', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
+      \ | call matchadd('DateTime', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
+      \ | call matchadd('DateTime', '\%(2[0-3]\|[0-1][0-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
 
   " ***********************************************************
   autocmd FileType * let &commentstring = substitute(&commentstring, '%s', ' %s ', '')
