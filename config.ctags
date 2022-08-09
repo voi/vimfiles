@@ -3,7 +3,7 @@
 --with-list-header=no
 --langmap=asm:+.cas
 --asm-kinds=dlmt
---c++-kinds=dfghstuxcn
+--c++-kinds=dfghsuxcn
 --c#-kinds=cdEfgimns
 --vim-kinds=acfmv
 --regex-markdown=/^\s\*\[ \]\s\+(.*):/..[]\1/
