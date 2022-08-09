@@ -1,6 +1,6 @@
 function s:Vimrc_changelog_new_entry() "{{{
-  let header = printf('# %s  ################################', strftime('%Y-%m-%d'))
-  let entry = strftime('* <?dt %Y-%m-%dT%H:%M ?> ')
+  let header = printf('# %s  %s', strftime('%Y-%m-%d'), repeat('#', 64))
+  let entry = strftime('* %Y-%m-%dT%H:%M:00Z ')
 
   if line('.') == 1
     let lnum = ( getline('.') =~# '^' . header )
@@ -12,7 +12,7 @@ function s:Vimrc_changelog_new_entry() "{{{
     call append(lnum, [ '', entry ])
     call cursor(lnum + 2, 9999)
   else
-    call append(0, [ header, '', entry])
+    call append(0, [ header, '', entry, ''])
     call cursor(3, 9999)
   endif
 endfunction "}}}
