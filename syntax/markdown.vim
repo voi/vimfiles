@@ -13,13 +13,14 @@ syn case ignore
 
 """"""""""""""""""""""""""""""""""""""""""""
 "" 4 Leaf blocks
-syn cluster maarkdownInline contains=markdownEscape
-syn cluster markdownBlock   contains=@markdownInline
+syn cluster maarkdownInline    contains=markdownEscape
+syn cluster markdownBlock      contains=@markdownInline
+syn cluster markdownQuoteBlock contains=@markdownBlock
 
 if &expandtab
-  syn match markdownBlockStart /^ */  nextgroup=markdownThematicBreak,@markdownBlock display
+  syn match markdownBlockStart /^ */  nextgroup=markdownThematicBreak,@markdownQuoteBlock,@markdownBlock display
 else
-  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=markdownThematicBreak,@markdownBlock display
+  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=markdownThematicBreak,@markdownQuoteBlock,@markdownBlock display
 endif
 
 
@@ -109,10 +110,10 @@ hi link markdownTableBorder  Statement
 
 "" 5 Container blocks
 "" 5.1 Block quotes
-syn match markdownBlockquote /\%(>\s\{}\)\+/ contained nextgroup=markdownThematicBreak,@markdownBlock
+syn match markdownBlockquote />\%(\%(\t\| \{0,3}\)>\)*/ contained nextgroup=markdownThematicBreak,@markdownBlock
 
 "
-syn cluster markdownBlock add=markdownBlockquote
+syn cluster markdownQuoteBlock add=markdownBlockquote
 
 "
 hi link markdownBlockquote  Directory
