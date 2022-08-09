@@ -60,14 +60,13 @@ function! s:SnippetFile_OnCompleteDone() "{{{
   call s:SnippetFile_Expand(path, v:completed_item)
 endfunction "}}}
 
-function! SnippetFile_TriggerKey(key) "{{{
+function! SnippetFile_TriggerKey() "{{{
   let ft = getbufvar('%', '&filetype')
   let pat = empty(ft) ? '*' : '*.' . ft
   let path = expand(get(g:, 'vimrc_template_path', '~/templates/'))
 
   "
   call complete(col('.'), 
-      \ [{'word': a:key }] + 
       \   map(globpath(path, pat, 0, 1), { idx, val -> {
       \     'word': fnamemodify(val, ':t'),
       \     'abbr': fnamemodify(val, ':t:r'),
@@ -85,5 +84,5 @@ augroup plugin-snippet-file-vim-event
 augroup END
 
 "
-" inoremap <silent> ; <C-r>=SnippetFile_TriggerKey(';')<CR>
+" inoremap <silent> ; <C-r>=SnippetFile_TriggerKey()<CR>
 

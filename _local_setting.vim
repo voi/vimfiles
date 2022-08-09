@@ -52,5 +52,5 @@ nnoremap <silent> <F12>   :GTag <C-r><C-w><CR>
 inoremap <silent> <M-e> <C-r>=Vimrc_Emoji_Complete()<CR>
 
 "
-inoremap <silent> ; <C-r>=SnippetFile_TriggerKey(';')<CR>
+inoremap <silent> <C-l> <C-r>=SnippetFile_TriggerKey()<CR>
 
