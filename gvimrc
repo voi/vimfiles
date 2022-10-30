@@ -23,15 +23,22 @@ endif
 " ***********************************************
 if has('win32')
   function! s:set_guifont(font_name) "{{{
+    let first_font = a:font_name
     let height=11
-    let name=a:font_name
-    let &guifont=printf('%s:h%d,Consolas:h%d', name, height, height)
-    let &guifontwide=printf('%s:h%d,BIZ_UDゴシック:h%d', name, height, height)
+
+    if empty(a:font_name)
+      let name= ''
+    else
+      let name= printf('%s:h%d,', a:font_name)
+    endif
+
+    let &guifont=printf('%sCascadia_Mono:h%d,Consolas:h%d', name, height, height)
+    let &guifontwide=printf('%sBIZ_UDゴシック:h%d', name, height)
   endfunction "}}}
 
   set columns=110
   set lines=45
-  set linespace=2
+  set linespace=1
   set rop=type:directx,renmode:5,taamode:1,contrast:3
   " set rop=type:directx,renmode:3,taamode:1,contrast:1
 
@@ -39,8 +46,9 @@ if has('win32')
   " call s:set_guifont('BIZ_UDゴシック')
   " ----
   " call s:set_guifont('Cica')
-  call s:set_guifont('HackGen')
+  " call s:set_guifont('HackGen')
   " call s:set_guifont('PlemolJP')
+  call s:set_guifont('')
 endif
 
 " colorscheme desert-kai
