@@ -1,9 +1,6 @@
 vim9script
 
 const URL_PATTERN = '\v(https?|ftp|teams)(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
-const WIN32_OPEN_URL = [
-  '"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"',
-  '--profile-directory=Default', '-inprivate']->join(' ')
 
 def SmartGF_goto_url(source: string): bool
   if source =~# URL_PATTERN
@@ -14,9 +11,7 @@ def SmartGF_goto_url(source: string): bool
     endif
 
     if has('win32')
-      call job_start(
-        printf('%s "%s"', WIN32_OPEN_URL, url),
-        { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
+      execute ':!start "' .. url .. '"'
     else
       execute ':!open "' .. url .. '"'
     endif
