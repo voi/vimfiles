@@ -1,3 +1,2 @@
-git clone https://github.com/dyama/skk-dict-kancolle _skk\skk-dict-kancolle
 git clone https://github.com/skk-dev/dict.git _skk\dict
 git clone https://github.com/uasi/skk-emoji-jisyo _skk\skk-emoji-jisyo

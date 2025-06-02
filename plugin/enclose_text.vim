@@ -1,86 +1,84 @@
-" *****************************************************************************
-function! s:enclose_text_parse(arguments) abort "{{{
-  let l:command = '-a'
-  let l:Escape = { val -> '\V' . escape(val, '\') }
-  let l:trim_ptn = ''
-  let l:spacing = ''
-  let l:tokens = []
+vim9script
 
-  for l:arg in a:arguments
-    if     l:arg =~# '^-[adr]$' | let l:command = l:arg
-    elseif l:arg ==# '-g'       | let l:Escape = { val -> val }
-    elseif l:arg ==# '-s'       | let l:spacing = ' '
-    elseif l:arg ==# '-t'       | let l:trim_ptn = '\v\s*'
-    elseif l:arg ==# '-c'       | let l:tokens = split(&commentstring, '\s*%s\s*', 1)
-    else                        | call add(l:tokens, l:arg)
+def EncloseText_parse(arguments: list<string>): any
+  var command = '-a'
+  var Escape = (val) => '\V' .. escape(val, '\')
+  var triming = ''
+  var tokens = []
+
+  for arg in arguments
+    if     arg =~# '^-[adr]$' | command = arg
+    elseif arg ==# '-t'       | triming = '\v\s*'
+    elseif arg ==# '-c'       | tokens = split(&commentstring, '%s', 1)
+    else                      | call add(tokens, arg)
     endif
   endfor
 
-  let l:tokens += [ '', '', '', '' ]
+  tokens += [ '', '', '', '' ]
 
-  if l:command ==# '-a'
-    return #{
-        \ fo: '^' . l:trim_ptn,
-        \ fc: l:trim_ptn . '$',
-        \ to: l:tokens[0] . l:spacing,
-        \ tc: l:spacing . l:tokens[1]
-        \ }
-  elseif l:command ==# '-d'
-    return #{
-        \ fo: '^' . l:Escape(l:tokens[0]) . l:trim_ptn,
-        \ fc: l:trim_ptn . l:Escape(l:tokens[1]) . '\v$',
-        \ to: '',
-        \ tc: ''
-        \ }
-  elseif l:command ==# '-r'
-    return #{
-        \ fo: '^' . l:Escape(l:tokens[0]) . l:trim_ptn,
-        \ fc: l:trim_ptn . l:Escape(l:tokens[1]) . '\v$',
-        \ to: l:tokens[2] . l:spacing,
-        \ tc: l:spacing . l:tokens[3]
-        \ }
+  if command ==# '-a'
+    return ({
+      fo: '^' .. triming,
+      fc: triming .. '$',
+      to: tokens[0],
+      tc: tokens[1],
+    })
+  elseif command ==# '-d'
+    return ({
+      fo: '^' .. Escape(tokens[0]) .. triming,
+      fc: triming .. Escape(tokens[1]) .. '\v$',
+      to: '',
+      tc: '',
+    })
+  elseif command ==# '-r'
+    return ({
+      fo: '^' .. Escape(tokens[0]) .. triming,
+      fc: triming .. Escape(tokens[1]) .. '\v$',
+      to: tokens[2],
+      tc: tokens[3],
+    })
   endif
 
   return {}
-endfunction "}}}
+enddef
 
-function! s:enclose_text_edit(text, pattern, type) abort "{{{
-  let l:edit_text = a:text
+def EncloseText_edit(source: string, pattern: any, is_head: bool, is_tail: bool): string
+  var text = source
 
-  if and(a:type, 0x01) && !(empty(a:pattern.fo) && empty(a:pattern.to))
-    let l:edit_text = substitute(l:edit_text, a:pattern.fo, a:pattern.to, '')
+  if is_head && !(empty(pattern.fo) && empty(pattern.to))
+    text = substitute(text, pattern.fo, pattern.to, '')
   endif
 
-  if and(a:type, 0x02) && !(empty(a:pattern.fc) && empty(a:pattern.tc))
-    let l:edit_text = substitute(l:edit_text, a:pattern.fc, a:pattern.tc, '')
+  if is_tail && !(empty(pattern.fc) && empty(pattern.tc))
+    text = substitute(text, pattern.fc, pattern.tc, '')
   endif
 
-  return l:edit_text
-endfunction "}}}
+  return text
+enddef
 
-function! s:enclose_text_apply(arguments) range abort "{{{
-  let l:pattern = s:enclose_text_parse(a:arguments)
+var enclose_text_context = {}
 
-  if !empty(l:pattern)
-    if visualmode() ==# 'v' && (getpos("'<")[1] != getpos("'>")[1])
-      keepjumps execute "'<s/\\%V.*/\\=<SID>enclose_text_edit(submatch(0), l:pattern, 0x01)/e"
-      keepjumps execute "'>s/.*\\%V.\\?/\\=<SID>enclose_text_edit(submatch(0), l:pattern, 0x02)/e"
-    else
-      keepjumps execute "'<,'>s/\\%V.*\\%V./\\=<SID>enclose_text_edit(submatch(0), l:pattern, 0x03)/e"
-    endif
+def EncloseText_apply(arguments: list<string>)
+  enclose_text_context = EncloseText_parse(arguments)
 
-    execute "normal `<"
+  if visualmode() ==# 'v' && getpos("'<")[1] != getpos("'>")[1]
+    keepjumps execute ":'<s/\\%V.*/\\=EncloseText_edit(submatch(0), enclose_text_context, true, false)/e"
+    keepjumps execute ":'>s/.*\\%V.\\?/\\=EncloseText_edit(submatch(0), enclose_text_context, false, true)/e"
+  else
+    keepjumps execute ":'<,'>s/\\%V.*\\%V.\\?/\\=EncloseText_edit(submatch(0), enclose_text_context, true, true)/e"
   endif
-endfunction "}}}
+enddef
 
-function! s:enclose_text_complete_arguments(ArgLead, CmdLine, CursorPos) abort "{{{
-  return [ '-a', '-d', '-r', '-g', '-s', '-t', '-c' ]
-endfunction "}}}
+def EncloseText_complete(argload: string, cmdline: string, cursorpos: number): any
+  return get(g:, 'enclose_text_pattern_list', [
+    '-a ( )',
+    '-a (\  \ )',
+    '-d ( )',
+    '-d -t ( )'
+  ])
 
-"
-command! -range -nargs=* -complete=customlist,<SID>enclose_text_complete_arguments
-    \ EncloseText call <SID>enclose_text_apply([ <f-args> ])
-command! -range -nargs=0 Comment   call <SID>enclose_text_apply([ '-a', '-s', '-c' ])
-command! -range -nargs=0 Uncomment call <SID>enclose_text_apply([ '-d', '-t', '-c' ])
+enddef
 
+command! -range -nargs=* -complete=customlist,EncloseText_complete EncloseText 
+      \ call EncloseText_apply([ <f-args> ])
 

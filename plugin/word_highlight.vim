@@ -1,138 +1,107 @@
-" vim: ft=vim sw=2 sts=2 ts=2 expandtab
-" **************************************************************
-" {{{
-" guibg=#0a7383 guifg=#ffffff
-" guibg=#a07040 guifg=#ffffff
-" guibg=#4070a0 guifg=#ffffff
-" guibg=#40a070 guifg=#ffffff
-" guibg=#70a040 guifg=#ffffff
-" guibg=#0070e0 guifg=#ffffff
-" guibg=#007020 guifg=#ffffff
-" guibg=#d4a00d guifg=#ffffff
-" guibg=#06287e guifg=#ffffff
-" guibg=#5b3674 guifg=#ffffff
-" guibg=#4c8f2f guifg=#ffffff
-" guibg=#1060a0 guifg=#ffffff
-" guibg=#a0b0c0 guifg=#000000
-let s:highlight_table = [
-    \ "gui=bold ctermfg=16  ctermbg=153 guifg=#ffffff guibg=#0a7383",
-    \ "gui=bold ctermfg=7   ctermbg=1   guibg=#a07040 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=2   guibg=#4070a0 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=3   guibg=#40a070 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=4   guibg=#70a040 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=5   guibg=#0070e0 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=6   guibg=#007020 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=21  guibg=#d4a00d guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=22  guibg=#06287e guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=45  guibg=#5b3674 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=16  guibg=#4c8f2f guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=50  guibg=#1060a0 guifg=#ffffff",
-    \ "gui=bold ctermfg=7   ctermbg=56  guibg=#a0b0c0 guifg=#000000",
-    \ ]
+vim9script
 
-" id-count
-let s:total_entry_cont = 0
+# entries : { id(from count, >0): pattern }
+var WordHighlight = {
+  colors: [
+    'gui=bold ctermfg=16  ctermbg=153 guibg=#0a7383 guifg=#ffffff',
+    'gui=bold ctermfg=7   ctermbg=1   guifg=#ffffff guibg=#a07040',
+    'gui=bold ctermfg=7   ctermbg=2   guifg=#ffffff guibg=#4070a0',
+    'gui=bold ctermfg=7   ctermbg=3   guifg=#ffffff guibg=#40a070',
+    'gui=bold ctermfg=7   ctermbg=4   guifg=#ffffff guibg=#70a040',
+    'gui=bold ctermfg=7   ctermbg=5   guifg=#ffffff guibg=#0070e0',
+    'gui=bold ctermfg=7   ctermbg=6   guifg=#ffffff guibg=#007020',
+    'gui=bold ctermfg=7   ctermbg=21  guifg=#ffffff guibg=#d4a00d',
+    'gui=bold ctermfg=7   ctermbg=22  guifg=#ffffff guibg=#06287e',
+    'gui=bold ctermfg=7   ctermbg=45  guifg=#ffffff guibg=#5b3674',
+    'gui=bold ctermfg=7   ctermbg=16  guifg=#ffffff guibg=#4c8f2f',
+    'gui=bold ctermfg=7   ctermbg=50  guifg=#ffffff guibg=#1060a0',
+    'gui=bold ctermfg=7   ctermbg=56  guifg=#000000 guibg=#a0b0c0',
+  ],
+  count: 0,
+  entries: {}
+}
 
-" { id-count:, pattern; }
-let s:global_entries = {}
+def WordHighlight_Update()
+  var tabnr = tabpagenr()
+  var winnr = tabpagewinnr(tabnr)
+  execute printf('tabdo windo call WordHighlight_Sync() | tabn %d | :%d wincmd w', tabnr, winnr)
+enddef
 
-" { id-count:, match-id; }
-" let w:current_entries
+def WordHighlight_Add(word: string)
+  var text = word
 
-" }}}
+  if text ==# '' | text = getregion(getpos("'<"), getpos("'>"))->join('') | endif
+  if text ==# '' | return | endif
 
-
-" **************************************************************
-" {{{
-"" 
-function! s:word_highlight_update() abort "{{{
-  let tabnr = tabpagenr()
-  let winnr = tabpagewinnr(tabnr)
-  execute printf( 'tabdo windo call WordHighlight_Update() | tabn %d | %d wincmd w', tabnr, winnr)
-endfunction "}}}
-
-"" 
-function! s:WordHighlight_Add(word) abort "{{{
-  if a:word ==# '' | return | endif
-
-  " check duplicated
-  for pattern in values( s:global_entries )
-    if pattern ==# a:word | return | endif
+  # check duplicated
+  for pattern in values(WordHighlight.entries)
+    if pattern ==# text | return | endif
   endfor
 
-  let s:global_entries[ s:total_entry_cont ] = a:word
-  let s:total_entry_cont += 1
+  WordHighlight.count += 1
+  WordHighlight.entries[ WordHighlight.count ] = text
 
-  call s:word_highlight_update()
-endfunction "}}}
+  call WordHighlight_Update()
+enddef
 
-"" 
-function! s:WordHighlight_Delete() abort "{{{
-  " select
-  for [ key, l:pattern ] in items( s:global_entries )
-    execute printf( 'echohl %s | echo %s | echohl None',
-        \ printf( 'WordHighlight%d', key ),
-        \ printf( '"%4d: %s"', key, escape( l:pattern, '\\' )))
-  endfor
+def WordHighlight_Delete()
+  var entry_id = inputlist(WordHighlight.entries
+    ->items()
+    ->map((idx, val) => printf("%d\t%s", val[0]->str2nr(), val[1])))
 
-  let key = str2nr( input('no > '), 10 )
-
-  "
-  if has_key( s:global_entries, key )
-    call remove(s:global_entries, key)
-
-    call s:word_highlight_update()
+  if has_key(WordHighlight.entries, entry_id)
+    call remove(WordHighlight.entries, entry_id)
+    call WordHighlight_Update()
   endif
-endfunction "}}}
+enddef
 
-"" 
-function! WordHighlight_Update() abort "{{{
-  " hi
-  for [key, val] in map(copy(s:highlight_table), { idx, val -> [ idx, val ] })
-    execute printf( 'hi! WordHighlight%d %s', key, val )
+def WordHighlight_Sync()
+  # initialize
+  # entries : { id(from count, >0): syntax-match-ID }
+  if !has_key(w:, 'word_highlight_matches')
+    w:word_highlight_matches = {}
+
+    for color in WordHighlight.colors
+        ->copy()
+        ->map((idx, val) => printf('hi! WordHighlight%d %s', idx + 1, val))
+      execute color
+    endfor
+  endif
+
+  # remove old match
+  for entry_id in w:word_highlight_matches->keys()
+    if !has_key(WordHighlight.entries, entry_id)
+      call matchdelete(w:word_highlight_matches[entry_id])
+      call remove(w:word_highlight_matches, entry_id)
+    endif
   endfor
 
-  " remove current syntax
-  for id in values(get( w:, 'current_entries', {}))
-    call matchdelete( id )
+  # reset current match
+  var count = WordHighlight.colors->len()
+
+  for entry_id in WordHighlight.entries->keys()
+    if !has_key(w:word_highlight_matches, entry_id)
+      w:word_highlight_matches[entry_id] = matchadd(
+        printf('WordHighlight%d', (entry_id->str2nr() % count) + 1),
+        WordHighlight.entries[entry_id])
+    endif
   endfor
+enddef
 
-  let w:current_entries = {}
+def WordHighlight_Clear()
+  WordHighlight.entries = {}
 
-  " update syntax from global syntax
-  let len = len( s:highlight_table )
+  call WordHighlight_Update()
+enddef
 
-  for [ key, pattern ] in items( s:global_entries )
-    let w:current_entries[ key ] = matchadd(
-        \ printf( 'WordHighlight%d', key % len ),
-        \ s:global_entries[ key ] )
-  endfor
-endfunction "}}}
+command! -nargs=+ WordHLAdd       call WordHighlight_Add('<args>')
+command! -range   WordHLVisualAdd call WordHighlight_Add('')
 
-"" 
-function! s:WordHighlight_Clear() "{{{
-  let s:global_entries = {}
+command! WordHLDelete call WordHighlight_Delete()
+command! WordHLClear  call WordHighlight_Clear()
 
-  call s:word_highlight_update()
-endfunction "}}}
-
-" }}}
-
-
-" **************************************************************
-" {{{
-command! -nargs=+ WordHLAdd call s:WordHighlight_Add('<args>')
-
-nnoremap sma <Esc>:WordHLAdd 
-nnoremap smm <Esc>:WordHLAdd \<<C-r><C-w>\><CR>
-
-nnoremap <silent> smd <Esc>:call <SID>WordHighlight_Delete()<CR>
-nnoremap <silent> smr <Esc>:call <SID>WordHighlight_Clear()<CR>
-
-augroup plugin_vim_simple_word_highlight_
+augroup plugin_autocmd_word_highlight
   autocmd!
-  autocmd WinEnter * call WordHighlight_Update()
+  autocmd WinEnter * call WordHighlight_Sync()
 augroup END
 
-" }}}
-"

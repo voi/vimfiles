@@ -15,12 +15,11 @@ syn case ignore
 "" 4 Leaf blocks
 syn cluster maarkdownInline    contains=markdownEscape
 syn cluster markdownBlock      contains=@markdownInline
-syn cluster markdownQuoteBlock contains=@markdownBlock
 
 if &expandtab
-  syn match markdownBlockStart /^ */  nextgroup=markdownThematicBreak,@markdownQuoteBlock,@markdownBlock display
+  syn match markdownBlockStart /^ */  nextgroup=markdownThematicBreak,@markdownBlock display
 else
-  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=markdownThematicBreak,@markdownQuoteBlock,@markdownBlock display
+  syn match markdownBlockStart /^\%( \{1,3}\|\t*\)/  nextgroup=markdownThematicBreak,@markdownBlock display
 endif
 
 
@@ -85,12 +84,12 @@ syn sync match markdownFencedCodeBlockSync grouphere markdownFencedCodeBlock "[`
 
 "" 4.6 HTML blocks
 "" 4.7 Link reference definitions
-syn region markdownLinkLabel matchgroup=markdownLink start=/\[[^\][:space:]]\@=/ skip=/\[\S.{}\]\|\\[\[\]]/ end=/\]/ nextgroup=markdownLinkColon,markdownLinkReference,markdownLinkUrl oneline contains=markdownImageLabel,xmlTag
+syn region markdownLinkText matchgroup=markdownLink start=/\[[^\][:space:]]\@=/ skip=/\[\S.{}\]\|\\[\[\]]/ end=/\]/ nextgroup=markdownLinkColon,markdownLinkReference,markdownLinkUrl oneline contains=markdownImageLabel,xmlTag
 
 syn match markdownLinkColon  /:/ nextgroup=markdownLinkDest skipnl skipwhite contained
 
 "
-hi link markdownLinkLabel  Underlined
+hi link markdownLinkText  Underlined
 hi link markdownLinkColon  Typedef
 
 
@@ -108,12 +107,22 @@ syn cluster markdownBlock  add=markdownTable
 hi link markdownTableBorder  Statement
 
 
+"" x.x Latex blocks (extension)
+syn region markdownLatexBlock matchgroup=Delimiter start=/\z(\$\{2}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1\s*$/  keepend contained
+
+"
+syn cluster markdownBlock add=markdownLatexBlock
+
+"
+syn sync match markdownLatexBlockSync grouphere markdownLatexBlock "[`\$]\{2}" 
+
+
 "" 5 Container blocks
 "" 5.1 Block quotes
 syn match markdownBlockquote />\%(\%(\t\| \{0,3}\)>\)*/ contained nextgroup=markdownThematicBreak,@markdownBlock
 
 "
-syn cluster markdownQuoteBlock add=markdownBlockquote
+syn cluster markdownBlock add=markdownBlockquote
 
 "
 hi link markdownBlockquote  Directory
@@ -164,46 +173,46 @@ hi link markdownCodeSpan  String
 
 "" 6.4 Emphasis and strong emphasis
 " [:punct:] - '*' - '_'
-function! s:EmphasisAndStrongStar(name, count) "{{{
+let s:markdownStrongEmphasisContains=join([
+    \ 'markdownEmphasis', 'markdownStrong', 'markdownStrongEmphasis',
+    \ 'markdownCodeSpan', 'markdownStrikeThrough'],
+    \ ',')
+
+function! s:EmphasisAndStrong(name, count) "{{{
   let punct = '!"#$%&' . "'" . '()+,-.\/:;<=>?@\[\\\]^`{|}~'
+  " asterisk
   let ast = repeat('\*', a:count)
-  execute 'syn region markdown' . a:name . ' start=/' . join([
-      \   '^' . ast . '[^[:space:]*]\@=',
-      \   '\%(\\\*\|[^*]\)\@<=' . ast . '[^[:space:]\u00A0[:punct:]]\@=',
-      \   '[[:space:]\u00A0' . punct . '_]\@<=' . ast . '[' . punct . '_]\@='
-      \ ], '\|') .
-      \ '/ end=/' . join([
-      \   '[' . punct . '_]\@<=' . ast . '\%($\|[[:space:]\u00A0' . punct . '_]\)\@=', 
-      \   '[^[:space:]\u00A0[:punct:]]\@<=' . ast . '\%($\|[^*]\)\@='
-      \ ], '\|') .
-      \ '/ keepend oneline contains=markdownEmphasis,markdownStrong,markdownStrongEmphasis'
-endfunction "}}}
-
-function! s:EmphasisAndStrongUnderline(name, count) "{{{
-  let punct = '!"#$%&' . "'" . '()+,-.\/:;<=>?@\[\\\]^`{|}~'
+  let beg = join([
+      \   printf('^%s[^[:space:]*]\@=', ast),
+      \   printf('\%(\\\*\|[^*]\)\@<=%s[^[:space:]\u00A0[:punct:]]\@=', ast),
+      \   printf('[[:space:]\u00A0%s_]\@<=%s[%s_]\@=', punct, ast, punct)
+      \ ], '\|')
+  let end = join([
+      \   printf('[%s_]\@<=%s\%($\|[[:space:]\u00A0%s_]\)\@=', punct, ast, punct), 
+      \   printf('[^[:space:]\u00A0[:punct:]]\@<=%s\%($\|[^*]\)\@=', ast)
+      \ ], '\|')
+  execute printf('syn region markdown%s start=/%s/ end=/%s/ keepend contains=%s',
+      \ a:name, beg, end, s:markdownStrongEmphasisContains)
+  " underscore
   let udl = repeat('_', a:count)
-  execute 'syn region markdown' . a:name . ' start=/' . join([
-      \   '^' . udl . '[^[:space:]\u00A0_]\@=',
-      \   '[' . punct . '*]\@<=' . udl . '[^[:space:]\u00A0[:punct:]_]\@=',
-      \   '[[:space:]\u00A0' . punct . '*]\@<=' . udl . '[' . punct . '*]\@='
-      \ ], '\|') .
-      \ '/ end=/' . join([
-      \   '[^[:space:]\u00A0_]\@<=' . udl . '$',
-      \   '[' . punct . '*]\@<=' . udl . '$',
-      \   '[^[:space:]\u00A0[:punct:]_]\@<=' . udl . '[' . punct . '*]\@=',
-      \   '[' . punct . '*]\@<=' . udl . '[[:space:]\u00A0' . punct . '*]\@='
-      \ ], '\|') .
-      \ '/ keepend oneline contains=markdownEmphasis,markdownStrong,markdownStrongEmphasis'
-
+  let beg = join([
+      \   printf('^%s[^[:space:]\u00A0_]\@=', udl),
+      \   printf('[%s*]\@<=%s[^[:space:]\u00A0[:punct:]_]\@=', punct, udl),
+      \   printf('[[:space:]\u00A0%s*]\@<=%s[%s*]\@=', punct, udl, punct)
+      \ ], '\|')
+  let end = join([
+      \   printf('[^[:space:]\u00A0_]\@<=%s$', udl),
+      \   printf('[%s*]\@<=%s$', punct, udl),
+      \   printf('[^[:space:]\u00A0[:punct:]_]\@<=%s[%s*]\@=', udl, punct),
+      \   printf('[%s*]\@<=%s[[:space:]\u00A0%s*]\@=', punct, udl, punct)
+      \ ], '\|')
+  execute printf('syn region markdown%s start=/%s/ end=/%s/ keepend contains=%s',
+      \ a:name, beg, end, s:markdownStrongEmphasisContains)
 endfunction "}}}
 
-call s:EmphasisAndStrongStar('Emphasis', 1)
-call s:EmphasisAndStrongStar('Strong', 2)
-call s:EmphasisAndStrongStar('StrongEmphasis', 3)
-
-call s:EmphasisAndStrongUnderline('Emphasis', 1)
-call s:EmphasisAndStrongUnderline('Strong', 2)
-call s:EmphasisAndStrongUnderline('StrongEmphasis', 3)
+call s:EmphasisAndStrong('Emphasis', 1)
+call s:EmphasisAndStrong('Strong', 2)
+call s:EmphasisAndStrong('StrongEmphasis', 3)
 
 "
 if has('gui_running')
@@ -224,9 +233,16 @@ syn region markdownStrikeThrough start="\%(\_^\|[^\\\~]\)\@<=\~\{2}\%([^\~]\|\_$
 hi link markdownStrikeThrough markdownTaskDone
 
 
+"" x.x Latex (extension)
+syn region markdownLatex start=/\%(\_^\|[^\\\$]\)\@<=\$\%([^`]\|\_$\)/  skip=/\$\{2,}/ end=/\$/ oneline
+
+"
+hi link markdownLatex String
+
+
 "" 6.6 Links
 syn region markdownLinkDest start=/<[^>[:space:]]\@=/ skip=/\\[<>]/ end=/>/ nextgroup=markdownLinkTitle skipnl skipwhite oneline contained
-syn match  markdownLinkDest /[^<[:space:]]\S*/ nextgroup=markdownLinkTitle skipnl skipwhite oneline contained
+" syn match  markdownLinkDest /<[^<>]*>/ nextgroup=markdownLinkTitle skipnl skipwhite contained
 
 syn region markdownLinkTitle start=/"/ skip=/\\"/ end=/"/ oneline contained
 syn region markdownLinkTitle start=/'/ skip=/\\'/ end=/'/ oneline contained
@@ -245,7 +261,7 @@ hi link markdownLink  Typedef
 "" 6.7 Images
 syn region markdownImageLabel matchgroup=markdownImage start=/!\[/ end=/\][(\[]\@=/ nextgroup=markdownLinkUrl,markdownLinkReference oneline
 
-syn region markdownLinkUrl matchgroup=markdownLink start=/(/ skip=/(\S.{})\|\\[()]/ end=/)/  contained contains=markdownLinkDest oneline
+syn region markdownLinkUrl matchgroup=markdownLink start=/(/ skip=/\\[()]/ end=/)/  contained contains=markdownLinkDest oneline
 
 
 "

@@ -1,129 +1,125 @@
-scriptencoding utf-8
+vim9script
 
-let s:kana_dakuten = {
-      \ 'saffix': 'ﾞ',
-      \ 'han': 'ｳｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾊﾋﾌﾍﾎ',
-      \ 'zen': 'ヴガギグゲゴザジズゼゾダヂヅデドバビブベボ'
-      \ }
-let s:kana_handakuten = {
-      \ 'saffix': 'ﾟ',
-      \ 'han': 'ﾊﾋﾌﾍﾎ',
-      \ 'zen': 'パピプペポ'
-      \ }
-let s:kana = {
-      \ 'saffix': '',
-      \ 'han': 'ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ',
-      \ 'zen': 'ヲァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン'
-      \ }
-let s:alpha = {
-      \ 'saffix': '',
-      \ 'han': 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-      \ 'zen': 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
-      \ }
-let s:number = {
-      \ 'saffix': '',
-      \ 'han': '0123456789',
-      \ 'zen': '０１２３４５６７８９'
-      \ }
-let s:symbol = {
-      \ 'saffix': '',
-      \ 'han': '!"#$%&' . "'" . '()*+,-./:;<=>?@[\]^_`{|}~',
-      \ 'zen': '！”＃＄％＆’（）＊＋，－．／：；＜＝＞？＠［￥］＾＿‘｛｜｝～'
-      \ }
+# dakuten ( -> voiced mark )
+var ZenHanJa_kana_dakuten = {
+  saffix: 'ﾞ',
+  han: 'ｳｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾊﾋﾌﾍﾎ',
+  zen: 'ヴガギグゲゴザジズゼゾダヂヅデドバビブベボ',
+  han_list: [],
+  zen_list: []
+}
 
-function! s:char_map(str, rule) "{{{
-  return a:rule.to[index(a:rule.from, a:str)] . a:rule.saffix
-endfunction "}}}
+ZenHanJa_kana_dakuten.han_list = ZenHanJa_kana_dakuten.han
+  ->split('\ze')
+  ->map((i, v) => v .. ZenHanJa_kana_dakuten.saffix)
 
-function! s:convert(text, rules) "{{{
-  let l:text = a:text
+ZenHanJa_kana_dakuten.zen_list = ZenHanJa_kana_dakuten.zen
+  ->split('\ze')
 
-  for l:rule in a:rules
-    let l:text = substitute(l:text, l:rule.match, '\=s:char_map(submatch(1), l:rule)', 'g')
-  endfor
+# handakuten ( semi-voiced mark )
+var ZenHanJa_kana_handakuten = {
+  saffix: 'ﾟ',
+  han: 'ﾊﾋﾌﾍﾎ',
+  zen: 'パピプペポ',
+  han_list: [],
+  zen_list: []
+}
 
-  return l:text
-endfunction "}}}
+ZenHanJa_kana_handakuten.han_list = ZenHanJa_kana_handakuten.han
+  ->split('\ze')
+  ->map((i, v) => v .. ZenHanJa_kana_handakuten.saffix)
 
-function! s:get_rule_to_han(context) "{{{
-  return { 
-        \ 'saffix': a:context.saffix,
-        \ 'match': '\m\([' . a:context.zen . ']\)',
-        \ 'from': split(a:context.zen, '\zs'),
-        \ 'to': split(a:context.han, '\zs')
-        \ }
-endfunction "}}}
+ZenHanJa_kana_handakuten.zen_list = ZenHanJa_kana_handakuten.zen
+  ->split('\ze')
 
-function! s:get_rule_to_zen(context) "{{{
-  return { 
-        \ 'saffix': '',
-        \ 'match': '\m\([' . escape(a:context.han, '[]\-^$*.') . ']\)' . a:context.saffix,
-        \ 'from': split(a:context.han, '\zs'),
-        \ 'to': split(a:context.zen, '\zs')
-        \ }
-endfunction "}}}
+var ZenHanJa_kana = {
+  han: 'ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ',
+  zen: 'ヲァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン'
+}
 
-function! s:get_rules(types, rule_maker) "{{{
-  let l:rules = []
+var ZenHanJa_alpha = {
+  han: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  zen: 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+}
 
-  if a:types =~# 'K'
-    let l:rules += [
-          \ a:rule_maker(s:kana_dakuten),
-          \ a:rule_maker(s:kana_handakuten),
-          \ a:rule_maker(s:kana)
-          \ ]
+var ZenHanJa_number = {
+  han: '0123456789',
+  zen: '０１２３４５６７８９'
+}
+
+var ZenHanJa_symbol = {
+  han: '!"#$%&' .. "'" .. '()*+,-./:;<=>?@[\]^_`{|}~',
+  zen: '！”＃＄％＆’（）＊＋，－．／：；＜＝＞？＠［￥］＾＿‘｛｜｝～'
+}
+
+def ZenHanJa_to_hankaku_normal(source: string, map: any): string
+  return source->tr(map.zen, map.han)
+enddef
+
+def ZenHanJa_to_zenkaku_normal(source: string, map: any): string
+  return source->tr(map.han, map.zen)
+enddef
+
+def ZenHanJa_to_hankaku_with_voicedmark(source: string, map: any): string
+  return source->substitute(
+    printf('[%s]', map.zen),
+    (m) => map.han_list[map.zen_list->index(m[0])] .. map.saffix,
+    'g')
+enddef
+
+def ZenHanJa_to_zenkaku_with_voicedmark(source: string, map: any): string
+  return source->substitute(
+    printf('[%s]%s', map.han, map.saffix),
+    (m) => map.zen_list[map.han_list->index(m[0][0 : 0])],
+    'g')
+enddef
+
+def ZenHanJa_edit(source: string, types: string, MapForSignle: func, MapForVoicedMark: func): string
+  var text = source
+
+  if types =~# 'K'
+    text = MapForVoicedMark(text, ZenHanJa_kana_dakuten)
+    text = MapForVoicedMark(text, ZenHanJa_kana_handakuten)
+    text = MapForSignle(text, ZenHanJa_kana)
   endif
 
-  if a:types =~# 'A'
-    call add(l:rules, a:rule_maker(s:alpha))
+  if types =~# 'A'
+    text = MapForSignle(text, ZenHanJa_alpha)
   endif
 
-  if a:types =~# 'N'
-    call add(l:rules, a:rule_maker(s:number))
+  if types =~# 'N'
+    text = MapForSignle(text, ZenHanJa_number)
   endif
 
-  if a:types =~# 'S'
-    call add(l:rules, a:rule_maker(s:symbol))
+  if types =~# 'S'
+    text = MapForSignle(text, ZenHanJa_symbol)
   endif
 
-  return l:rules
-endfunction "}}}
+  return text
+enddef
 
-function! s:apply_rules(line_begin, line_end, rules) "{{{
-  if empty(a:rules)
-    return
+def ZenHanJa_apply(converterName: string, types: string)
+  var beginln = getpos("'<")[1]
+  var endln = getpos("'>")[1]
+  var expr_part = printf("ZenHanJa_edit(submatch(0), '%s', %s_normal, %s_with_voicedmark)",
+        types, converterName, converterName)
+
+  if visualmode() ==# 'v' && beginln != endln
+    keepjumps execute ":'<s/\\%V.*/\\=" .. expr_part .. "/e"
+    keepjumps execute ":'>s/.*\\%V.\\?/\\=" .. expr_part .. "/e"
+
+    if (endln - beginln) > 1
+      keepjumps execute ":'<+1,'>-1s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
+    endif
+  else
+    keepjumps execute ":'<,'>s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
   endif
+enddef
 
-  for l:lnum in range(a:line_begin, a:line_end)
-    call setline(l:lnum, s:convert(getline(l:lnum), a:rules))
-  endfor
-endfunction "}}}
-
-function! s:to_Hankaku(line_begin, line_end, types) "{{{
-  let l:rules = s:get_rules(toupper(a:types), function('s:get_rule_to_han'))
-
-  call s:apply_rules(a:line_begin, a:line_end, l:rules)
-endfunction "}}}
-
-function! s:to_Zenkaku(line_begin, line_end, types) "{{{
-  let l:rules = s:get_rules(toupper(a:types), function('s:get_rule_to_zen'))
-
-  call s:apply_rules(a:line_begin, a:line_end, l:rules)
-endfunction "}}}
-
-function! ZenHanJaComplete(ArgLead, CmdLine, CursorPos) "{{{
+def ZenHanJa_Complete(arglead: string, cmdline: string, cursorpos: number): list<string>
   return [ 'K', 'A', 'N', 'S' ]
-endfunction "}}}
+enddef
 
-command! -range -nargs=0 Hankaku  call s:to_Hankaku(<line1>, <line2>, 'KANS')
-command! -range -nargs=0 HankakuK call s:to_Hankaku(<line1>, <line2>, 'K')
-command! -range -nargs=0 HankakuA call s:to_Hankaku(<line1>, <line2>, 'AN')
-command! -range -nargs=0 HankakuS call s:to_Hankaku(<line1>, <line2>, 'S')
-command! -range -nargs=* -complete=customlist,ZenHanJaComplete HankakuX call s:to_Hankaku(<line1>, <line2>, '<args>')
-
-command! -range -nargs=0 Zenkaku  call s:to_Zenkaku(<line1>, <line2>, 'KANS')
-command! -range -nargs=0 ZenkakuK call s:to_Zenkaku(<line1>, <line2>, 'K')
-command! -range -nargs=0 ZenkakuA call s:to_Zenkaku(<line1>, <line2>, 'AN')
-command! -range -nargs=0 ZenkakuS call s:to_Zenkaku(<line1>, <line2>, 'S')
-command! -range -nargs=* -complete=customlist,ZenHanJaComplete ZenkakuX call s:to_Zenkaku(<line1>, <line2>, '<args>')
+command! -range -nargs=* -complete=customlist,ZenHanJa_Complete Hankaku call ZenHanJa_apply('ZenHanJa_to_hankaku', '<args>')
+command! -range -nargs=* -complete=customlist,ZenHanJa_Complete Zenkaku call ZenHanJa_apply('ZenHanJa_to_zenkaku', '<args>')
 
