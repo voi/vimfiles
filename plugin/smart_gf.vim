@@ -33,7 +33,15 @@ def SmartGF_goto_path(source: string): bool
     if source !~# '^\%(file:/\{1,3}\)\?[^:\*?"<>|();]\+$' | return false | endif
   endif
 
-  execute 'silent! tabnew' source
+  var path = source->substitute('^file:/\{1,3}', '', '')
+
+  if !path->filereadable()
+    if input('? file is not found, create it? (y) > ') !=? 'y'
+      return false
+    endif
+  endif
+
+  execute 'silent! tabnew' path
 
   return true
 enddef
