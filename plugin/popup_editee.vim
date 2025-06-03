@@ -8,8 +8,8 @@ var icons = { file: ' -', dir: '[]', empty: '()', buf: ' >', win: ' =' }
 var pattern_type_dir = '\v^(dir|linkd)$'
 var pattern_type_file = '\v^(file|link)$'
 
-var pattern_ignore_dir = '\v^(' .. ['\.git', '\.svn', '_FOSSIL_']->join('|') .. ')$'
-var pattern_ignore_file = '\v\.(' .. ['exe', 'dll', 'docx?', 'xls[xm]?', 'vsdx?', 'pdf']->join('|') .. ')$'
+var pattern_ignore_dir = '\v^(\.git|\.svn)$'
+var pattern_ignore_file = '\v(^_FOSSIL_|.\exe|\.dll|\.docx?|\.xls[xm]?|\.vsdx?|\.pdf)$'
 
 def PopupEditee_update_variables()
   icons.file  = get(g:, 'popup_editee_icon_file',  icons.file)
@@ -195,7 +195,7 @@ enddef
 def PopupEditee_do_mru()
   call PopupEditee_update_variables()
 
-  var path = get(g:, 'vimrc_plugin_popup_mru_pinned', '~/.mru_pinned.txt')
+  var path = get(g:, 'vimrc_plugin_popup_mru_pinned', '~/.vim_mru_pinned.txt')
     ->expand()
     ->fnamemodify(':p')
   var items = (filereadable(path) ? readfile(path) : [])
@@ -315,7 +315,7 @@ def PopupEditee_get_glob_cache(bang: string, root_dir: string): list<any>
     #
     var ln = 1
     var dirs = [root]
-    var max_candidates = get(g:, 'popup_editee_glob_max_candidates', 50000)
+    var max_candidates = get(g:, 'popup_editee_glob_max_candidates', 10000)
     var start_time = reltime()
 
     while !dirs->empty()
