@@ -38,7 +38,7 @@ def VSCodeSnippet_LoadSnippet(file_path: string)
       for scope in VSCodeSnippet_ParseScope(snip, file_path)
         var snippets = get(VSCodeSnippet_snippets, scope, {})
 
-        for prefix in 
+        for prefix in VSCodeSnippet_ParseTextOrList(snip, 'prefix')
           snippets[prefix] = body
         endfor
 
