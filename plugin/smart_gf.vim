@@ -1,6 +1,6 @@
 vim9script
 
-const URL_PATTERN = '\v(https?|ftp|teams)(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
+const URL_PATTERN = '\v(https?|ftps?|teams)(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
 
 def SmartGF_goto_url(source: string): bool
   if source =~# URL_PATTERN
@@ -10,11 +10,13 @@ def SmartGF_goto_url(source: string): bool
       url = source->iconv(&encoding, &termencoding)
     endif
 
-    if has('win32')
-      execute ':silent !start "' .. url .. '"'
-    else
-      execute ':silent !open "' .. url .. '"'
+    var browser = get(g:, 'smart_gf_web_browser_command', '')
+
+    if browser->empty()
+      browser = has('win32') ? 'start' : 'open'
     endif
+
+    execute printf(':silent !%s "%s"', browser, url->escape('%'))
 
     return true
   else

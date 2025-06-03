@@ -29,6 +29,9 @@ g:popup_editee_icon_wind  = '📑'
 # history
 # g:vimrc_plugin_popup_mru_pinned = '~/_vim_mru_pinned.txt'
 
+## gf improved
+# g:smart_gf_web_browser_command = ''
+
 ## find root
 augroup vimrc_local_autocmd
   autocmd VimEnter * Root
