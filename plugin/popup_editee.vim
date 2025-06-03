@@ -7,9 +7,8 @@ var icons = { file: ' -', dir: '[]', empty: '()', buf: ' >', win: ' =' }
 
 var pattern_type_dir = '\v^(dir|linkd)$'
 var pattern_type_file = '\v^(file|link)$'
-
-var pattern_ignore_dir = '\v^(\.git|\.svn)$'
-var pattern_ignore_file = '\v(^_FOSSIL_|.\exe|\.dll|\.docx?|\.xls[xm]?|\.vsdx?|\.pdf)$'
+var pattern_ignore_dir = '^\%(\.git\|\.svn\)$'
+var pattern_ignore_file = '\%(^_FOSSIL_\|\.exe\|\.dll\|\.docx\?\|\.xls[xm]\?\|\.vsdx\?|\.pdf\)$'
 
 def PopupEditee_update_variables()
   icons.file  = get(g:, 'popup_editee_icon_file',  icons.file)
@@ -46,8 +45,8 @@ def PopupEditee_files_make_list(root: string): list<any>
   return readdirex(root)
     ->filter((i, v) => {
       return (
-        ((v.type =~# pattern_type_dir) && (v.type !~# pattern_ignore_dir)) ||
-        ((v.type =~# pattern_type_file) && (v.type !~# pattern_ignore_file)))
+        ((v.type =~# pattern_type_dir)  && (v.name !~# pattern_ignore_dir)) ||
+        ((v.type =~# pattern_type_file) && (v.name !~# pattern_ignore_file)))
     })
     ->map((i, v) => ({
       text: printf('%s %s (%s)', ((v.type =~# pattern_type_dir) ? icons.dir : icons.file), v.name, root),
