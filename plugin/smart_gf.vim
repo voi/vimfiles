@@ -11,9 +11,9 @@ def SmartGF_goto_url(source: string): bool
     endif
 
     if has('win32')
-      execute ':!start "' .. url .. '"'
+      execute ':silent !start "' .. url .. '"'
     else
-      execute ':!open "' .. url .. '"'
+      execute ':silent !open "' .. url .. '"'
     endif
 
     return true
