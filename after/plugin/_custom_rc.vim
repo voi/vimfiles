@@ -23,8 +23,8 @@ g:popup_editee_icon_wind  = '📑'
 # g:popup_editee_glob_max_candidates = 50000
 
 # ignore pattern
-# g:popup_editee_glob_regex_ignore_dir = '\v^(\.git|\.svn)$'
-# g:popup_editee_glob_regex_ignore_file = '\v(^_FOSSIL_|.\exe|\.dll|\.docx?|\.xls[xm]?|\.vsdx?|\.pdf)$'
+# g:popup_editee_glob_regex_ignore_dir = '^\%(\.git\|\.svn\)$'
+# g:popup_editee_glob_regex_ignore_file = '\%(^_FOSSIL_\|\.exe\|\.dll\|\.docx\?\|\.xls[xm]\?\|\.vsdx\?|\.pdf\)$'
 
 # history
 # g:vimrc_plugin_popup_mru_pinned = '~/_vim_mru_pinned.txt'
