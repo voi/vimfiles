@@ -30,7 +30,9 @@ g:popup_editee_icon_wind  = '📑'
 # g:vimrc_plugin_popup_mru_pinned = '~/_vim_mru_pinned.txt'
 
 ## gf improved
-# g:smart_gf_web_browser_command = ''
+if has('win32')
+  g:smart_gf_web_browser_command = '"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default --inprivate'
+endif
 
 ## find root
 augroup vimrc_local_autocmd
