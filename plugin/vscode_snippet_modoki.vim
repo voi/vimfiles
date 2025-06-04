@@ -114,12 +114,13 @@ def VSCodeSnippet_MakeBody(prefix: string): list<string>
   endif
 
   return body
-    ->map((i, v) => v->substitute('\$\d\+', '', 'g'))
-    ->map((i, v) => v->substitute('\${\d\+}', '', 'g'))
-    ->map((i, v) => v->substitute('\${\d\+|\([^|}]\+\)|}', '\1', 'g'))
-    ->map((i, v) => v->substitute('\${\d\+:\([^}]\+\)}', '\1', 'g'))
-    ->map((i, v) => v->substitute('\$\([A-Z_]\+\)', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
-    ->map((i, v) => v->substitute('\${\([^}]\+\)}', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!$\d\+', '', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+}', '', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+|\([^|}]\+\)|}', '\1', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+:\([^}]\+\)}', '\1', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!$\([A-Z_]\+\)', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!${\([^}]\+\)}', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
+    ->map((i, v) => v->substitute('\\\$', '$', 'g'))
 enddef
 
 #    0123456789A12**|3456789B1234567
