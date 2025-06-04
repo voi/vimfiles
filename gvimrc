@@ -14,8 +14,8 @@ set linespace=1
 # font rendering
 if has('win32')
   set rop=type:directx,renmode:5,taamode:1,contrast:1
-  set guifont=Cascadia_Code:h11,BIZ_UDゴシック:h11,Consolas:h11
-  set guifontwide=BIZ_UDゴシック:h11
+  set guifont=Cascadia_Code:h10.5,BIZ_UDゴシック:h10.5,Consolas:h10.5
+  set guifontwide=BIZ_UDゴシック:h10.5
 
   set background=light
   colorscheme retrobox
