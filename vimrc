@@ -472,7 +472,7 @@ augroup vimrc_autocmd_filetype
 
   # markdown
   autocmd FileType markdown 
-        \ setl comments=b:*,b:-,b:+,b:1.,nb:> formatoptions-=c formatoptions+=jro completeslash=slash
+        \ setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
 
 augroup END
 
