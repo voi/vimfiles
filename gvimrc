@@ -25,7 +25,7 @@ endif
 
 # ime
 if has('multi_byte_ime') || has('xim')
-  inoremap <silent> <Esc> <ESC>:set iminsert=0<CR>
+  inoremap <silent> <Esc> <C-o>:set iminsert=0<CR><ESC>
 
   set iminsert=0 imsearch=0
 endif
