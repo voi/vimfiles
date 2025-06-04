@@ -34,11 +34,21 @@ def SmartGF_goto_path(source: string): bool
     if source !~# '^\%(file:/\{1,3}\)\?[^:\*?"<>|();]\+$' | return false | endif
   endif
 
-  var path = source->substitute('^file:/\{1,3}', '', '')
+  var path = source->substitute('^file:/\{1,3}', '', '')->fnamemodify(':p')
 
-  if !path->filereadable()
-    if input('? file is not found, create it? (y) > ') !=? 'y'
+  if path =~# get(g:, 'smart_gf_executable_binary_pattern', '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$')
+    if path->filereadable()
+      execute printf(':silent !%s "%s"', DEFAULT_OPENER, path)
+
+      return true
+    else
       return false
+    endif
+  else
+    if !path->filereadable()
+      if input('? file is not found, create it? (y) > ') !=? 'y'
+        return false
+      endif
     endif
   endif
 

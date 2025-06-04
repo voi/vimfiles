@@ -33,6 +33,7 @@ g:popup_editee_icon_wind  = '📑'
 if has('win32')
   g:smart_gf_web_browser_command = '"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default --inprivate'
 endif
+# g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'
 
 ## find root
 augroup vimrc_local_autocmd
