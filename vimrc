@@ -340,6 +340,11 @@ xnoremap <silent> <expr> g< printf(":g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'),
       \ (&et ? repeat(' ', &sw) : '\t'))
 
+# switch cursorline highlight
+nnoremap <silent> <Leader>L :hi CursorLine cterm=NONE term=NONE gui=NONE
+nnoremap <silent> <Leader>l :hi CursorLine cterm=reverse term=reverse gui=reverse
+
+
 ################################################################
 # command! -nargs=? -complete=filetype Temp 
 #     \ execute printf('tabe %s_%s | setf %s', tempname(), strftime('%Y-%m-%d_%H-%M-%S'),
