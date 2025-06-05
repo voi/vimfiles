@@ -108,6 +108,14 @@ def PopupEditee_buffers_action_enter(winid: number, ctx: any)
   execute 'buffer' bnr
 enddef
 
+def PopupEditee_buffers_action_t(winid: number, ctx: any)
+  var bnr = ctx.active->get(line('.', winid) - 1, {})->get('bufnr', 0)
+
+  call popup_close(winid)
+
+  execute 'split | buffer' bnr '| wincmd T'
+enddef
+
 def PopupEditee_windows_action_enter(winid: number, ctx: any)
   var item = ctx.active->get(line('.', winid) - 1, '')
 
@@ -203,7 +211,10 @@ def PopupEditee_do_mru()
         text: PopupEditee_path_to_candidate((v->isdirectory() ? icons.dir : icons.file), v),
         path: v
     }))
-  var handlers = { "\<CR>": function(PopupEditee_files_action_enter) }
+  var handlers = {
+    "\<CR>": function(PopupEditee_files_action_enter),
+    "t": function(PopupEditee_files_action_t)
+  }
 
   call PopupEditee_open(' Mru ', items, handlers)
 enddef
@@ -222,7 +233,10 @@ def PopupEditee_do_buffers()
 
       return { text: icons.buf .. ' ' .. bn_, bufnr: v }
     } )
-  var handlers = { "\<CR>": function(PopupEditee_buffers_action_enter) }
+  var handlers = {
+    "\<CR>": function(PopupEditee_buffers_action_enter),
+    "t": function(PopupEditee_buffers_action_t)
+  }
 
   call PopupEditee_open(' Buffers ', items, handlers)
 enddef
@@ -360,7 +374,10 @@ def PopupEditee_do_glob(bang: string, root_dir: string)
       text: PopupEditee_path_to_candidate(icons.file, v),
       path: v
     }))
-  var handlers = { "\<CR>": function(PopupEditee_files_action_enter) }
+  var handlers = {
+    "\<CR>": function(PopupEditee_files_action_enter),
+    "t": function(PopupEditee_files_action_t)
+  }
 
   call PopupEditee_open(printf(' Glob(%d) : %s', items->len(), root), items, handlers)
 enddef
