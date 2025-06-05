@@ -40,6 +40,9 @@ augroup vimrc_local_autocmd
   autocmd VimEnter * Root
 augroup END
 
+## cursorline
+nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
+
 ## popup
 nnoremap <silent> <C-p>f     :PopupFiles<CR>
 nnoremap <silent> <C-p>F     :PopupFiles %:h<CR>

@@ -339,9 +339,8 @@ xnoremap <silent> <expr> g< printf(":g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'),
       \ (&et ? repeat(' ', &sw) : '\t'))
 
-# switch cursorline highlight
-nnoremap <silent> <Leader>L :hi CursorLine cterm=NONE term=NONE gui=NONE<CR>
-nnoremap <silent> <Leader>l :hi CursorLine cterm=reverse term=reverse gui=reverse<CR>
+# in-file search list
+nnoremap <silent> g/ :vimgrep //gj %<CR>
 
 
 ################################################################
@@ -407,8 +406,13 @@ command! -bang -nargs=? QFiles {
   setl conceallevel=3
 }
 
-# in-file search list
-nnoremap <silent> g/ :vimgrep //gj %<CR>
+# switch cursorline highlight
+command! -nargs=0 CursorLineOnOff {
+  var val = (execute('hi CursorLine') =~# 'cleared') ? 'reverse' : 'NONE'
+
+  execute printf('hi CursorLine cterm=%s term=%s gui=%s', val, val, val)
+}
+
 
 ################################################################
 def Vimrc_qf_keymap()
