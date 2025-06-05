@@ -62,34 +62,43 @@ def VSCodeSnippet_initialize(force: bool)
   endif
 enddef
 
-def VSCodeSnippet_ExpandVarious(various: string): string
-  if     various ==# 'TM_SELECTED_TEXT'         | return @0
-  elseif various ==# 'TM_CURRENT_LINE'          | return getline('.')
-  elseif various ==# 'TM_CURRENT_WORD'          | return expand('<cword>')
-  elseif various ==# 'TM_LINE_INDEX'            | return (line('.') - 1)->string()
-  elseif various ==# 'TM_LINE_NUMBER'           | return line('.')->string()
-  elseif various ==# 'TM_FILENAME'              | return expand('%:t')
-  elseif various ==# 'TM_FILENAME_BASE'         | return expand('%:t:r')
-  elseif various ==# 'TM_DIRECTORY'             | return expand('%:p:h')
-  elseif various ==# 'TM_FILEPATH'              | return expand('%:p')
-  elseif various ==# 'RELATIVE_FILEPATH'        | return expand('%:p')
-  elseif various ==# 'CLIPBOARD'                | return @*
-  elseif various ==# 'WORKSPACE_NAME'           | return expand('%:p')
-  elseif various ==# 'WORKSPACE_FOLDER'         | return expand('%:p:h')
-  elseif various ==# 'CURRENT_YEAR'             | return strftime('%Y')
-  elseif various ==# 'CURRENT_YEAR_SHORT'       | return strftime('%y')
-  elseif various ==# 'CURRENT_MONTH'            | return strftime('%m')
-  elseif various ==# 'CURRENT_MONTH_NAME'       | return strftime('%B')
-  elseif various ==# 'CURRENT_MONTH_NAME_SHORT' | return strftime('%b')
-  elseif various ==# 'CURRENT_DATE'             | return strftime('%d')
-  elseif various ==# 'CURRENT_DAY_NAME'         | return strftime('%A')
-  elseif various ==# 'CURRENT_DAY_NAME_SHORT'   | return strftime('%a')
-  elseif various ==# 'CURRENT_HOUR'             | return strftime('%H')
-  elseif various ==# 'CURRENT_MINUTE'           | return strftime('%M')
-  elseif various ==# 'CURRENT_SECOND'           | return strftime('%S')
-  elseif various ==# 'CURRENT_SECONDS_UNIX'     | return strftime('%s')
+def VSCodeSnippet_ExpandVarious(variable: string): string
+  var val = variable->substitute('^{\|}$', '', 'g')
+
+  # choice, placeholder, transform
+  if     val =~# '^\w\+|' | return val->substitute('^\w\+|\([^|]\+\)|$', '\1', '')
+  elseif val =~# '^\w\+:' | return val->substitute('^\w\+:\(.\+\)$', '\1', '')
+  elseif val =~# '^\w\+/' | val = val->substitute('/.*$', '', '')
+  endif
+
+  if     val =~# '\v^[0-9]+$'               | return ''
+  elseif val ==# 'TM_SELECTED_TEXT'         | return @0
+  elseif val ==# 'TM_CURRENT_LINE'          | return getline('.')
+  elseif val ==# 'TM_CURRENT_WORD'          | return expand('<cword>')
+  elseif val ==# 'TM_LINE_INDEX'            | return (line('.') - 1)->string()
+  elseif val ==# 'TM_LINE_NUMBER'           | return line('.')->string()
+  elseif val ==# 'TM_FILENAME'              | return expand('%:t')
+  elseif val ==# 'TM_FILENAME_BASE'         | return expand('%:t:r')
+  elseif val ==# 'TM_DIRECTORY'             | return expand('%:p:h')
+  elseif val ==# 'TM_FILEPATH'              | return expand('%:p')
+  elseif val ==# 'RELATIVE_FILEPATH'        | return expand('%:p')
+  elseif val ==# 'CLIPBOARD'                | return @*
+  elseif val ==# 'WORKSPACE_NAME'           | return expand('%:p')
+  elseif val ==# 'WORKSPACE_FOLDER'         | return expand('%:p:h')
+  elseif val ==# 'CURRENT_YEAR'             | return strftime('%Y')
+  elseif val ==# 'CURRENT_YEAR_SHORT'       | return strftime('%y')
+  elseif val ==# 'CURRENT_MONTH'            | return strftime('%m')
+  elseif val ==# 'CURRENT_MONTH_NAME'       | return strftime('%B')
+  elseif val ==# 'CURRENT_MONTH_NAME_SHORT' | return strftime('%b')
+  elseif val ==# 'CURRENT_DATE'             | return strftime('%d')
+  elseif val ==# 'CURRENT_DAY_NAME'         | return strftime('%A')
+  elseif val ==# 'CURRENT_DAY_NAME_SHORT'   | return strftime('%a')
+  elseif val ==# 'CURRENT_HOUR'             | return strftime('%H')
+  elseif val ==# 'CURRENT_MINUTE'           | return strftime('%M')
+  elseif val ==# 'CURRENT_SECOND'           | return strftime('%S')
+  elseif val ==# 'CURRENT_SECONDS_UNIX'     | return strftime('%s')
   else
-    return ''
+    return variable
   endif
 enddef
 
@@ -108,12 +117,8 @@ def VSCodeSnippet_MakeBody(prefix: string): list<string>
   endif
 
   return body
-    ->map((i, v) => v->substitute('\%(\\\)\@<!$\d\+', '', 'g'))
-    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+}', '', 'g'))
-    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+|\([^|}]\+\)|}', '\1', 'g'))
-    ->map((i, v) => v->substitute('\%(\\\)\@<!${\d\+:\([^}]\+\)}', '\1', 'g'))
-    ->map((i, v) => v->substitute('\%(\\\)\@<!$\([A-Z_]\+\)', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
-    ->map((i, v) => v->substitute('\%(\\\)\@<!${\([^}]\+\)}', '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
+    ->map((i, v) => v->substitute('\%(\\\)\@<!$\([0-9]\+\|[_a-zA-Z][_a-zA-Z0-9]*\|{\%(\\}\|[^}]\)\+}\)',
+          \ '\=VSCodeSnippet_ExpandVarious(submatch(1))', 'g'))
     ->map((i, v) => v->substitute('\\\$', '$', 'g'))
 enddef
 
