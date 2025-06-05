@@ -3,12 +3,6 @@ vim9script
 # { "language" or "_" : { snip.prefix: snip.body } }
 var VSCodeSnippet_snippets = {}
 
-def VSCodeSnippet_ParseScope(snip: dict<any>, filepath: string): list<string>
-  var scopes = get(snip, 'scope', '_')->split(',')
-
-  return ( scopes->empty() ? [filepath->fnamemodify(':t:r')] : scopes )
-enddef
-
 def VSCodeSnippet_ParseTextOrList(snip: dict<any>, prop_name: string): list<string>
   var scope = get(snip, prop_name, '')
 
@@ -19,7 +13,7 @@ def VSCodeSnippet_ParseTextOrList(snip: dict<any>, prop_name: string): list<stri
   endif
 enddef
 
-def VSCodeSnippet_LoadSnippet(file_path: string)
+def VSCodeSnippet_LoadSnippet(file_path: string, default_scope: string)
   try
     var source = readfile(file_path)
       ->filter((i, v) => v !~# '^\s*\/\/.*$')
@@ -35,7 +29,7 @@ def VSCodeSnippet_LoadSnippet(file_path: string)
     for [name, snip] in source->items()->filter((i, v) => v[1]->type() ==# v:t_dict)
       var body = VSCodeSnippet_ParseTextOrList(snip, 'body')
 
-      for scope in VSCodeSnippet_ParseScope(snip, file_path)
+      for scope in get(snip, 'scope', default_scope)->split(',')
         var snippets = get(VSCodeSnippet_snippets, scope, {})
 
         for prefix in VSCodeSnippet_ParseTextOrList(snip, 'prefix')
@@ -59,11 +53,11 @@ def VSCodeSnippet_initialize(force: bool)
     var pathes = get(g:, 'code_snippet_glob_pathes', &rtp)
 
     for file_path in globpath(pathes, '*.json', 0, 1)
-      call VSCodeSnippet_LoadSnippet(file_path)
+      call VSCodeSnippet_LoadSnippet(file_path, file_path->fnamemodify(':t:r'))
     endfor
 
     for file_path in globpath(pathes, '*.code-snippets', 0, 1)
-      call VSCodeSnippet_LoadSnippet(file_path)
+      call VSCodeSnippet_LoadSnippet(file_path, '_')
     endfor
   endif
 enddef
