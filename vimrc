@@ -277,7 +277,6 @@ inoremap <silent> <expr> <C-p> pumvisible() ? "\<Up>" : "\<C-p>"
 
 inoremap <silent> <expr> <C-Space> pumvisible() ? "" : "\<C-x>\<C-o>"
 inoremap <silent> <expr> <C-f>     pumvisible() ? "" : "\<C-x>\<C-f>"
-inoremap <silent> <expr> <C-v>     pumvisible() ? "" : "\<C-x>\<C-v>"
 
 # navigation
 nnoremap <silent> <F9>    :lnext<CR>zz
