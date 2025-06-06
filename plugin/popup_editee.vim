@@ -212,7 +212,7 @@ def PopupEditee_do_buffers()
         bn_ = printf('%s (%s)', bn_->fnamemodify(':t'), bn_->fnamemodify(':p:h'))
       endif
 
-      return { text: icons.buf .. ' ' .. bn_, bufnr: v }
+      return { text: printf('%4d %s %s', v, icons.buf, bn_), bufnr: v }
     } )
   var handlers = {
     "\<CR>": function(PopupEditee_buffers_action_open, ['buffer %d']),
@@ -338,7 +338,7 @@ def PopupEditee_get_glob_cache(bang: string, root_dir: string): list<any>
 
     execute 'silent close'
 
-    echomsg printf('glob(%d): %f : %s', ln, reltimefloat(reltime(start_time)), root)
+    echomsg printf('glob / %d : %f : %s', ln, reltimefloat(reltime(start_time)), root)
   endif
 
   return [bnr, root]
