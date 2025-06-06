@@ -408,9 +408,11 @@ command! -bang -nargs=? QFiles {
 
 # switch cursorline highlight
 command! -nargs=0 CursorLineOnOff {
-  var val = (execute('hi CursorLine') =~# 'cleared') ? 'reverse' : 'NONE'
-
-  execute printf('hi CursorLine cterm=%s term=%s gui=%s', val, val, val)
+  if &cursorlineopt =~# 'line\|both'
+    set cursorlineopt=number
+  else
+    set cursorlineopt=both
+  endif
 }
 
 
@@ -534,12 +536,10 @@ augroup END
 
 ################################################################
 def Vimrc_custom_highlight()
-  hi clear CursorLine
   hi clear SpecialKey
 
   # cursor
-  hi CursorLine   term=NONE    cterm=NONE    gui=NONE
-  hi CursorLineNr term=reverse cterm=reverse
+  hi CursorLineNr term=reverse cterm=reverse gui=reverse
 
   # ime
   if has('multi_byte_ime')
