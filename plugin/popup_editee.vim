@@ -54,7 +54,7 @@ def PopupEditee_files_make_list(root: string): list<any>
     }))
 enddef
 
-def PopupEditee_files_action_open(cmd: string, winid: number, ctx: any)
+def PopupEditee_files_action_open(command_format: string, winid: number, ctx: any)
   var path = ctx.active->get(line('.', winid) - 1, '')->get('path', '')
 
   if path->isdirectory()
@@ -72,18 +72,14 @@ def PopupEditee_files_action_open(cmd: string, winid: number, ctx: any)
   else
     call popup_close(winid)
 
-    execute cmd path
-
+    execute printf(command_format, path)
   endif
 enddef
 
-def PopupEditee_files_action_enter(winid: number, ctx: any)
-  call PopupEditee_files_action_open('edit', winid, ctx)
-enddef
-
-def PopupEditee_files_action_t(winid: number, ctx: any)
-  call PopupEditee_files_action_open('tabedit', winid, ctx)
-enddef
+var popup_editee_file_open_handlers = {
+  "\<CR>": function(PopupEditee_files_action_open, ['edit %s']),
+  't': function(PopupEditee_files_action_open, ['tabedit %s'])
+}
 
 def PopupEditee_files_action_up(winid: number, ctx: any)
   #
@@ -97,30 +93,22 @@ def PopupEditee_files_action_up(winid: number, ctx: any)
   ctx.active = ctx.source
 
   #
-  call PopupEditee_set_list(winid, printf(' Files (%d): %s ', ctx.active->len(), root), ctx.active)
+  call PopupEditee_set_list(winid, printf(' Files / %d : %s ', ctx.active->len(), root), ctx.active)
 enddef
 
-def PopupEditee_buffers_action_enter(winid: number, ctx: any)
+def PopupEditee_buffers_action_open(command_format: string, winid: number, ctx: any)
   var bnr = ctx.active->get(line('.', winid) - 1, {})->get('bufnr', 0)
 
   call popup_close(winid)
 
-  execute 'buffer' bnr
-enddef
-
-def PopupEditee_buffers_action_t(winid: number, ctx: any)
-  var bnr = ctx.active->get(line('.', winid) - 1, {})->get('bufnr', 0)
-
-  call popup_close(winid)
-
-  execute 'split | buffer' bnr '| wincmd T'
+  execute printf(command_format, bnr)
 enddef
 
 def PopupEditee_windows_action_enter(winid: number, ctx: any)
   var item = ctx.active->get(line('.', winid) - 1, '')
 
   call popup_close(winid)
-  call item->get('winid', '')->win_gotoid()
+  call item->get('winid', 0)->win_gotoid()
 enddef
 
 def PopupEditee_lines_action_enter(winid: number, ctx: any)
@@ -189,14 +177,11 @@ def PopupEditee_do_files(root_dir: string)
 
   var root = root_dir->empty() ? getcwd() : root_dir
   var items = PopupEditee_files_make_list(root)
-  var handlers = {
-    "\<CR>": function(PopupEditee_files_action_enter),
-    't': function(PopupEditee_files_action_t),
-    '^': function(PopupEditee_files_action_up)
-  }
+  var handlers = { '^': function(PopupEditee_files_action_up) }
+  ->extend(popup_editee_file_open_handlers)
 
   call PopupEditee_open(
-    printf(' Files(%d): %s ', items->len(), root), items, handlers)
+    printf(' Files / %d : %s ', items->len(), root), items, handlers)
 enddef
 
 def PopupEditee_do_mru()
@@ -211,12 +196,8 @@ def PopupEditee_do_mru()
         text: PopupEditee_path_to_candidate((v->isdirectory() ? icons.dir : icons.file), v),
         path: v
     }))
-  var handlers = {
-    "\<CR>": function(PopupEditee_files_action_enter),
-    "t": function(PopupEditee_files_action_t)
-  }
 
-  call PopupEditee_open(' Mru ', items, handlers)
+  call PopupEditee_open(' Mru ', items, popup_editee_file_open_handlers)
 enddef
 
 def PopupEditee_do_buffers()
@@ -234,8 +215,8 @@ def PopupEditee_do_buffers()
       return { text: icons.buf .. ' ' .. bn_, bufnr: v }
     } )
   var handlers = {
-    "\<CR>": function(PopupEditee_buffers_action_enter),
-    "t": function(PopupEditee_buffers_action_t)
+    "\<CR>": function(PopupEditee_buffers_action_open, ['buffer %d']),
+    "t": function(PopupEditee_buffers_action_open, ['split | buffer %d | wincmd T'])
   }
 
   call PopupEditee_open(' Buffers ', items, handlers)
@@ -244,10 +225,8 @@ enddef
 def PopupEditee_do_windows()
   call PopupEditee_update_variables()
 
-  # [ { text:, bufnr:, winid: }, ... ]
-  var items = []
-  # { winid, bufname }
-  var winid2buf = {}
+  var items = []      # [ { text:, bufnr:, winid: }, ... ]
+  var winid2buf = {}  # { winid: bufname }
 
   for tab_no in range(1, tabpagenr('$'))
     for bufnr in tab_no->tabpagebuflist()
@@ -297,7 +276,7 @@ def PopupEditee_do_lines()
       handlers: { "\<CR>": function(PopupEditee_lines_action_enter) }
     }
     var winid = popup_menu(ctx.active, {
-      title: printf(' Lines (%d) ', lines->len()),
+      title: printf(' Lines / %d ', lines->len()),
       filter: (winid, key) => PopupEditee_action(winid, key, ctx)
     })
 
@@ -374,12 +353,9 @@ def PopupEditee_do_glob(bang: string, root_dir: string)
       text: PopupEditee_path_to_candidate(icons.file, v),
       path: v
     }))
-  var handlers = {
-    "\<CR>": function(PopupEditee_files_action_enter),
-    "t": function(PopupEditee_files_action_t)
-  }
 
-  call PopupEditee_open(printf(' Glob(%d) : %s', items->len(), root), items, handlers)
+  call PopupEditee_open(printf(' Glob / %d : %s', items->len(), root),
+    items, popup_editee_file_open_handlers)
 enddef
 
 def PopupEditee_open_glob_cache(bang: string, root_dir: string)
