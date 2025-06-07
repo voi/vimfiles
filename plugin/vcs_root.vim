@@ -2,12 +2,14 @@ vim9script
 
 def VcsRoot_find_root(dirs: list<string>, files: list<string>): string
   var source = expand('%')->fnamemodify(':p:h') .. ';'
+  var root = ''
 
   for dir in dirs
     var target = dir->finddir(source)
 
     if !target->empty()
-      return target->fnamemodify(':p')->substitute(dir .. '[\\/]$', '', '')
+      root = target->fnamemodify(':p')->substitute(dir .. '[\\/]$', '', '')
+      break
     endif
   endfor
 
@@ -15,11 +17,15 @@ def VcsRoot_find_root(dirs: list<string>, files: list<string>): string
     var target = file->findfile(source)
 
     if !target->empty()
-      return target->fnamemodify(':p:h')
+      var root2 = target->fnamemodify(':p:h')
+
+      if root2->len() > root->len() | root = root2 | endif
+
+      break
     endif
   endfor
 
-  return ''
+  return root
 enddef
 
 def VcsRoot_lcd(bang: string, arguments: list<string>)

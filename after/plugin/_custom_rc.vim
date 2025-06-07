@@ -36,6 +36,9 @@ endif
 # g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'
 
 ## find root
+g:vcs_root_target_dirs = ['.svn', '.git']
+g:vcs_root_target_files = ['_FOSSIL_', 'vimrc']
+
 augroup vimrc_local_autocmd
   autocmd VimEnter * Root
 augroup END
