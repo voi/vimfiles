@@ -9,7 +9,9 @@ def EncloseText_parse(arguments: list<string>): any
   for arg in arguments
     if     arg =~# '^-[adr]$' | command = arg
     elseif arg ==# '-t'       | triming = '\v\s*'
-    elseif arg ==# '-c'       | tokens = split(&commentstring, '%s', 1)
+    elseif arg ==# '-c'
+      tokens = split(&commentstring, '%s', 1)
+        ->map((i, v) => v->substitute('^\s\+$', '', ''))
     else                      | call add(tokens, arg)
     endif
   endfor
