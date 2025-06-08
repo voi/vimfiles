@@ -63,9 +63,9 @@ nnoremap <silent> <Leader>ww :WordHLAdd expand('<cword>')<CR>
 xnoremap <silent> <Leader>w  :WordHLVisualAdd<CR>
 
 ## code snippet
-nnoremap <Leader>s :VSCodeSnippetInsert 
-inoremap <Leader>s <C-o>:VSCodeSnippetInsert 
-xnoremap <Leader>s :VSCodeSnippetReplace 
+nnoremap <C-s> :VSCodeSnippetInsert 
+inoremap <C-s> <C-o>:VSCodeSnippetInsert 
+xnoremap <C-s> :VSCodeSnippetReplace 
 
 ## word surround
 # g:enclose_text_pattern_list = []
