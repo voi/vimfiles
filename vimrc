@@ -1,8 +1,12 @@
 vim9script
 
-source $VIMRUNTIME/defaults.vim
+# source $VIMRUNTIME/defaults.vim
+set nocompatible
 
 scriptencoding utf-8
+
+filetype plugin indent on
+syntax on
 
 
 ###############################
@@ -12,12 +16,15 @@ set fileencodings=utf-8,ucs-bom,euc-jp,eucjp-jisx0213,cp932,iso-2022-jp-3,iso-20
 
 set ambiwidth=double
 set helplang=ja,en
+set ttimeout
 set ttimeoutlen=-1
 
 # display
+set display=truncate
 set lazyredraw
 set number
 set list
+set ruler
 set nowrap
 set nofixendofline
 
@@ -25,8 +32,10 @@ set belloff=all
 set display=lastline
 set colorcolumn=80,100
 set guioptions+=cM
+set guioptions-=t
 # |¦»▸>￫↲
 set listchars=tab:￫\ ,trail:.,extends:»,precedes:«,nbsp:%,conceal:↲
+set showcmd
 set showbreak=▸\ 
 set shortmess=coOIWtT
 set matchpairs& matchpairs+=<:>
@@ -38,6 +47,7 @@ set fillchars=fold:\
 # format
 set formatoptions+=jnmM2
 set formatoptions-=l
+set nrformats-=octal
 
 # forward/back
 set whichwrap+=h,l,<,>,[,]
@@ -84,7 +94,6 @@ set switchbuf=useopen,usetab
 set ignorecase
 set smartcase
 set nowrapscan
-set noincsearch
 set nohlsearch
 set tags+=./tags;
 
