@@ -424,6 +424,12 @@ command! -nargs=0 CursorLineOnOff {
   endif
 }
 
+# switch scrolloff always center
+command! -nargs=0 ScrolloffCenterOnOff {
+  if &scrolloff != 0 | set scrolloff=0 | else | set scrolloff=999 | endif
+  set scrolloff?
+}
+
 
 ################################################################
 def Vimrc_qf_keymap()

@@ -45,6 +45,7 @@ augroup END
 
 ## cursorline
 nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
+nnoremap <silent> <Leader>s  :ScrolloffCenterOnOff<CR>
 
 ## popup
 nnoremap <silent> <C-p>f     :PopupFiles<CR>
