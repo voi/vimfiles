@@ -1,9 +1,5 @@
 vim9script
 
-# set path for VSCode snippets folder.
-g:code_snippet_glob_pathes = '~/scoop/persist/vscode/data/user-data/User/snippets'
-  ->expand()->fnamemodify(':p')
-
 # icon character ( color emoji )
 g:vimrc_statusline_icon_pwd = '📍'
 g:vimrc_statusline_icon_ro  = '❎'
@@ -26,13 +22,7 @@ g:popup_editee_icon_wind  = '📑'
 # g:popup_editee_glob_regex_ignore_dir = '^\%(\.git\|\.svn\)$'
 # g:popup_editee_glob_regex_ignore_file = '\%(^_FOSSIL_\|\.exe\|\.dll\|\.docx\?\|\.xls[xm]\?\|\.vsdx\?|\.pdf\)$'
 
-# history
-# g:vimrc_plugin_popup_mru_pinned = '~/_vim_mru_pinned.txt'
-
 ## gf improved
-if has('win32')
-  g:smart_gf_web_browser_command = '"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default --inprivate'
-endif
 # g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'
 
 ## find root
