@@ -50,6 +50,7 @@ set formatoptions-=l
 set nrformats-=octal
 
 # forward/back
+set backspace=indent,eol,start
 set whichwrap+=h,l,<,>,[,]
 set virtualedit+=block
 
