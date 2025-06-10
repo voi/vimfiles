@@ -28,12 +28,6 @@ def SmartGF_goto_path(source: string): bool
     return false
   endif
 
-  if has('win32')
-    if source !~# '^\%(file:/\{1,3}\)\?\%([A-Z]:\)\?[^:\*?"<>|]\+$' | return false | endif
-  else
-    if source !~# '^\%(file:/\{1,3}\)\?[^:\*?"<>|();]\+$' | return false | endif
-  endif
-
   var path = source->substitute('^file:/\{1,3}', '', '')->fnamemodify(':p')
 
   if path =~# get(g:, 'smart_gf_executable_binary_pattern', '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$')
