@@ -108,9 +108,9 @@ def g:Vimrc_tabline(): string
   var bufpath = bufnr->bufname()->fnamemodify(':p')
   var bufname = bufpath->fnamemodify(':t')
 
-  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '^/')
-  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '!?')
-  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '|>')
+  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📂.')
+  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡')
+  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝')
 
   var left = '%#TabLine#____%#TabLineSel#'
     .. printf('%3d:', tabnr) ..  (&modified ? icon_mod : icon_nor) .. ' '
@@ -140,9 +140,9 @@ def g:Vimrc_statusline(): string
   elseif md == 't'  | left = '%#StatusLine_Command#' .. ' TRM '
   endif
 
-  var icon_pwd = get(g:, 'vimrc_statusline_icon_pwd', '@:')
-  var icon_mod = get(g:, 'vimrc_statusline_icon_mod', '!.')
-  var icon_ro  = get(g:, 'vimrc_statusline_icon_ro',  'X.')
+  var icon_pwd = get(g:, 'vimrc_statusline_icon_pwd', '📍')
+  var icon_mod = get(g:, 'vimrc_statusline_icon_mod', '❎')
+  var icon_ro  = get(g:, 'vimrc_statusline_icon_ro',  '⚡')
 
   left ..= '%#StatusLine_Modes#'
     .. (&modified ? icon_mod : '')

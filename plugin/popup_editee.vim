@@ -3,7 +3,7 @@ vim9script
 var popup_editee_glob_last_cache_buffer = tempname()
 
 var path_slash = has('win32') ? '\' : '/'
-var icons = { file: ' -', dir: '[]', empty: '()', buf: ' >', win: ' =' }
+var icons = { file: '📝', dir: '📁', empty: '🈳', buf: '📜', win: '📑' }
 
 var pattern_type_dir = '\v^(dir|linkd)$'
 var pattern_type_file = '\v^(file|link)$'

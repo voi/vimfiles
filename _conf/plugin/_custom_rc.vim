@@ -1,19 +1,19 @@
 vim9script
 
 # icon character ( color emoji )
-g:vimrc_statusline_icon_pwd = '📍'
-g:vimrc_statusline_icon_ro  = '❎'
-g:vimrc_statusline_icon_mod = '⚡'
-
-g:vimrc_tabline_icon_dir = '📂:'
-g:vimrc_tabline_icon_nor = '📝'
-g:vimrc_tabline_icon_mod = '⚡'
-
-g:popup_editee_icon_dir   = '📁'
-g:popup_editee_icon_file  = '📝'
-g:popup_editee_icon_empty = '🈳'
-g:popup_editee_icon_buff  = '📜'
-g:popup_editee_icon_wind  = '📑'
+# g:vimrc_statusline_icon_pwd = ''
+# g:vimrc_statusline_icon_ro  = ''
+# g:vimrc_statusline_icon_mod = ''
+# 
+# g:vimrc_tabline_icon_dir = ''
+# g:vimrc_tabline_icon_nor = ''
+# g:vimrc_tabline_icon_mod = ''
+# 
+# g:popup_editee_icon_dir   = ''
+# g:popup_editee_icon_file  = ''
+# g:popup_editee_icon_empty = ''
+# g:popup_editee_icon_buff  = ''
+# g:popup_editee_icon_wind  = ''
 
 # limit
 # g:popup_editee_glob_max_candidates = 50000
