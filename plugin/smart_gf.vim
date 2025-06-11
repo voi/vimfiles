@@ -1,10 +1,10 @@
 vim9script
 
-const URL_PATTERN = '\v(https?|ftps?|teams)(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
+const URL_PATTERN = '\v([[:alpha:]{2,}])(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
 const DEFAULT_OPENER = has('win32') ? 'start' : 'open'
 
 def SmartGF_goto_url(source: string): bool
-  if source =~# URL_PATTERN
+  if source =~# URL_PATTERN && source !~# '^file:\/\/'
     var url = source
 
     if &encoding !=# &termencoding
@@ -13,9 +13,7 @@ def SmartGF_goto_url(source: string): bool
 
     var browser = get(g:, 'smart_gf_web_browser_command', '')
 
-    if browser->empty() | browser = DEFAULT_OPENER | endif
-
-    execute printf(':silent !%s "%s"', browser, url->escape('%'))
+    execute printf(':silent !%s %s "%s"', DEFAULT_OPENER, browser, url->escape('%'))
 
     return true
   else
