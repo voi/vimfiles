@@ -39,6 +39,7 @@ set showcmd
 set showbreak=▸\ 
 set shortmess=coOIWtT
 set matchpairs& matchpairs+=<:>
+set cursorlineopt=number
 
 # folding
 set foldtext=getline(v:foldstart)
