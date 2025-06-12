@@ -108,13 +108,14 @@ def g:Vimrc_tabline(): string
   var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
   var bufpath = bufnr->bufname()->fnamemodify(':p')
   var bufname = bufpath->fnamemodify(':t')
+  var tabimage = printf('[%2d/%2d]', tabnr, tabpagenr('$'))
 
-  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📂.')
-  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡')
-  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝')
+  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📂 ')
+  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡ ')
+  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝 ')
 
-  var left = '%#TabLine#____%#TabLineSel#'
-    .. printf('%3d:', tabnr) ..  (&modified ? icon_mod : icon_nor) .. ' '
+  var left = '%#TabLine#' .. tabimage .. '%#TabLineSel#'
+    ..  (&modified ? icon_mod : icon_nor)
     ..  (bufname->empty() ? '...' : bufname)
   var right = '%< ' .. icon_dir .. bufpath->fnamemodify(':h:t') .. '/'
     .. '%T%#TabLineFill#'
