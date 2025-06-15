@@ -108,7 +108,7 @@ def g:Vimrc_tabline(): string
   var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
   var bufpath = bufnr->bufname()->fnamemodify(':p')
   var bufname = bufpath->fnamemodify(':t')
-  var tabimage = printf('[%2d/%2d]', tabnr, tabpagenr('$'))
+  var tabimage = printf('[%2d]%2d<', tabpagenr('$'), tabnr)
 
   var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📂 ')
   var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡ ')
