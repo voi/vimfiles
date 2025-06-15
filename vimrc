@@ -132,7 +132,7 @@ def g:Vimrc_statusline(): string
 
   if     md == 'n'  | left = '%#StatusLine_Normal#'  .. ' NOR '
   elseif md == 'i'  | left = '%#StatusLine_Insert#'  .. ' INS '
-  elseif md == 'r'  | left = '%#StatusLine_Replace#' .. ' REP '
+  elseif md == 'R'  | left = '%#StatusLine_Replace#' .. ' REP '
   elseif md == 'v'  | left = '%#StatusLine_Visual#'  .. ' VIS '
   elseif md == '' | left = '%#StatusLine_Visual#'  .. ' VIS '
   elseif md == 's'  | left = '%#StatusLine_Visual#'  .. ' SEL '
