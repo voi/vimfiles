@@ -35,8 +35,9 @@ def GVimrc_indent_guide()
   if &expandtab
     setlocal conceallevel=2 concealcursor=iv
 
-    for i in range(1, 32)
-      call matchadd('Conceal', printf('\%%(^ \{%d}\)\zs ', i * &softtabstop), 0, -1, {'conceal': '¦'})
+    for i in range(1, 16)
+      call matchadd(
+        'Conceal', printf('\%%(^ \{%d}\)\zs ', i * &softtabstop), 0, -1, {'conceal': '¦'})
     endfor
   endif
 enddef
