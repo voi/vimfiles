@@ -30,6 +30,7 @@ g:vcs_root_target_dirs = ['.svn', '.git']
 g:vcs_root_target_files = ['_FOSSIL_', 'vimrc']
 
 augroup vimrc_local_autocmd
+  autocmd!
   autocmd VimEnter * Root
 augroup END
 
