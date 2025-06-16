@@ -41,54 +41,59 @@ def VcsCmd_execute(arguments: list<string>)
   echomsg msg
 enddef
 
-# subversion
-if executable('svn')
-  # svn ls --search [glob pattern]
-  command! -nargs=* -complete=dir SvnLs     call VcsCmd_exec_to_out(['svn', 'ls', <q-args>], 'svn')
-  command! -nargs=* -complete=dir SvnStatus call VcsCmd_exec_to_out(['svn', 'status', <q-args>], 'svn')
-  command! -nargs=* -complete=dir SvnUpdate call VcsCmd_exec_to_out(['svn', 'update', <q-args>], 'svn')
+augroup _plugin_vcs_command_
+  autocmd!
+  autocmd VimEnter * {
+    # subversion
+    if executable('svn')
+      # svn ls --search [glob pattern]
+      execute 'command! -nargs=* -complete=dir SvnLs     call VcsCmd_exec_to_out(["svn", "ls", <q-args>], "svn")'
+      execute 'command! -nargs=* -complete=dir SvnStatus call VcsCmd_exec_to_out(["svn", "status", <q-args>], "svn")'
+      execute 'command! -nargs=* -complete=dir SvnUpdate call VcsCmd_exec_to_out(["svn", "update", <q-args>], "svn")'
 
-  command! -nargs=* -complete=file SvnLog      call VcsCmd_exec_to_out(['svn', 'log', <q-args>], 'svn')
-  command! -nargs=* -complete=file SvnDiff     call VcsCmd_exec_to_out(['svn', 'diff', <q-args>], 'diff')
-  command! -nargs=+ -complete=file SvnBlame    call VcsCmd_exec_to_out(['svn', 'blame', '--force', <q-args>], 'svn')
+      execute 'command! -nargs=* -complete=file SvnLog   call VcsCmd_exec_to_out(["svn", "log", <q-args>], "svn")'
+      execute 'command! -nargs=* -complete=file SvnDiff  call VcsCmd_exec_to_out(["svn", "diff", <q-args>], "diff")'
+      execute 'command! -nargs=+ -complete=file SvnBlame call VcsCmd_exec_to_out(["svn", "blame", "--force", <q-args>], "svn")'
 
-  command! -nargs=+ -complete=file SvnAdd      call VcsCmd_execute(['svn', 'add', <q-args>])
-  command! -nargs=+ -complete=file SvnRevert   call VcsCmd_execute(['svn', 'revert', <q-args>])
-  command! -nargs=+ -complete=file SvnResolved call VcsCmd_execute(['svn', 'resolved', <q-args>])
+      execute 'command! -nargs=+ -complete=file SvnAdd      call VcsCmd_execute(["svn", "add", <q-args>])'
+      execute 'command! -nargs=+ -complete=file SvnRevert   call VcsCmd_execute(["svn", "revert", <q-args>])'
+      execute 'command! -nargs=+ -complete=file SvnResolved call VcsCmd_execute(["svn", "resolved", <q-args>])'
 
-  command! -nargs=*                SvnHelp  call VcsCmd_exec_to_out(['svn', 'help', <q-args>], 'man')
-endif
+      execute 'command! -nargs=*                SvnHelp  call VcsCmd_exec_to_out(["svn", "help", <q-args>], "man")'
+    endif
 
-# git
-if executable('git')
-  command! -nargs=* -complete=dir  GitLs     call VcsCmd_exec_to_out(['git', 'ls-files', <q-args>], 'git')
-  command! -nargs=* -complete=dir  GitStatus call VcsCmd_exec_to_out(['git', 'status', '-s', <q-args>], 'git')
-  command! -nargs=* -complete=dir  GitGrep   call VcsCmd_exec_to_out(['git', 'grep', <q-args>], 'tags')
+    # git
+    if executable('git')
+      execute 'command! -nargs=* -complete=dir  GitLs     call VcsCmd_exec_to_out(["git", "ls-files", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=dir  GitStatus call VcsCmd_exec_to_out(["git", "status", "-s", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=dir  GitGrep   call VcsCmd_exec_to_out(["git", "grep", <q-args>], "tags")'
 
-  command! -nargs=* -complete=file GitLog    call VcsCmd_exec_to_out(['git', 'log', <q-args>], 'git')
-  command! -nargs=* -complete=file GitDiff   call VcsCmd_exec_to_out(['git', 'diff', <q-args>], 'diff')
-  command! -nargs=+ -complete=file GitBlame  call VcsCmd_exec_to_out(['git', 'blame', <q-args>], 'git')
+      execute 'command! -nargs=* -complete=file GitLog    call VcsCmd_exec_to_out(["git", "log", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=file GitDiff   call VcsCmd_exec_to_out(["git", "diff", <q-args>], "diff")'
+      execute 'command! -nargs=+ -complete=file GitBlame  call VcsCmd_exec_to_out(["git", "blame", <q-args>], "git")'
 
-  command! -nargs=+ -complete=file GitAdd    call VcsCmd_execute(['git', 'add', <q-args>])
-  command! -nargs=+ -complete=file GitRevert call VcsCmd_execute(['git', 'revert', <q-args>])
+      execute 'command! -nargs=+ -complete=file GitAdd    call VcsCmd_execute(["git", "add", <q-args>])'
+      execute 'command! -nargs=+ -complete=file GitRevert call VcsCmd_execute(["git", "revert", <q-args>])'
 
-  command! -nargs=*                GitHelp  call VcsCmd_exec_to_out(['git', 'help', '-g', <q-args>], 'man')
-endif
+      execute 'command! -nargs=*                GitHelp  call VcsCmd_exec_to_out(["git", "help", "-g", <q-args>], "man")'
+    endif
 
-# fossil
-if executable('fossil')
-  command! -nargs=* -complete=dir  FossilLs     call VcsCmd_exec_to_out(['fossil', 'ls', <q-args>], 'git')
-  command! -nargs=* -complete=dir  FossilStatus call VcsCmd_exec_to_out(['fossil', 'status', <q-args>], 'git')
-  command! -nargs=* -complete=dir  FossilChange call VcsCmd_exec_to_out(['fossil', 'change', <q-args>], 'git')
-  command! -nargs=* -complete=dir  FossilGrep   call VcsCmd_exec_to_out(['fossil', 'grep', <q-args>], 'tags')
+    # fossil
+    if executable('fossil')
+      execute 'command! -nargs=* -complete=dir  FossilLs     call VcsCmd_exec_to_out(["fossil", "ls", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=dir  FossilStatus call VcsCmd_exec_to_out(["fossil", "status", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=dir  FossilChange call VcsCmd_exec_to_out(["fossil", "change", <q-args>], "git")'
+      execute 'command! -nargs=* -complete=dir  FossilGrep   call VcsCmd_exec_to_out(["fossil", "grep", <q-args>], "tags")'
 
-  command! -nargs=* -complete=file FossilDiff   call VcsCmd_exec_to_out(['fossil', 'diff', <q-args>], 'diff')
-  command! -nargs=+ -complete=file FossilBlame  call VcsCmd_exec_to_out(['fossil', 'blame', <q-args>], 'git')
+      execute 'command! -nargs=* -complete=file FossilDiff   call VcsCmd_exec_to_out(["fossil", "diff", <q-args>], "diff")'
+      execute 'command! -nargs=+ -complete=file FossilBlame  call VcsCmd_exec_to_out(["fossil", "blame", <q-args>], "git")'
 
-  command! -nargs=+ -complete=file FossilAdd    call VcsCmd_execute(['fossil', 'add', <q-args>])
-  command! -nargs=+ -complete=file FossilRevert call VcsCmd_execute(['fossil', 'revert', <q-args>])
+      execute 'command! -nargs=+ -complete=file FossilAdd    call VcsCmd_execute(["fossil", "add", <q-args>])'
+      execute 'command! -nargs=+ -complete=file FossilRevert call VcsCmd_execute(["fossil", "revert", <q-args>])'
 
-  command! -nargs=*                FossilLog   call VcsCmd_exec_to_out(['fossil', 'timeline -v -n 0', <q-args>], 'git')
-  command! -nargs=*                FossilHelp  call VcsCmd_exec_to_out(['fossil', 'help', <q-args>], 'man')
-endif
+      execute 'command! -nargs=*                FossilLog   call VcsCmd_exec_to_out(["fossil", "timeline -v -n 0", <q-args>], "git")'
+      execute 'command! -nargs=*                FossilHelp  call VcsCmd_exec_to_out(["fossil", "help", <q-args>], "man")'
+    endif
+  }
+augroup END
 
