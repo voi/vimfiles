@@ -681,6 +681,8 @@ g:netrw_browse_split = 4
 g:netrw_preview = 1
 g:netrw_winsize = 75
 
+g:markdown_folding = 1
+
 
 ################################################################
 packadd! matchit
