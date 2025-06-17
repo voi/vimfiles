@@ -629,7 +629,9 @@ def Vimrc_custom_highlight()
 
     endif
   endif
+enddef
 
+def Vimrc_custom_syntax()
   # extra whitespaces
   #   u00A0 ' ' no-break space
   #   u2000 ' ' en quad
@@ -652,7 +654,8 @@ enddef
 
 augroup vimrc_autocmd_colors_highlight
   autocmd!
-  autocmd VimEnter,WinEnter,ColorScheme * call Vimrc_custom_highlight()
+  autocmd ColorScheme       * call Vimrc_custom_highlight()
+  autocmd VimEnter,WinEnter * call Vimrc_custom_syntax()
   autocmd WinEnter,BufWinEnter * setlocal cursorline wincolor=
   autocmd WinLeave             * setlocal nocursorline wincolor=NormalNC
 augroup END
