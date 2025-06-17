@@ -101,7 +101,7 @@ augroup _plugin_ctags_outline_
   autocmd!
   autocmd VimEnter * {
     if executable('ctags')
-      command! CtagsOutline call Ctags_outline_show()
+      execute 'command! CtagsOutline call Ctags_outline_show()'
     endif
   }
 augroup END
