@@ -36,6 +36,7 @@ augroup END
 
 ## cursorline
 nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
+nnoremap <silent> <Leader>L  :CursorLineReverseOnOff<CR>
 nnoremap <silent> <Leader>s  :ScrolloffCenterOnOff<CR>
 
 ## popup

@@ -427,6 +427,20 @@ command! -nargs=0 CursorLineOnOff {
   endif
 }
 
+#
+var hi_cursor_backup = ''
+
+command! -nargs=0 CursorLineReverseOnOff {
+  if hi_cursor_backup->empty()
+    hi_cursor_backup = execute('hi CursorLine')
+      ->substitute('^.*CursorLine.*xxx', 'hi CursorLine', '')
+    call execute('hi CursorLine term=reverse cterm=reverse gui=reverse')
+  else
+    call execute('hi clear CursorLine | ' .. hi_cursor_backup)
+    hi_cursor_backup = ''
+  endif
+}
+
 # switch scrolloff always center
 command! -nargs=0 ScrolloffCenterOnOff {
   if &scrolloff != 0 | set scrolloff=0 | else | set scrolloff=999 | endif
