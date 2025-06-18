@@ -97,12 +97,14 @@ def Ctags_outline_show()
   setl conceallevel=3
 enddef
 
+def CtagsOutline_addCommand()
+  if executable('ctags')
+    command! CtagsOutline call Ctags_outline_show()
+  endif
+enddef
+
 augroup _plugin_ctags_outline_
   autocmd!
-  autocmd VimEnter * {
-    if executable('ctags')
-      execute 'command! CtagsOutline call Ctags_outline_show()'
-    endif
-  }
+  autocmd VimEnter * call CtagsOutline_addCommand()
 augroup END
 

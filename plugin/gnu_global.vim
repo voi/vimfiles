@@ -85,14 +85,16 @@ def GlobalUtil_tagfunc(pattern: string, flag: string, info: any): list<any>
     })
 enddef
 
+def GlobalUtil_addCommand()
+  if executable('global')
+    command! -bang -nargs=1                GTags  call GlobalUtil_tags_of_word(<q-args>, "<bang>")
+    command! -bang -nargs=1 -complete=file GFTags call GlobalUtil_tags_in_file(<q-args>, "<bang>")
+  endif
+enddef
+
 augroup _plugin_gnu_global_
   autocmd!
-  autocmd VimEnter * {
-    if executable('global')
-      execute 'command! -bang -nargs=1                GTags  call GlobalUtil_tags_of_word(<q-args>, "<bang>")'
-      execute 'command! -bang -nargs=1 -complete=file GFTags call GlobalUtil_tags_in_file(<q-args>, "<bang>")'
-    endif
-  }
+  autocmd VimEnter * call GlobalUtil_addCommand()
   autocmd FileType c,cpp {
     setl path+=./;/
 
