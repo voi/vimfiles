@@ -253,6 +253,7 @@ nnoremap <silent> <Leader>ow :setl wrap!      wrap?<CR>
 nnoremap <silent> <Leader>os :setl wrapscan!  wrapscan?<CR>
 nnoremap <silent> <Leader>oi :setl incsearch! incsearch?<CR>
 nnoremap <silent> <Leader>ol :setl relativenumber! relativenumber?<CR>
+nnoremap <silent> <Leader>op :set  paste! paste?<CR>
 
 # buffer
 nnoremap <silent> [b :bprev<CR>
