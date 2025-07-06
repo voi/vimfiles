@@ -234,7 +234,7 @@ endif
 vnoremap <silent> _ "0p`<
 
 # narrowing by fond
-nnoremap <silent> z, zMzO
+nnoremap <silent> z, zMzv
 
 # auto-indent editing at empty line
 nnoremap <expr> i empty(getline('.')) ? '"_cc' : 'i'
@@ -477,6 +477,21 @@ def Vimrc_qf_keymap()
 enddef
 
 # filetype
+def Vimrc_markdown_foldexpr(): string
+  var head_ = getline(v:lnum)->matchstr('^#\+')->len()
+  var synx_ = synIDattr(synID(v:lnum, 1, 1), 'name')
+
+  if head_ > 0 && synx_ !~# 'markdown\w*CodeBlock'
+    return '>' .. string(max([head_ - 1, 1]))
+  endif
+
+  return '='
+enddef
+
+def Vimrc_markdown_foldtext(): string
+  return getline(v:foldstart)
+enddef
+
 augroup vimrc_autocmd_filetype
   autocmd!
 
@@ -514,7 +529,9 @@ augroup vimrc_autocmd_filetype
 
   # markdown
   autocmd FileType markdown 
-        \ setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
+        \   setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
+        \ | setl foldexpr=Vimrc_markdown_foldexpr()
+        \ | setl foldtext=Vimrc_markdown_foldtext()
 
 augroup END
 
@@ -703,6 +720,7 @@ g:netrw_preview = 1
 g:netrw_winsize = 75
 
 g:markdown_folding = 1
+g:markdown_yaml_head = 1
 
 
 ################################################################
