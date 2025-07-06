@@ -433,13 +433,15 @@ command! -nargs=0 CursorLineOnOff {
 var hi_cursor_backup = ''
 
 command! -nargs=0 CursorLineReverseOnOff {
-  if hi_cursor_backup->empty()
-    hi_cursor_backup = execute('hi CursorLine')
-      ->substitute('^.*CursorLine.*xxx', 'hi CursorLine', '')
-    call execute('hi CursorLine term=reverse cterm=reverse gui=reverse')
-  else
-    call execute('hi clear CursorLine | ' .. hi_cursor_backup)
-    hi_cursor_backup = ''
+  if &cursorlineopt =~# 'line\|both'
+    if hi_cursor_backup->empty()
+      hi_cursor_backup = execute('hi CursorLine')
+        ->substitute('^.*CursorLine.*xxx', 'hi CursorLine', '')
+      call execute('hi CursorLine term=reverse cterm=reverse gui=reverse')
+    else
+      call execute('hi clear CursorLine | ' .. hi_cursor_backup)
+      hi_cursor_backup = ''
+    endif
   endif
 }
 
