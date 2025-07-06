@@ -216,7 +216,8 @@ def PopupEditee_do_buffers()
     } )
   var handlers = {
     "\<CR>": function(PopupEditee_buffers_action_open, ['buffer %d']),
-    "t": function(PopupEditee_buffers_action_open, ['split | buffer %d | wincmd T'])
+    "t": function(PopupEditee_buffers_action_open, ['split | buffer %d | wincmd T']),
+    "d": function(PopupEditee_buffers_action_open, ['bw %d'])
   }
 
   call PopupEditee_open(' Buffers ', items, handlers)
