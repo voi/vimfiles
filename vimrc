@@ -278,11 +278,11 @@ nnoremap <silent> ]t :tabnext<CR>
 nnoremap <silent> <Leader>d :copy .-1<CR>
 xnoremap <silent> <Leader>d :copy '<-1<CR>gv
 
-nnoremap <silent> <C-k> :move .-2<CR>
-nnoremap <silent> <C-j> :move .+1<CR>
+nnoremap <silent> <C-k> :move .-2<CR>=
+nnoremap <silent> <C-j> :move .+1<CR>=
 
-xnoremap <silent> <C-k> :move '<-2<CR>gv
-xnoremap <silent> <C-j> :move '>+1<CR>gv
+xnoremap <silent> <C-k> :move '<-2<CR>gv=gv
+xnoremap <silent> <C-j> :move '>+1<CR>gv=gv
 
 # popup menu
 inoremap <silent> <expr> <CR>  pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
