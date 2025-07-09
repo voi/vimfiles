@@ -479,11 +479,16 @@ enddef
 
 # filetype
 def Vimrc_markdown_foldexpr(): string
-  var head_ = getline(v:lnum)->matchstr('^#\+')->len()
+  var line_ = getline(v:lnum)
+  var head_ = line_->matchstr('^#\+')->len()
   var synx_ = synIDattr(synID(v:lnum, 1, 1), 'name')
 
   if head_ > 0 && synx_ !~# 'markdown\w*CodeBlock'
     return '>' .. string(max([head_ - 1, 1]))
+  endif
+
+  if line_->empty() && getline(v:lnum + 1) =~# '^#\+'
+    return '-1'
   endif
 
   return '='
