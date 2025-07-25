@@ -781,6 +781,7 @@ if has('gui_running')
   augroup END
 
 else
+  set cursorlineopt=both
   set background=dark
 
   colorscheme retrobox
