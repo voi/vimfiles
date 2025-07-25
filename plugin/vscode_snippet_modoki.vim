@@ -109,7 +109,7 @@ def VSCodeSnippet_MakeBody(prefix: string): list<string>
   var body = get(candidates, prefix, [])
 
   if body->type() ==# v:t_list
-    body = body->filter((i, v) => v->type() ==# v:t_string)
+    body = body->copy()->filter((i, v) => v->type() ==# v:t_string)
   elseif body->type() ==# v:t_string
     body = [body]
   else
