@@ -163,7 +163,7 @@ enddef
 set laststatus=2 statusline=%!g:Vimrc_statusline()
 
 if has('vcon') | set termguicolors | endif
-if has('conceal') | set conceallevel=2 | endif
+if has('conceal') | set conceallevel=2 concealcursor=n | endif
 if has('win32')
   set makeencoding=cp932
   set termencoding=cp932
