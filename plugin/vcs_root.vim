@@ -42,7 +42,7 @@ def VcsRoot_lcd(bang: string, arguments: list<string>)
   if root->empty()
     echomsg "('_`;) >/" .. getcwd()->fnamemodify(':t') .. '/'
   else
-    execute (bang->empty() ? 'tcd ' : 'lcd') .. root
+    execute (bang->empty() ? 'tcd ' : 'lcd ') .. root
   endif
 enddef
 
