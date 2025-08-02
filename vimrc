@@ -177,7 +177,7 @@ if !has('gui_running') | set mouse=  | endif
 # set autochdir
 # set isfname+=(,)
 # set textwidth=0
-set synmaxcol=200
+# set synmaxcol=200
 # set scrolloff=999
 # set splitbelow
 # set splitright
