@@ -401,9 +401,9 @@ syn clear xmlError
 ################################
 #   6.11 Disallowed Raw HTML (extension)
 #   6.12 Hard line breaks {{{
-syn match markdownLineBreak /  $/ contained containedin=@markdownInline
+syn match markdownLineBreak /  $/ containedin=@markdownInline
 
-hi link markdownLineBreak  EndOfBuffer
+hi link markdownLineBreak ErrorMsg
 #   }}}
 
 
