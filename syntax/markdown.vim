@@ -1,5 +1,5 @@
 vim9script
-# vim:set sw=2:
+
 if exists("b:current_syntax")
   finish
 endif
@@ -229,40 +229,48 @@ def Markdown_defineEmphasis(name: string, beg: string, end: string)
     name, beg, end, (get(g:, 'markdown_strong_emphasis_oneline', 0) ? 'oneline' : ''))
 enddef
 
-def LeftFlanking_Delimiter_Run(chr: string, count: number, punct: string, pre: string): string
+def LeftFlanking_Delimiter_Run(chr: string, count: number, punct: string, left: string): string
   var delim = repeat(chr, count)
 
   return join([
     # (1) and (2a)
-    pre .. delim .. '[[:space:]' .. punct .. ']\@!',
+    '[[:space:][:cntrl:]' .. punct .. chr .. left .. '\\]\@<!' 
+          \ .. delim 
+          \ .. '[[:space:][:cntrl:]' .. punct .. ']\@!',
     # (2b)
-    '[[:space:]' .. punct .. ']\@<=' .. delim .. '[' .. chr .. ']\@!'
+    '[[:space:][:cntrl:]' .. punct .. ']\@<=' 
+          \ .. delim 
+          \ .. '[[:space:][:cntrl:]]\@!'
   ], '\|')
 enddef
 
-def RightFlaking_Delimiter_Run(chr: string, count: number, punct: string, post: string): string
+def RightFlaking_Delimiter_Run(chr: string, count: number, punct: string, right: string): string
   var delim = repeat(chr, count)
 
   return join([
     # (1) and (2a)
-    '[[:space:]' .. punct .. ']\@<!' .. delim .. post,
+    '[[:space:][:cntrl:]' .. punct .. chr .. '\\]\@<!' .. 
+          \ delim .. 
+          \ '[[:space:][:cntrl:]' .. punct .. chr .. right .. ']\@!',
     # (2b)
-    '[[:space:]' .. chr .. ']\@<!' .. delim .. '[[:space:]' .. punct .. ']\@='
+    '[[:space:][:cntrl:]\\]\@<!' 
+          \ .. delim 
+          \ .. '[[:space:][:cntrl:]' .. punct .. ']\@='
   ], '\|')
 enddef
 
 def Markdown_syntaxEmphasis(name: string, count: number)
   # asterisk
-  var ast_punct = '!"#$%&' .. "'" .. '()+,\-./:;<=>?@\[\]^_`{|}~'
-  var ast_left = LeftFlanking_Delimiter_Run('\*', count, ast_punct, '\\\@<!')
+  var ast_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^_`{|}~'
+  var ast_left = LeftFlanking_Delimiter_Run('\*', count, ast_punct, '')
   var ast_right = RightFlaking_Delimiter_Run('\*', count, ast_punct, '')
 
   call Markdown_defineEmphasis(name, ast_left, ast_right)
 
   # underscore
-  var udl_punct = '!"#$%&' .. "'" .. '()+,\-./:;<=>?@\[\]^*`{|}~'
-  var udl_left = LeftFlanking_Delimiter_Run('_', count, udl_punct, '[[:alnum:]\\]\@<!')
-  var udl_right = RightFlaking_Delimiter_Run('_', count, udl_punct, '[[:alnum:]]\@!')
+  var udl_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^*`{|}~'
+  var udl_left = LeftFlanking_Delimiter_Run('_', count, udl_punct, '[:alnum:]\u2E00-\U3FFFF')
+  var udl_right = RightFlaking_Delimiter_Run('_', count, udl_punct, '[:alnum:]\u2E00-\U3FFFF')
 
   call Markdown_defineEmphasis(name, udl_left, udl_right)
 enddef
