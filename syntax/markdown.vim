@@ -323,8 +323,7 @@ hi link markdownLatexSpan String
 
 
 ################################
-#   6.6 Links
-#   6.7 Images {{{
+#   6.6 Links {{{
 syn region markdownLink matchgroup=markdownLinkMarker start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
       \ nextgroup=markdownLinkDest,markdownLinkRef keepend oneline display
 
@@ -356,6 +355,16 @@ hi link markdownLinkUrl Underlined
 syn region markdownLinkAltTitle start=/"/ skip=/\\"/ end=/"/ contained display conceal cchar="
 
 hi link markdownLinkAltTitle String
+#   }}}
+
+
+################################
+#   6.7 Images {{{
+syn region markdownImage matchgroup=markdownLinkMarker start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
+      \ nextgroup=markdownLinkDest keepend oneline display
+
+hi link markdownImage String
+
 #   }}}
 
 
