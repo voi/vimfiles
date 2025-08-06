@@ -295,19 +295,13 @@ hi link markdownStrongEmphasisMarker SpecialKey
 ################################
 #   6.5 Strikethrough (extension) {{{
 syn region markdownStrikeThrough start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
-      \ containedin=@markdownInline contains=markdownConcealUrlInStrikeThrough oneline display
+      \ containedin=@markdownInline contains=markdownInlineLink oneline display
 
-if !link_url_cchar->empty()
-  var conceal_syntax = 'syn match markdownConcealUrlInStrikeThrough /%s/ conceal cchar=' .. link_url_cchar[0]
-
-  execute printf(conceal_syntax, "\\<www\\.[^[:cntrl:][:space:]<>]\\+\\>")
-  execute printf(conceal_syntax, "\\<[a-z]]\\{3,}:\\/\\/[\\w!?\\/+\\-_\\~;.,*&@#$%()'[\\]]+\\>")
-  execute printf(conceal_syntax, "\\<[\\w\\-._]+@[\\w\\-._]+\\.[A-Za-z]+\\>")
-
-  hi link markdownConcealUrlInStrikeThrough markdownTaskDone
+if has('gui_running')
+  hi markdownStrikeThrough  gui=strikethrough guifg=#999999
+else
+  hi link markdownStrikeThrough  SpecialKey
 endif
-
-hi link markdownStrikeThrough markdownTaskDone
 #   }}}
 
 
