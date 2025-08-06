@@ -765,7 +765,7 @@ if has('gui_running')
   # indent guide
   def GVimrc_indent_guide()
     if &expandtab
-      setlocal conceallevel=2 concealcursor=iv
+      setlocal conceallevel=2 # concealcursor=iv
 
       for i in range(1, 16)
         call matchadd(
