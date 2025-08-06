@@ -236,11 +236,11 @@ def LeftFlanking_Delimiter_Run(chr: string, count: number, punct: string, left: 
     # (1) and (2a)
     '[[:space:][:cntrl:]' .. punct .. chr .. left .. '\\]\@<!' 
           \ .. delim 
-          \ .. '[[:space:][:cntrl:]' .. punct .. ']\@!',
+          \ .. '[[:space:][:cntrl:]' .. punct .. chr .. ']\@!',
     # (2b)
     '[[:space:][:cntrl:]' .. punct .. ']\@<=' 
           \ .. delim 
-          \ .. '[[:space:][:cntrl:]]\@!'
+          \ .. '[[:space:][:cntrl:]' .. chr .. ']\@!'
   ], '\|')
 enddef
 
@@ -253,9 +253,9 @@ def RightFlaking_Delimiter_Run(chr: string, count: number, punct: string, right:
           \ delim .. 
           \ '[[:space:][:cntrl:]' .. punct .. chr .. right .. ']\@!',
     # (2b)
-    '[[:space:][:cntrl:]\\]\@<!' 
+    '[[:space:][:cntrl:]\\' .. chr .. ']\@<!' 
           \ .. delim 
-          \ .. '[[:space:][:cntrl:]' .. punct .. ']\@='
+          \ .. '[[:space:][:cntrl:]' .. punct .. chr .. ']\@='
   ], '\|')
 enddef
 
