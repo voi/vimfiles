@@ -163,35 +163,41 @@ hi link markdownBlockquote Directory
 ################################
 #   5.2 List items
 #   5.4 Lists {{{
-syn match markdownListMarker /\d\{1,9}[.)][[:space:]]\@=/ 
-      \ display contained skipwhite nextgroup=markdownContainerBlockStart
-syn match markdownListMarker /\([-+*]\)[[:space:]]\@=/ 
-      \ display contained skipwhite nextgroup=markdownTaskTodo,markdownTaskDone,markdownContainerBlockStart
+syn cluster markdownList 
+      \ contains=markdownOrderedList,markdownUnorderedList
 
-hi link markdownListMarker  Tag
+syn match markdownOrderedList /\d\{1,9}[.)]\s\@=/ 
+      \ skipwhite nextgroup=markdownContainerBlockStart
+      \ contained display
+syn match markdownUnorderedList /[-+*]\s\@=/ 
+      \ skipwhite nextgroup=markdownContainerBlockStart
+      \ contained display
+
+hi link markdownOrderedList Tag
+hi link markdownUnorderedList Tag
 #   }}}
 
 
 ################################
 #   5.3 Task list items (extension) {{{
-syn match markdownTaskTodo /\[ \]/    contained display
-syn match markdownTaskDone /\[x\] .*/ contained display
+syn cluster markdownContainerBlock 
+      \ add=markdownTaskTodo,markdownTaskDone
 
-#
+syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2 
+      \ contains=markdownUnorderedList contained display
+syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2 
+      \ contains=markdownUnorderedList,markdownInlineLink contained display
+
 hi link markdownTaskTodo Statement
-
-if has('gui_running')
-  hi markdownTaskDone  gui=strikethrough guifg=#999999
-else
-  hi link markdownTaskDone  SpecialKey
-endif
+hi link markdownTaskDone markdownStrikeThrough
 #   }}}
 
 # }}}
 
 ################################################################
 # 6 Inlines {{{
-syn cluster markdownInline contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink
+syn cluster markdownInline 
+      \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink
 
 
 ################################
