@@ -9,7 +9,14 @@ endif
 syn sync minlines=50 maxlines=75
 syn case ignore
 
-var link_url_cchar = get(g:, 'markdown_link_url_conceal_char', '')
+#
+var link_dest_cchars = get(g:, 'markdown_link_destination_cchars', '')
+#
+var markdown_link_destination_conceal = ((link_dest_cchars->len() > 0) ?
+      \ ' conceal cchar=' .. link_dest_cchars[0] : '')
+#
+var markdown_link_title_conceal = ((link_dest_cchars->len() > 1) ?
+      \ ' conceal cchar=' .. link_dest_cchars[1] : '')
 
 
 ################################################################
@@ -93,28 +100,13 @@ hi link markdownFencedCodeBlock Comment
 ################################
 #   4.6 HTML blocks
 #   4.7 Link reference definitions {{{
-syn region markdownLinkReferenceDefine matchgroup=markdownLinkMarker start=/\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\]:/ 
-      \ nextgroup=markdownLinkRefDefDest skipwhite oneline contained display
+syn region markdownLinkReferenceDefine matchgroup=markdownLinkMarker 
+      \ start=/\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\]:/ 
+      \ nextgroup=markdownLinkDestination skipwhite oneline display
 
 hi link markdownLinkReferenceDefine Tag
 hi link markdownLinkMarker Statement
 
-#
-var link_ref_def_dest = 'nextgroup=markdownLinkTitle skipwhite contained display'
-
-if !link_url_cchar->empty()
-  link_ref_def_dest ..= ' conceal cchar=' .. link_url_cchar[0]
-endif
-
-execute 'syn region markdownLinkRefDefDest start=/</ skip=/\\[<>]/ end=/>/ oneline ' .. link_ref_def_dest
-execute 'syn match markdownLinkRefDefDest /[^<>[:space:]]\+/ ' .. link_ref_def_dest
-
-hi link markdownLinkRefDefDest Underlined
-
-#
-syn region markdownLinkTitle start=/\"/ skip=/\\\"/ end=/\"/ contained display
-
-hi link markdownLinkTitle String
 #   }}}
 
 
@@ -324,44 +316,56 @@ hi link markdownLatexSpan String
 
 ################################
 #   6.6 Links {{{
-syn region markdownLink matchgroup=markdownLinkMarker start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
-      \ nextgroup=markdownLinkDest,markdownLinkRef keepend oneline display
+syn region markdownLink matchgroup=markdownLinkMarker 
+      \ start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
+      \ nextgroup=markdownInlineLink,markdownLinkRef keepend oneline display
 
 hi link markdownLink String
 
 #
-syn region markdownLinkDest matchgroup=markdownLinkMarker start=/(/ skip=/\\[()]/ end=/\\\@<!)/ 
-      \ oneline contains=markdownLinkUrl transparent keepend contained display
+syn region markdownInlineLink matchgroup=markdownLinkMarker 
+      \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ 
+      \ oneline contains=markdownLinkDestination transparent keepend contained display
 
 #
-syn region markdownLinkRef matchgroup=markdownLinkMarker start=/\[/ skip=/\\[\[\]]/ end=/\\\@<!\]/ 
+syn region markdownLinkRef matchgroup=markdownLinkMarker 
+      \ start=/\[/ skip=/\\[\[\]]/ end=/\\\@<!\]/ 
       \ oneline contained display
 
 hi link markdownLinkRef Tag
 
 #
-var link_dest = 'nextgroup=markdownLinkAltTitle skipwhite contained display'
+execute 'syn region markdownLinkDestination start=/</ skip=/\\[<>]/ end=/>/ '
+      \ .. 'keepend oneline nextgroup=markdownLinkTitle skipwhite contained display ' 
+      \ .. markdown_link_destination_conceal
+execute 'syn match markdownLinkDestination /\%([^<>()[:space:][:cntrl:]]\|\[()]\)\+/ ' 
+      \ .. 'nextgroup=markdownLinkTitle skipwhite contained display'
+      \ .. markdown_link_destination_conceal
 
-if !link_url_cchar->empty()
-  link_dest ..= ' conceal cchar=' .. link_url_cchar[0]
-endif
-
-execute 'syn region markdownLinkUrl start=/</ skip=/\\[<>]/ end=/>/ oneline ' .. link_dest
-execute 'syn match markdownLinkUrl /[^<>[:space:]]\+/ ' .. link_dest
-
-hi link markdownLinkUrl Underlined
+hi link markdownLinkDestination Underlined
 
 #
-syn region markdownLinkAltTitle start=/"/ skip=/\\"/ end=/"/ contained display conceal cchar="
+def Markdown_syntaxLinkTitle(start: string, skip: string, end: string)
+  execute 'syn region markdownLinkTitle '
+        \ .. printf('start=/\\\@<!%s/ skip=/\\%s/ end=/\\\@<!%s/ ', start, skip, end)
+        \ .. 'keepend contained display'
+        \ .. markdown_link_title_conceal
+enddef
 
-hi link markdownLinkAltTitle String
+call Markdown_syntaxLinkTitle('"', '"', '"')
+call Markdown_syntaxLinkTitle("'", "'", "'")
+call Markdown_syntaxLinkTitle('(', '[()]', ')')
+
+
+hi link markdownLinkTitle String
 #   }}}
 
 
 ################################
 #   6.7 Images {{{
-syn region markdownImage matchgroup=markdownLinkMarker start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
-      \ nextgroup=markdownLinkDest keepend oneline display
+syn region markdownImage matchgroup=markdownLinkMarker 
+      \ start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
+      \ nextgroup=markdownInlineLink keepend oneline display
 
 hi link markdownImage String
 
