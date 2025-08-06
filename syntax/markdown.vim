@@ -33,7 +33,8 @@ endif
 
 ################################################################
 # 4. Leaf blocks {{{
-syn cluster markdownLeafBlock contains=markdownThematicBreak,markdownHeader,markdownCodeBlock,markdownFencedCodeBlock,markdownLinkReferenceDefine
+syn cluster markdownLeafBlock 
+      \ contains=markdownThematicBreak,markdownHeader,markdownCodeBlock,markdownFencedCodeBlock,markdownLinkReferenceDefine
 
 
 ################################
@@ -141,7 +142,7 @@ syn sync match markdownLatexBlockMarker grouphere markdownLatexBlock "[`\$]\{2}"
 ################################################################
 # 5 Container blocks {{{
 syn cluster markdownContainerBlock 
-      \ contains=markdownBlockquote,markdownListMarker
+      \ contains=markdownBlockquote,@markdownList
 
 if &expandtab
   syn match markdownContainerBlockStart /\%( \{4}\)*\%( \{1,3}\)\?/ 
@@ -154,7 +155,8 @@ endif
 
 ################################
 #   5.1 Block quotes {{{
-syn match markdownBlockquote />/ nextgroup=markdownContainerBlockStart contained display
+syn match markdownBlockquote />/ 
+      \ nextgroup=markdownContainerBlockStart contained display
 
 hi link markdownBlockquote Directory
 #   }}}
@@ -388,13 +390,13 @@ hi link markdownAutoLink Underlined
 ################################
 #   6.9 Autolinks (extension) {{{
 # www
-syn match markdownAutoLinkEx /\<www\.[^[:cntrl:][:space:]<>]\+\>/ 
+syn match markdownAutoLinkEx /\<www\.[^<>[:cntrl:][:space:]]\+\>/ 
       \ display containedin=@markdownInline
 # url
-syn match markdownAutoLinkEx /\<[a-z]]\{3,}:\/\/[\w!?\/+\-_\~;.,*&@#$%()'[\]]+\>/ 
+syn match markdownAutoLinkEx /\<[a-z]]\{3,}:\/\/[[:alnum:]!?\/+\-_\~;.,*&@#$%()'[\]]\+\>/ 
       \ display containedin=@markdownInline
 # mail
-syn match markdownAutoLinkEx /\<[\w\-._]+@[\w\-._]+\.[A-Za-z]+\>/ 
+syn match markdownAutoLinkEx /\<[[:alnum:]\-._]+@[[:alnum:]\-._]\+\.[[:alpha:]]\+\>/ 
       \ display containedin=@markdownInline
 
 hi link markdownAutoLinkEx Underlined
@@ -462,7 +464,7 @@ hi link markdownEmoji Constant
 ################################################################
 # Front matter (YAML) {{{
 syn region markdownFrontMatter matchgroup=markdownFrontMatterMarker 
-      \ start=/\%^---$/ end=/^\%(---\|\.\.\.\)\s*$/ keepend display contains=@Spell
+      \ start=/\%^---$/ end=/^\%(---\|\.\.\.\)\s*$/ keepend contained display contains=@Spell
 
 hi link markdownFrontMatterMarker Delimiter
 hi link markdownFrontMatter Comment
