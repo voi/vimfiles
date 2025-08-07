@@ -9,14 +9,16 @@ endif
 syn sync minlines=50 maxlines=75
 syn case ignore
 
+# 
+var is_gfm_enabled = get(g:, 'markdown_gfm_extension_enabled', 1)
+# 
+var is_latex_enabled = get(g:, 'markdown_math_syntax_enabled', 1)
 #
-var link_dest_cchars = get(g:, 'markdown_link_destination_cchars', '')
+var link_dest_cchars = get(g:, 'markdown_link_destination_cchars', '')->split('\zs')
 #
-var markdown_link_destination_conceal = ((link_dest_cchars->len() > 0) ?
-      \ ' conceal cchar=' .. link_dest_cchars[0] : '')
+var markdown_link_destination_conceal = ' conceal cchar=' .. get(link_dest_cchars, 0, '')
 #
-var markdown_link_title_conceal = ((link_dest_cchars->len() > 1) ?
-      \ ' conceal cchar=' .. link_dest_cchars[1] : '')
+var markdown_link_title_conceal = ' conceal cchar=' .. get(link_dest_cchars, 1, '')
 
 
 ################################################################
@@ -118,27 +120,31 @@ hi link markdownLinkMarker Statement
 #   4.8 Paragraphs
 #   4.9 Blank lines
 #   4.10 Tables (extension) {{{
-syn cluster markdownLeafBlock add=markdownTable
+if is_gfm_enabled
+  syn cluster markdownLeafBlock add=markdownTable
 
-syn match markdownTable /\%(\S.*\s\)\\\@<!|\%(.*\s|\)*\%(.*\)\?/ 
-      \ transparent contains=markdownTableBorder,@markdownInline contained
-syn match markdownTableBorder /\%(^\|\s\)\@<=|\ze\%(\s\|$\)/ contained
-syn match markdownTableBorder /:\?-\+:\?/ contained
+  syn match markdownTable /\%(\S.*\s\)\\\@<!|\%(.*\s|\)*\%(.*\)\?/ 
+        \ transparent contains=markdownTableBorder,@markdownInline contained
+  syn match markdownTableBorder /\%(^\|\s\)\@<=|\ze\%(\s\|$\)/ contained
+  syn match markdownTableBorder /:\?-\+:\?/ contained
 
-hi link markdownTableBorder Statement
+  hi link markdownTableBorder Statement
+endif
 #   }}}
 
 
 ################################
 #   x.x Latex Block (extension) {{{
-syn cluster markdownLeafBlock add=markdownLatexBlock
+if is_latex_enabled
+  syn cluster markdownLeafBlock add=markdownLatexBlock
 
-syn region markdownLatexBlock matchgroup=Delimiter
-      \ start=/\z(\$\{2}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1\s*$/ 
-      \ keepend contained
+  syn region markdownLatexBlock matchgroup=Delimiter
+        \ start=/\z(\$\{2}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1\s*$/ 
+        \ keepend contained
 
-syn sync match markdownLatexBlockMarker 
-      \ grouphere markdownLatexBlock "[`\$]\{2}" 
+  syn sync match markdownLatexBlockMarker 
+        \ grouphere markdownLatexBlock "[`\$]\{2}" 
+endif
 #   }}}
 
 # }}}
@@ -189,18 +195,20 @@ hi link markdownUnorderedList Tag
 
 ################################
 #   5.3 Task list items (extension) {{{
-syn cluster markdownContainerBlock 
-      \ add=markdownTaskTodo,markdownTaskDone
+if is_gfm_enabled
+  syn cluster markdownContainerBlock 
+        \ add=markdownTaskTodo,markdownTaskDone
 
-syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2 
-      \ contains=markdownUnorderedList 
-      \ contained display
-syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2 
-      \ contains=markdownUnorderedList,markdownInlineLink 
-      \ contained display
+  syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2 
+        \ contains=markdownUnorderedList 
+        \ contained display
+  syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2 
+        \ contains=markdownUnorderedList,markdownInlineLink 
+        \ contained display
 
-hi link markdownTaskTodo Statement
-hi link markdownTaskDone markdownStrikeThrough
+  hi link markdownTaskTodo Statement
+  hi link markdownTaskDone markdownStrikeThrough
+endif
 #   }}}
 
 # }}}
@@ -306,26 +314,30 @@ hi link markdownStrongEmphasisMarker SpecialKey
 
 ################################
 #   6.5 Strikethrough (extension) {{{
-syn region markdownStrikeThrough 
-      \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
-      \ containedin=@markdownInline contains=markdownInlineLink 
-      \ oneline display
+if is_gfm_enabled
+  syn region markdownStrikeThrough 
+        \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
+        \ containedin=@markdownInline contains=markdownInlineLink 
+        \ oneline display
 
-if has('gui_running')
-  hi markdownStrikeThrough  gui=strikethrough guifg=#999999
-else
-  hi link markdownStrikeThrough  SpecialKey
+  if has('gui_running')
+    hi markdownStrikeThrough  gui=strikethrough guifg=#999999
+  else
+    hi link markdownStrikeThrough  SpecialKey
+  endif
 endif
 #   }}}
 
 
 ################################
 #   x.x Latex Span (extension) {{{
-syn region markdownLatexSpan 
-      \ start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
-      \ containedin=@markdownInline oneline display
+if is_latex_enabled
+  syn region markdownLatexSpan 
+        \ start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
+        \ containedin=@markdownInline oneline display
 
-hi link markdownLatexSpan String
+  hi link markdownLatexSpan String
+endif
 #   }}}
 
 
@@ -405,17 +417,19 @@ hi link markdownAutoLink Underlined
 
 ################################
 #   6.9 Autolinks (extension) {{{
-# www
-syn match markdownAutoLinkEx /\<www\.[^<>[:cntrl:][:space:]]\+\>/ 
-      \ display containedin=@markdownInline
-# url
-syn match markdownAutoLinkEx /\<[a-z]]\{3,}:\/\/[[:alnum:]!?\/+\-_\~;.,*&@#$%()'[\]]\+\>/ 
-      \ display containedin=@markdownInline
-# mail
-syn match markdownAutoLinkEx /\<[[:alnum:]\-._]+@[[:alnum:]\-._]\+\.[[:alpha:]]\+\>/ 
-      \ display containedin=@markdownInline
+if is_gfm_enabled
+  # www
+  syn match markdownAutoLinkEx /\<www\.[^<>[:cntrl:][:space:]]\+\>/ 
+        \ display containedin=@markdownInline
+  # url
+  syn match markdownAutoLinkEx /\<[a-z]]\{3,}:\/\/[[:alnum:]!?\/+\-_\~;.,*&@#$%()'[\]]\+\>/ 
+        \ display containedin=@markdownInline
+  # mail
+  syn match markdownAutoLinkEx /\<[[:alnum:]\-._]+@[[:alnum:]\-._]\+\.[[:alpha:]]\+\>/ 
+        \ display containedin=@markdownInline
 
-hi link markdownAutoLinkEx Underlined
+  hi link markdownAutoLinkEx Underlined
+endif
 #   }}}
 
 
@@ -453,28 +467,30 @@ hi link markdownLineBreak ErrorMsg
 # }}}
 
 ################################################################
-#   Issue reference within a repository (Github) {{{
-syn match markdownIssueRef /\%(^\|\s\)\@<=#\d\+\%(\s\|$\)\@=/ 
-      \ display containedin=@markdownInline
-syn match markdownIssueRef /\%(^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\s\|$\)\@=/ 
-      \ display containedin=@markdownInline
+if is_gfm_enabled
+  #   Issue reference within a repository (Github) {{{
+  syn match markdownIssueRef /\%(^\|\s\)\@<=#\d\+\%(\s\|$\)\@=/ 
+        \ display containedin=@markdownInline
+  syn match markdownIssueRef /\%(^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\s\|$\)\@=/ 
+        \ display containedin=@markdownInline
 
-hi link markdownIssueRef Tag
-#   }}}
+  hi link markdownIssueRef Tag
+  #   }}}
 
-#   Username @mentions (Github) {{{
-syn match markdownMentions /\%(^\|\s\)\@<=@[[:alnum:]-_]\+\%(\s\|$\)\@=/ 
-      \ display containedin=@markdownInline
+  #   Username @mentions (Github) {{{
+  syn match markdownMentions /\%(^\|\s\)\@<=@[[:alnum:]-_]\+\%(\s\|$\)\@=/ 
+        \ display containedin=@markdownInline
 
-hi link markdownMentions Identifier
-#   }}}
+  hi link markdownMentions Identifier
+  #   }}}
 
-#   Emoji (Github) {{{
-syn match markdownEmoji /\%(^\|\s\)\@<=:\a\w\+\a:\%(\s\|$\)\@=/ 
-      \ display containedin=@markdownInline
+  #   Emoji (Github) {{{
+  syn match markdownEmoji /\%(^\|\s\)\@<=:\a\w\+\a:\%(\s\|$\)\@=/ 
+        \ display containedin=@markdownInline
 
-hi link markdownEmoji Constant
-#   }}}
+  hi link markdownEmoji Constant
+  #   }}}
+endif
 
 
 ################################################################
