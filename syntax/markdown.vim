@@ -23,10 +23,12 @@ var markdown_link_title_conceal = ((link_dest_cchars->len() > 1) ?
 # 3. Block and Inline {{{
 if &expandtab
   syn match markdownBlockStart /^\%( \{4}\)*\%( \{1,3}\)\?/ 
-        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock,markdownFrontMatter display
+        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock,markdownFrontMatter 
+        \ display
 else
   syn match markdownBlockStart /^\t*\%( \{1,3}\)\?/ 
-        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock,markdownFrontMatter display
+        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock,markdownFrontMatter 
+        \ display
 endif
 
 # }}}
@@ -92,7 +94,8 @@ syn region markdownFencedCodeBlock matchgroup=Delimiter
       \ start=/\z(\~\{3,}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/ end=/\z1\~*\s*$/ 
       \ keepend contained display
 
-syn sync match markdownFencedCodeBlockMarker grouphere markdownFencedCodeBlock "[`\~]\{3,}" 
+syn sync match markdownFencedCodeBlockMarker 
+      \ grouphere markdownFencedCodeBlock "[`\~]\{3,}" 
 
 hi link markdownFencedCodeBlock Comment
 #   }}}
@@ -134,7 +137,8 @@ syn region markdownLatexBlock matchgroup=Delimiter
       \ start=/\z(\$\{2}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1\s*$/ 
       \ keepend contained
 
-syn sync match markdownLatexBlockMarker grouphere markdownLatexBlock "[`\$]\{2}" 
+syn sync match markdownLatexBlockMarker 
+      \ grouphere markdownLatexBlock "[`\$]\{2}" 
 #   }}}
 
 # }}}
@@ -146,17 +150,20 @@ syn cluster markdownContainerBlock
 
 if &expandtab
   syn match markdownContainerBlockStart /\%( \{4}\)*\%( \{1,3}\)\?/ 
-        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock contained
+        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock 
+        \ contained
 else
   syn match markdownContainerBlockStart /\t*\%( \{1,3}\)\?/ 
-        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock contained
+        \ nextgroup=@markdownLeafBlock,@markdownContainerBlock 
+        \ contained
 endif
 
 
 ################################
 #   5.1 Block quotes {{{
 syn match markdownBlockquote />/ 
-      \ nextgroup=markdownContainerBlockStart contained display
+      \ nextgroup=markdownContainerBlockStart 
+      \ contained display
 
 hi link markdownBlockquote Directory
 #   }}}
@@ -186,9 +193,11 @@ syn cluster markdownContainerBlock
       \ add=markdownTaskTodo,markdownTaskDone
 
 syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2 
-      \ contains=markdownUnorderedList contained display
+      \ contains=markdownUnorderedList 
+      \ contained display
 syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2 
-      \ contains=markdownUnorderedList,markdownInlineLink contained display
+      \ contains=markdownUnorderedList,markdownInlineLink 
+      \ contained display
 
 hi link markdownTaskTodo Statement
 hi link markdownTaskDone markdownStrikeThrough
@@ -204,7 +213,8 @@ syn cluster markdownInline
 
 ################################
 #   6.1 Backslash escapes {{{
-syn match markdownEscape /\\[!"#$%&'()*+,\-./:;<=>?@\[\]^_`{|}~]/ display
+syn match markdownEscape /\\[!"#$%&'()*+,\-./:;<=>?@\[\]^_`{|}~]/ 
+      \ display
 
 hi link markdownEscape WarningMsg
 #   }}}
@@ -296,8 +306,10 @@ hi link markdownStrongEmphasisMarker SpecialKey
 
 ################################
 #   6.5 Strikethrough (extension) {{{
-syn region markdownStrikeThrough start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
-      \ containedin=@markdownInline contains=markdownInlineLink oneline display
+syn region markdownStrikeThrough 
+      \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
+      \ containedin=@markdownInline contains=markdownInlineLink 
+      \ oneline display
 
 if has('gui_running')
   hi markdownStrikeThrough  gui=strikethrough guifg=#999999
@@ -309,7 +321,8 @@ endif
 
 ################################
 #   x.x Latex Span (extension) {{{
-syn region markdownLatexSpan start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
+syn region markdownLatexSpan 
+      \ start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
       \ containedin=@markdownInline oneline display
 
 hi link markdownLatexSpan String
@@ -320,14 +333,16 @@ hi link markdownLatexSpan String
 #   6.6 Links {{{
 syn region markdownLink matchgroup=markdownLinkMarker 
       \ start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
-      \ nextgroup=markdownInlineLink,markdownLinkRef keepend oneline display
+      \ nextgroup=markdownInlineLink,markdownLinkRef 
+      \ keepend oneline display
 
 hi link markdownLink String
 
 #
 syn region markdownInlineLink matchgroup=markdownLinkMarker 
       \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ 
-      \ oneline contains=markdownLinkDestination transparent keepend contained display
+      \ oneline contains=markdownLinkDestination 
+      \ transparent keepend contained display
 
 #
 syn region markdownLinkRef matchgroup=markdownLinkMarker 
@@ -367,7 +382,8 @@ hi link markdownLinkTitle String
 #   6.7 Images {{{
 syn region markdownImage matchgroup=markdownLinkMarker 
       \ start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
-      \ nextgroup=markdownInlineLink keepend oneline display
+      \ nextgroup=markdownInlineLink 
+      \ keepend oneline display
 
 hi link markdownImage String
 
@@ -464,7 +480,8 @@ hi link markdownEmoji Constant
 ################################################################
 # Front matter (YAML) {{{
 syn region markdownFrontMatter matchgroup=markdownFrontMatterMarker 
-      \ start=/\%^---$/ end=/^\%(---\|\.\.\.\)\s*$/ keepend contained display contains=@Spell
+      \ start=/\%^---$/ end=/^\%(---\|\.\.\.\)\s*$/ 
+      \ keepend contained display contains=@Spell
 
 hi link markdownFrontMatterMarker Delimiter
 hi link markdownFrontMatter Comment
