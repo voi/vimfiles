@@ -216,7 +216,7 @@ endif
 ################################################################
 # 6 Inlines {{{
 syn cluster markdownInline 
-      \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink
+      \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink,markdownLineBreak
 
 
 ################################
@@ -315,10 +315,11 @@ hi link markdownStrongEmphasisMarker SpecialKey
 ################################
 #   6.5 Strikethrough (extension) {{{
 if is_gfm_enabled
+  syn cluster markdownInline add=markdownStrikeThrough
+
   syn region markdownStrikeThrough 
         \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
-        \ containedin=@markdownInline contains=markdownInlineLink 
-        \ oneline display
+        \ contains=markdownInlineLink oneline display
 
   if has('gui_running')
     hi markdownStrikeThrough  gui=strikethrough guifg=#999999
@@ -332,9 +333,11 @@ endif
 ################################
 #   x.x Latex Span (extension) {{{
 if is_latex_enabled
+  syn cluster markdownInline add=markdownLatexSpan
+
   syn region markdownLatexSpan 
         \ start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
-        \ containedin=@markdownInline oneline display
+        \ oneline display
 
   hi link markdownLatexSpan String
 endif
@@ -454,7 +457,7 @@ syn clear xmlError
 ################################
 #   6.11 Disallowed Raw HTML (extension)
 #   6.12 Hard line breaks {{{
-syn match markdownLineBreak /  $/ containedin=@markdownInline
+syn match markdownLineBreak /  $/ contained
 
 hi link markdownLineBreak ErrorMsg
 #   }}}
