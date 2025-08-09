@@ -473,25 +473,27 @@ hi link markdownLineBreak ErrorMsg
 
 ################################################################
 if is_github_wiki_syntax_enabled
+  syn cluster markdownInline add=markdownIssueRef,markdownMentions,markdownEmoji
+
   #   Issue reference within a repository (Github) {{{
-  syn match markdownIssueRef /\%(^\|\s\)\@<=#\d\+\%(\s\|$\)\@=/ 
-        \ display containedin=@markdownInline
-  syn match markdownIssueRef /\%(^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\s\|$\)\@=/ 
-        \ display containedin=@markdownInline
+  syn match markdownIssueRef /\%(\_^\|\s\)\@<=#\d\+\%(\_$\|\s\)\@=/ 
+        \ display
+  syn match markdownIssueRef /\%(\_^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\_$\|\s\)\@=/ 
+        \ display
 
   hi link markdownIssueRef Tag
   #   }}}
 
   #   Username @mentions (Github) {{{
-  syn match markdownMentions /\%(^\|\s\)\@<=@[[:alnum:]-_]\+\%(\s\|$\)\@=/ 
-        \ display containedin=@markdownInline
+  syn match markdownMentions /\%(\_^\|\s\)\@<=@[[:alnum:]_-]\+\%(\_$\|\s\)\@=/ 
+        \ display
 
   hi link markdownMentions Identifier
   #   }}}
 
   #   Emoji (Github) {{{
-  syn match markdownEmoji /\%(^\|\s\)\@<=:\a\w\+\a:\%(\s\|$\)\@=/ 
-        \ display containedin=@markdownInline
+  syn match markdownEmoji /\%(\_^\|\s\)\@<=:\a\w*\a:\%(\_$\|\s\)\@=/ 
+        \ display
 
   hi link markdownEmoji Constant
   #   }}}
