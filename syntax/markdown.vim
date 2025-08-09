@@ -10,14 +10,13 @@ syn sync minlines=50 maxlines=75
 syn case ignore
 
 # 
-var is_gfm_enabled = get(g:, 'markdown_gfm_extension_enabled', 1)
-# 
-var is_latex_enabled = get(g:, 'markdown_math_syntax_enabled', 1)
+var is_latex_syntax_enabled = get(g:, 'markdown_latex_syntax_enabled', 1)
+var is_gfm_syntax_enabled = get(g:, 'markdown_gfm_extension_syntax_enabled', 1)
+var is_github_wiki_syntax_enabled = get(g:, 'markdown_github_wiki_syntax_enabled', 1)
 #
 var link_dest_cchars = get(g:, 'markdown_link_destination_cchars', '')->split('\zs')
 #
 var markdown_link_destination_conceal = ' conceal cchar=' .. get(link_dest_cchars, 0, '')
-#
 var markdown_link_title_conceal = ' conceal cchar=' .. get(link_dest_cchars, 1, '')
 
 
@@ -120,7 +119,7 @@ hi link markdownLinkMarker Statement
 #   4.8 Paragraphs
 #   4.9 Blank lines
 #   4.10 Tables (extension) {{{
-if is_gfm_enabled
+if is_gfm_syntax_enabled
   syn cluster markdownLeafBlock add=markdownTable
 
   syn match markdownTable /\%(\S.*\s\)\\\@<!|\%(.*\s|\)*\%(.*\)\?/ 
@@ -135,7 +134,7 @@ endif
 
 ################################
 #   x.x Latex Block (extension) {{{
-if is_latex_enabled
+if is_latex_syntax_enabled
   syn cluster markdownLeafBlock add=markdownLatexBlock
 
   syn region markdownLatexBlock matchgroup=Delimiter
@@ -195,7 +194,7 @@ hi link markdownUnorderedList Tag
 
 ################################
 #   5.3 Task list items (extension) {{{
-if is_gfm_enabled
+if is_gfm_syntax_enabled
   syn cluster markdownContainerBlock 
         \ add=markdownTaskTodo,markdownTaskDone
 
@@ -314,7 +313,7 @@ hi link markdownStrongEmphasisMarker SpecialKey
 
 ################################
 #   6.5 Strikethrough (extension) {{{
-if is_gfm_enabled
+if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownStrikeThrough
 
   syn region markdownStrikeThrough 
@@ -332,7 +331,7 @@ endif
 
 ################################
 #   x.x Latex Span (extension) {{{
-if is_latex_enabled
+if is_latex_syntax_enabled
   syn cluster markdownInline add=markdownLatexSpan
 
   syn region markdownLatexSpan 
@@ -420,7 +419,7 @@ hi link markdownAutoLink Underlined
 
 ################################
 #   6.9 Autolinks (extension) {{{
-if is_gfm_enabled
+if is_gfm_syntax_enabled
   # www
   syn match markdownAutoLinkEx /\<www\.[^<>[:cntrl:][:space:]]\+\>/ 
         \ display containedin=@markdownInline
@@ -470,7 +469,7 @@ hi link markdownLineBreak ErrorMsg
 # }}}
 
 ################################################################
-if is_gfm_enabled
+if is_github_wiki_syntax_enabled
   #   Issue reference within a repository (Github) {{{
   syn match markdownIssueRef /\%(^\|\s\)\@<=#\d\+\%(\s\|$\)\@=/ 
         \ display containedin=@markdownInline
