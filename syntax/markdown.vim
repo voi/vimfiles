@@ -406,12 +406,12 @@ hi link markdownImage String
 
 ################################
 #   6.8 Autolinks {{{
-# www
-syn match markdownAutoLink /<www\.[^[:cntrl:][:space:]<>]\+>/ display
-# uri
-syn match markdownAutoLink /<[a-z]]\{3,}:\/\/[\w!?\/+\-_\~;.,*&@#$%()'[\]]+>/ display
-# mail
-syn match markdownAutoLink /<[\w\-._]+@[\w\-._]+\.[A-Za-z]+>/ display
+# absolute URL
+syn match markdownAutoLink /\\\@<!<[[:alnum:]+.-]\{2,32}:[^<>[:space:][:cntrl:]]\+>/ 
+      \ display
+# email
+syn match markdownAutoLink /\\\@<!<[[:alnum:].!#$%&'*+\/=?^_`{|}~-]\+@\w\%([[:alnum:]-]\{0,61}\w\)\?\%(\.\w\%([[:alnum:]-]\{0,61}\w\)\?\)*>/ 
+      \ display
 
 hi link markdownAutoLink Underlined
 #   }}}
@@ -420,15 +420,18 @@ hi link markdownAutoLink Underlined
 ################################
 #   6.9 Autolinks (extension) {{{
 if is_gfm_syntax_enabled
+  syn cluster markdownInline add=markdownAutoLinkEx
+
   # www
-  syn match markdownAutoLinkEx /\<www\.[^<>[:cntrl:][:space:]]\+\>/ 
-        \ display containedin=@markdownInline
-  # url
-  syn match markdownAutoLinkEx /\<[a-z]]\{3,}:\/\/[[:alnum:]!?\/+\-_\~;.,*&@#$%()'[\]]\+\>/ 
-        \ display containedin=@markdownInline
-  # mail
-  syn match markdownAutoLinkEx /\<[[:alnum:]\-._]+@[[:alnum:]\-._]\+\.[[:alpha:]]\+\>/ 
-        \ display containedin=@markdownInline
+  syn match markdownAutoLinkEx /\<www\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+        \ display
+  # URL (http/https)
+  syn match markdownAutoLinkEx /\<https\?:\/\/[[:alnum:]_-]\+\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+        \ display
+  # email
+  syn match markdownAutoLinkEx /\<\%(mailto:\|xmpp:\)\?[[:alnum:]._+-]\+@[[:alnum:]._-]\+\%(\.[[:alnum:]._-]\+\)*[[:alnum:]]/ 
+        \ display
+
 
   hi link markdownAutoLinkEx Underlined
 endif
