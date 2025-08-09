@@ -423,13 +423,13 @@ if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownAutoLinkEx
 
   # www
-  syn match markdownAutoLinkEx /\<www\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=www\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
         \ display
   # URL (http/https)
-  syn match markdownAutoLinkEx /\<https\?:\/\/[[:alnum:]_-]\+\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=https\?:\/\/[[:alnum:]_-]\+\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
         \ display
   # email
-  syn match markdownAutoLinkEx /\<\%(mailto:\|xmpp:\)\?[[:alnum:]._+-]\+@[[:alnum:]._-]\+\%(\.[[:alnum:]._-]\+\)*[[:alnum:]]/ 
+  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=\%(mailto:\|xmpp:\)\?[[:alnum:]._+-]\+@[[:alnum:]._-]\+\%(\.[[:alnum:]._-]\+\)*[[:alnum:]]\>/ 
         \ display
 
 
