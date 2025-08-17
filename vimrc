@@ -226,6 +226,9 @@ else
   nnoremap <silent> gc "*c
   nnoremap <silent> gC "*C
 
+  nnoremap <silent> gs "*s
+  nnoremap <silent> gS "*S
+
   vnoremap <silent> gp "*p
   vnoremap <silent> gy "*y
   vnoremap <silent> gc "*c
