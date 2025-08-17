@@ -44,6 +44,7 @@ set cursorlineopt=number
 # folding
 set foldtext=getline(v:foldstart)
 set fillchars=fold:\ 
+set fillchars+=foldopen:▾,foldsep:.,foldclose:▸
 
 # format
 set formatoptions+=jnmM2
