@@ -13,6 +13,7 @@ try
 
   g:skk_jisyo = fnamemodify(globpath(&rtp, '_skk/') .. '.skk-jisyo', ':p')
   g:skk_large_jisyo = fnamemodify(globpath(&rtp, '_skk/') .. 'SKK-JISYO.L', ':p')
+  g:skk_manual_save_jisyo_keys = ''
   g:skk_auto_save_jisyo = 1
   g:skk_egg_like_newline = 1
   g:skk_show_annotation = 1
