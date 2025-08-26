@@ -266,9 +266,9 @@ def RightFlaking_Delimiter_Run(chr: string, count: number, punct: string, right:
 
   return join([
     # (1) and (2a)
-    '[[:space:][:cntrl:]' .. punct .. chr .. '\\]\@<!' .. 
-          \ delim .. 
-          \ '[[:space:][:cntrl:]' .. punct .. chr .. right .. ']\@!',
+    '[[:space:][:cntrl:]' .. punct .. chr .. '\\]\@<!' 
+          \ ..  delim 
+          \ ..  '[[:space:][:cntrl:]' .. punct .. chr .. right .. ']\@!',
     # (2b)
     '[[:space:][:cntrl:]\\' .. chr .. ']\@<!' 
           \ .. delim 
