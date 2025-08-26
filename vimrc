@@ -632,7 +632,7 @@ def Vimrc_custom_highlight()
     hi NormalNC     guifg=#BBBBBB             gui=italic    ctermfg=grey     cterm=italic
 
     if has('gui_running')
-      hi Normal     guifg=#F0F0F0               gui=NONE
+      hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
 
       hi Folded     guifg=#DDDDDD               gui=italic
       hi FoldColumn guifg=#FFFFFF               gui=bold
