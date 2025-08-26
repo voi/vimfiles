@@ -459,7 +459,8 @@ syn clear xmlError
 ################################
 #   6.11 Disallowed Raw HTML (extension)
 #   6.12 Hard line breaks {{{
-syn match markdownLineBreak /  $/ contained
+syn match markdownLineBreak / \{2,}$/ contained
+syn match markdownLineBreak /\\$/ contained
 
 hi link markdownLineBreak ErrorMsg
 #   }}}
