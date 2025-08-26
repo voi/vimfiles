@@ -145,8 +145,8 @@ def g:Vimrc_statusline(): string
   endif
 
   var icon_pwd = get(g:, 'vimrc_statusline_icon_pwd', '📍')
-  var icon_mod = get(g:, 'vimrc_statusline_icon_mod', '❎')
-  var icon_ro  = get(g:, 'vimrc_statusline_icon_ro',  '⚡')
+  var icon_mod = get(g:, 'vimrc_statusline_icon_mod', '⚡')
+  var icon_ro  = get(g:, 'vimrc_statusline_icon_ro',  '❎')
 
   left ..= '%#StatusLine_Modes#'
     .. (&modified ? icon_mod : '')
