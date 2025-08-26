@@ -42,6 +42,10 @@ set matchpairs& matchpairs+=<:>
 set cursorlineopt=number
 
 # folding
+def Vimrc_foldtext(): string
+  return getline(v:foldstart)->slice(0, winwidth(0) - 5) .. ' ...'
+enddef
+
 set foldtext=getline(v:foldstart)
 set fillchars=fold:\ 
 set fillchars+=foldopen:▾,foldsep:.,foldclose:▸
@@ -498,10 +502,6 @@ def Vimrc_markdown_foldexpr(): string
   return '='
 enddef
 
-def Vimrc_markdown_foldtext(): string
-  return getline(v:foldstart)
-enddef
-
 augroup vimrc_autocmd_filetype
   autocmd!
 
@@ -541,7 +541,7 @@ augroup vimrc_autocmd_filetype
   autocmd FileType markdown 
         \   setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
         \ | setl foldexpr=Vimrc_markdown_foldexpr()
-        \ | setl foldtext=Vimrc_markdown_foldtext()
+        \ | setl foldtext=Vimrc_foldtext()
 
 augroup END
 
