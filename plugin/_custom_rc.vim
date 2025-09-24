@@ -39,6 +39,13 @@ nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
 nnoremap <silent> <Leader>L  :CursorLineReverseOnOff<CR>
 nnoremap <silent> <Leader>s  :ScrolloffCenterOnOff<CR>
 
+## zoom in / out
+if has('gui_running') && has('win32')
+  nnoremap <silent> <Leader>+ :ZoomIn<CR>
+  nnoremap <silent> <Leader>- :ZoomOut<CR>
+  nnoremap <silent> <Leader>0 :ZoomReset<CR>
+endif
+
 ## popup
 nnoremap <silent> <C-p>f     :PopupFiles<CR>
 nnoremap <silent> <C-p>F     :PopupFiles %:h<CR>

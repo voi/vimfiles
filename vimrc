@@ -407,6 +407,42 @@ command! Where echo expand('%')->fnamemodify(':p:h')
 # print full file path
 command! Me echo expand('%')->fnamemodify(':p')
 
+# zoom in / out and reset
+var vimrc_zoom_guifont_original = []
+
+if has('gui_running') && has('win32')
+  command! ZoomIn {
+    if vimrc_zoom_guifont_original->empty()
+      vimrc_zoom_guifont_original = [&guifont, &guifontwide]
+    endif
+
+    var SizeUp = (setfont) => setfont->substitute('\%(:h\)\zs\(\d\+\)', (m) => m[1]->str2nr() + 1, 'g')
+
+    execute 'set guifont=' .. SizeUp(&guifont)
+    execute 'set guifontwide=' .. SizeUp(&guifontwide)
+  }
+
+  command! ZoomOut {
+    if vimrc_zoom_guifont_original->empty()
+      vimrc_zoom_guifont_original = [&guifont, &guifontwide]
+    endif
+
+    var SizeDown = (setfont) => setfont->substitute('\%(:h\)\zs\(\d\+\)', (m) => max([1, m[1]->str2nr() - 1]), 'g')
+
+    execute 'set guifont=' .. SizeDown(&guifont)
+    execute 'set guifontwide=' .. SizeDown(&guifontwide)
+  }
+
+  command! ZoomReset {
+    if !vimrc_zoom_guifont_original->empty()
+      execute 'set guifont=' .. get(vimrc_zoom_guifont_original, 0, '')
+      execute 'set guifontwide=' .. get(vimrc_zoom_guifont_original, 1, '')
+
+      vimrc_zoom_guifont_original = []
+    endif
+  }
+endif
+
 # open powershell (terminal is cmd.exe)
 if has('win32')
   command! Powershell terminal ++close ++rows=16 powershell
