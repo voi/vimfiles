@@ -510,6 +510,8 @@ augroup vimrc_autocmd_filetype
     autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setf xml
   endif
 
+  autocmd BufReadPost * if bufnr('$') == 1 | execute('lcd %:p:h') | endif
+
   autocmd FileType help nnoremap <buffer> q :pclose<CR><C-w>c
 
   # comment
