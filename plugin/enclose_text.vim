@@ -77,7 +77,7 @@ def EncloseText_complete(argload: string, cmdline: string, cursorpos: number): a
     '-a (\  \ )',
     '-d ( )',
     '-d -t ( )'
-  ])
+  ])->filter((i, v) => v =~ argload)
 
 enddef
 
