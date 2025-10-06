@@ -254,15 +254,50 @@ nnoremap <expr> A empty(getline('.')) ? '"_cc' : 'A'
 nnoremap <silent> <Leader><Leader> :update<CR>
 
 # switch modes.
-nnoremap <silent> <Leader>oe :setl expandtab! expandtab?<CR>
-nnoremap <silent> <Leader>oh :setl hlsearch!  hlsearch?<CR>
-nnoremap <silent> <Leader>or :setl readonly!  modifiable! modifiable?<CR>
-nnoremap <silent> <Leader>ow :setl wrap!      wrap?<CR>
-nnoremap <silent> <Leader>os :setl wrapscan!  wrapscan?<CR>
-nnoremap <silent> <Leader>oi :setl incsearch! incsearch?<CR>
-nnoremap <silent> <Leader>ol :setl relativenumber! relativenumber?<CR>
-nnoremap <silent> <Leader>op :set  paste! paste?<CR>
-nnoremap <silent> <Leader>ov :setl cursorcolumn! cursorcolumn?<CR>
+def Vimrc_option_menu_action(winid: number, key: string, items: list<any>): bool
+  if key ==# "\<CR>"
+    var item = items->get(line('.', winid) - 1, {})
+    call execute(item->get('cmd', 'echo'))
+    call popup_close(winid)
+
+    return true
+
+  elseif key !=# 'j' && key !=# 'k' && key !=# "\<ESC>"
+    for item in items
+      if key ==# item->get('key', '')
+        call execute(item->get('cmd', 'echo'))
+        call popup_close(winid)
+
+        return true
+      endif
+    endfor
+
+  endif
+
+  return popup_filter_menu(winid, key)
+enddef
+
+def g:Vimrc_option_menu_open()
+  var items = [
+    [ 'h', 'hlsearch',  &hlsearch ],
+    [ 'i', 'incsearch', &incsearch ],
+    [ 'r', 'modifiable', &modifiable ],
+    [ 'w', 'wrap',      &wrap ],
+    [ 's', 'wrapscan',  &wrapscan ],
+    [ 'p', 'paste', &paste ],
+    [ 'v', 'cursorcolumn', &cursorcolumn ]
+  ]->map((i, v) => ( {
+        \ 'key': v[0], 
+        \ 'text': printf('(%s) %s %s', v[0], (v[2] ? '*' : ' '), v[1]), 
+        \ 'cmd': printf('setl %s!', v[1]) } )
+  )->extend(get(g:, 'vimrc_option_menu_custom_items', []))
+
+  var winid = popup_menu(items, {
+    filter: (winid, key) => Vimrc_option_menu_action(winid, key, items)
+  })
+enddef
+
+nnoremap <silent> <Leader>o :call g:Vimrc_option_menu_open()<CR>
 
 # buffer
 nnoremap <silent> [b :bprev<CR>

@@ -1,5 +1,8 @@
 vim9script
 
+# { key: <input-char>, text: <caption>, cmd: <ecexute()> }
+# g:vimrc_option_menu_custom_items = []
+
 # icon character ( color emoji )
 # g:vimrc_statusline_icon_pwd = ''
 # g:vimrc_statusline_icon_ro  = ''
