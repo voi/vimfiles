@@ -133,7 +133,7 @@ def PopupEditee_action_include(winid: number, ctx: any)
 
   if empty(text) | return | endif
 
-  ctx.active = ctx.active->copy()->filter((i, v) => v->get('text', '') =~ text)
+  ctx.active = ctx.active->copy()->filter((i, v) => v->get('text', '') =~? text)
 
   call PopupEditee_set_list(winid, '', ctx.active)
 enddef
