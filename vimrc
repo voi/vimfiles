@@ -16,8 +16,7 @@ set fileencodings=utf-8,ucs-bom,euc-jp,eucjp-jisx0213,cp932,iso-2022-jp-3,iso-20
 
 set ambiwidth=double
 set helplang=ja,en
-set ttimeout
-set ttimeoutlen=-1
+set ttimeout timeoutlen=3000 ttimeoutlen=100
 
 # display
 set display=truncate
@@ -46,7 +45,7 @@ def Vimrc_foldtext(): string
   return getline(v:foldstart)->slice(0, winwidth(0) - 5) .. ' ...'
 enddef
 
-set foldtext=getline(v:foldstart)
+set foldtext=Vimrc_foldtext()
 set fillchars=fold:\ 
 set fillchars+=foldopen:▾,foldsep:.,foldclose:▸
 
@@ -85,6 +84,7 @@ set wildignore+=*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.xlsm
 set wildignore+=*.lzh,*.gz,*.zip,*.7z
 set wildignorecase
 set wildmode=list:full
+set wildoptions+=fuzzy
 
 # file
 # set autowrite autowriteall
@@ -101,7 +101,7 @@ set switchbuf=useopen,usetab
 set ignorecase
 set smartcase
 set nowrapscan
-set nohlsearch
+set hlsearch
 set tags+=./tags;
 
 # crypt file

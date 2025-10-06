@@ -25,6 +25,12 @@ vim9script
 # g:popup_editee_glob_regex_ignore_dir = '^\%(\.git\|\.svn\)$'
 # g:popup_editee_glob_regex_ignore_file = '\%(^_FOSSIL_\|\.exe\|\.dll\|\.docx\?\|\.xls[xm]\?\|\.vsdx\?|\.pdf\)$'
 
+# markdown
+# g:markdown_latex_syntax_enabled = 0
+# g:markdown_gfm_extension_syntax_enabled = 0
+# g:markdown_github_wiki_syntax_enabled = 0
+# g:markdown_link_destination_cchars = '📳"'
+
 ## gf improved
 # g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'
 
@@ -63,6 +69,7 @@ nnoremap <silent> <C-p><C-g> :PopupGlob!<CR>
 ## word highlight
 nnoremap          <Leader>wa :WordHLAdd 
 nnoremap <silent> <Leader>ww :WordHLAdd expand('<cword>')<CR>
+nnoremap <silent> <Leader>wd :WordHLDelete<CR>
 xnoremap <silent> <Leader>w  :WordHLVisualAdd<CR>
 
 ## code snippet
