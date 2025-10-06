@@ -352,14 +352,18 @@ nnoremap <silent> <C-F10> :botright cw<CR>
 nnoremap <silent> <C-w>s  <C-w>s<C-^>
 nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
-# auto-complete imitation
-def Vimrc_Keymap_Complete(chr: string): string
-  return chr .. ( pumvisible() ? '' : "\<C-x>\<C-p>\<C-n>" )
-enddef
+if has('patch-9.1.1590')
+  set autocomplete autocompletedelay=5 autocompletetimeout=100
+else
+  # auto-complete imitation
+  def Vimrc_Keymap_Complete(chr: string): string
+    return chr .. ( pumvisible() ? '' : "\<C-x>\<C-p>\<C-n>" )
+  enddef
 
-for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
-  exec printf("imap <silent> <expr> %s Vimrc_Keymap_Complete('%s')", k, k)
-endfor
+  for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
+    exec printf("imap <silent> <expr> %s Vimrc_Keymap_Complete('%s')", k, k)
+  endfor
+endif
 
 # path complete
 inoremap <expr> /
