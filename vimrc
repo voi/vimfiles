@@ -409,13 +409,13 @@ nnoremap <silent> g/ :vimgrep //gj %<CR>
 
 # relative j/k
 def g:Vimrc_relative_jk(jk: string)
-  var rn = getbufvar('.', '&relativenumber')
+  var rn = getbufvar('%', '&relativenumber')
   setl relativenumber | redraw
 
   var off = input('offset > ')
   if !off->empty() | call execute('normal ' .. off .. jk) | endif
 
-  call setbufvar('.', '&relativenumber', rn)
+  call setbufvar('%', '&relativenumber', rn)
 enddef
 
 nnoremap <silent> <Space>k :call g:Vimrc_relative_jk('k')<CR>
