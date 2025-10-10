@@ -236,13 +236,13 @@ else
   nnoremap <silent> gs "*s
   nnoremap <silent> gS "*S
 
-  vnoremap <silent> gp "*p
+  vnoremap <silent> gp "*P
   vnoremap <silent> gy "*y
   vnoremap <silent> gc "*c
 endif
 
 # visual replace
-vnoremap <silent> _ "0p`<
+vnoremap <silent> _ "0P`<
 
 # narrowing by fond
 nnoremap <silent> z, zMzv
