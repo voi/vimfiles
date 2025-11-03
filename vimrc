@@ -421,6 +421,24 @@ enddef
 nnoremap <silent> <Space>k :call g:Vimrc_relative_jk('k')<CR>
 nnoremap <silent> <Space>j :call g:Vimrc_relative_jk('j')<CR>
 
+# smart wrap
+def g:Vimrc_smart_wrap()
+  if getbufvar('%', '&wrap')
+    setl nowrap
+    nunmap <silent> gj
+    nunmap <silent> gk
+    nunmap <silent> j
+    nunmap <silent> k
+  else
+    setl wrap
+    nnoremap <silent> gj j
+    nnoremap <silent> gk k
+    nnoremap <silent> j  gj
+    nnoremap <silent> k  gk
+  endif
+enddef
+
+nnoremap <silent> <Space>w :call g:Vimrc_smart_wrap()<CR>
 
 ################################################################
 # command! -nargs=? -complete=filetype Temp 
