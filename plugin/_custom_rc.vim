@@ -29,7 +29,10 @@ vim9script
 # g:markdown_latex_syntax_enabled = 0
 # g:markdown_gfm_extension_syntax_enabled = 0
 # g:markdown_github_wiki_syntax_enabled = 0
-# g:markdown_link_destination_cchars = '📳"'
+# g:markdown_link_destination_cchar = '📧'
+# g:markdown_link_title_cchar = '🏷️'
+# g:markdown_link_todo_cchar = '⏹️🔲'
+# g:markdown_link_done_cchar = '✅'
 
 ## gf improved
 # g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'

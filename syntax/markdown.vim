@@ -14,10 +14,21 @@ var is_latex_syntax_enabled = get(g:, 'markdown_latex_syntax_enabled', 1)
 var is_gfm_syntax_enabled = get(g:, 'markdown_gfm_extension_syntax_enabled', 1)
 var is_github_wiki_syntax_enabled = get(g:, 'markdown_github_wiki_syntax_enabled', 1)
 #
-var link_dest_cchars = get(g:, 'markdown_link_destination_cchars', '')->split('\zs')
+def Get_markdown_conceal(option: string): string
+  var option_string = get(g:, option, '')
+
+  if option_string->empty()
+    return ''
+  else
+    return ' conceal cchar=' .. get(option_string->split('\zs'), 0, '')
+  endif
+enddef
 #
-var markdown_link_destination_conceal = ' conceal cchar=' .. get(link_dest_cchars, 0, '')
-var markdown_link_title_conceal = ' conceal cchar=' .. get(link_dest_cchars, 1, '')
+var markdown_link_destination_conceal = Get_markdown_conceal('markdown_link_destination_cchar')
+var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_cchar')
+#
+var markdown_list_todo_conceal = Get_markdown_conceal('markdown_link_todo_cchar')
+var markdown_list_done_conceal = Get_markdown_conceal('markdown_link_done_cchar')
 
 
 ################################################################
@@ -198,12 +209,18 @@ if is_gfm_syntax_enabled
   syn cluster markdownContainerBlock 
         \ add=markdownTaskTodo,markdownTaskDone
 
-  syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2 
-        \ contains=markdownUnorderedList 
+  syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2
+        \ contains=markdownTaskTodoMarker,markdownUnorderedList,markdownInlineLink 
         \ contained display
-  syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2 
-        \ contains=markdownUnorderedList,markdownInlineLink 
+  syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2
+        \ contains=markdownTaskDoneMarker,markdownUnorderedList,markdownInlineLink 
         \ contained display
+
+  execute 'syn match markdownTaskTodoMarker /\[ \]/ contained '
+        \ .. markdown_list_todo_conceal
+
+  execute 'syn match markdownTaskDoneMarker /\[[xX]\]/ contained '
+        \ .. markdown_list_done_conceal
 
   hi link markdownTaskTodo Statement
   hi link markdownTaskDone markdownStrikeThrough
