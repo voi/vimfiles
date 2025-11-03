@@ -69,7 +69,7 @@ set tabstop=4 shiftwidth=4 softtabstop=4
 
 # completion
 set complete=.,b,k,w
-set completeopt=menuone,preview
+set completeopt=menuone,noinsert,fuzzy
 set pumheight=16
 set wildignore+=*/.git,*/.git/*
 set wildignore+=*/.svn,*/.svn/*
@@ -354,6 +354,8 @@ nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
 if has('patch-9.1.1590')
   set autocomplete autocompletedelay=5 autocompletetimeout=100
+  set completefuzzycollect=keyword,files,whole_line
+# set completeopt+=popup completepopup=border:on
 else
   # auto-complete imitation
   def Vimrc_Keymap_Complete(chr: string): string
