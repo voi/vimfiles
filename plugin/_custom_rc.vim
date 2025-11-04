@@ -31,8 +31,9 @@ vim9script
 # g:markdown_github_wiki_syntax_enabled = 0
 # g:markdown_link_destination_cchar = '📧'
 # g:markdown_link_title_cchar = '🏷️'
-# g:markdown_link_todo_cchar = '⏹️🔲'
-# g:markdown_link_done_cchar = '✅'
+# g:markdown_link_item_cchar = '▪️'
+# g:markdown_link_todo_cchar = '□🔲⏹️'
+# g:markdown_link_done_cchar = '〼✅'
 
 ## gf improved
 # g:smart_gf_executable_binary_pattern = '\v\.(exe|docx?|xls[xm]?|vsdx?|pdf)$'

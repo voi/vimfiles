@@ -27,6 +27,7 @@ enddef
 var markdown_link_destination_conceal = Get_markdown_conceal('markdown_link_destination_cchar')
 var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_cchar')
 #
+var markdown_list_item_conceal = Get_markdown_conceal('markdown_link_item_cchar')
 var markdown_list_todo_conceal = Get_markdown_conceal('markdown_link_todo_cchar')
 var markdown_list_done_conceal = Get_markdown_conceal('markdown_link_done_cchar')
 
@@ -194,9 +195,10 @@ syn cluster markdownList
 syn match markdownOrderedList /\d\{1,9}[.)]\s\@=/ 
       \ skipwhite nextgroup=markdownContainerBlockStart
       \ contained display
-syn match markdownUnorderedList /[-+*]\s\@=/ 
-      \ skipwhite nextgroup=markdownContainerBlockStart
-      \ contained display
+execute 'syn match markdownUnorderedList /[-+*]\s\@=/ '
+      \ .. 'skipwhite nextgroup=markdownContainerBlockStart '
+      \ .. 'contained display '
+      \ .. markdown_list_item_conceal
 
 hi link markdownOrderedList Tag
 hi link markdownUnorderedList Tag
@@ -216,10 +218,10 @@ if is_gfm_syntax_enabled
         \ contains=markdownTaskDoneMarker,markdownUnorderedList,markdownInlineLink 
         \ contained display
 
-  execute 'syn match markdownTaskTodoMarker /\[ \]/ contained '
+  execute 'syn match markdownTaskTodoMarker /[-+*]\%( \{1,4}\|\t\)\[ \]/ contained '
         \ .. markdown_list_todo_conceal
 
-  execute 'syn match markdownTaskDoneMarker /\[[xX]\]/ contained '
+  execute 'syn match markdownTaskDoneMarker /[-+*]\%( \{1,4}\|\t\)\[[xX]\]/ contained '
         \ .. markdown_list_done_conceal
 
   hi link markdownTaskTodo Statement
