@@ -68,7 +68,7 @@ set smarttab shiftround
 set tabstop=4 shiftwidth=4 softtabstop=4
 
 # completion
-set complete=.,b,k,w
+set complete=.,b^25,u^25,k^25,w^25
 set completeopt=menuone,noinsert,fuzzy
 set pumheight=16
 set wildignore+=*/.git,*/.git/*
