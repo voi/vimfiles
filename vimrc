@@ -652,10 +652,14 @@ augroup vimrc_autocmd_filetype
   autocmd FileType qf call Vimrc_qf_keymap() 
 
   # markdown
+  command! -range ToggleMarkdownTask s/\%([-+*]\%( \{1,4}\|\t\)\[\)\@<=[ xX]\%(\]\s\)\@=/\=(submatch(0) == ' ' ? 'x' : ' ')/
+
   autocmd FileType markdown 
         \   setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
         \ | setl foldexpr=Vimrc_markdown_foldexpr()
         \ | setl foldtext=Vimrc_foldtext()
+        \ | nnoremap <buffer> <M-x> :ToggleMarkdownTask<CR>
+        \ | xnoremap <buffer> <M-x> :ToggleMarkdownTask<CR>
 
 augroup END
 
