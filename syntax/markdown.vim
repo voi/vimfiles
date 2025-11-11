@@ -24,6 +24,8 @@ def Get_markdown_conceal(option: string): string
   endif
 enddef
 #
+var markdown_link_inline_conceal = Get_markdown_conceal('markdown_link_inline_cchar')
+var markdown_link_reference_conceal = Get_markdown_conceal('markdown_link_reference_cchar')
 var markdown_link_destination_conceal = Get_markdown_conceal('markdown_link_destination_cchar')
 var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_cchar')
 #
@@ -211,21 +213,22 @@ if is_gfm_syntax_enabled
   syn cluster markdownContainerBlock 
         \ add=markdownTaskTodo,markdownTaskDone
 
-  syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/hs=s+2
-        \ contains=markdownTaskTodoMarker,markdownUnorderedList,markdownInlineLink 
-        \ contained display
-  syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s.*/hs=s+2
-        \ contains=markdownTaskDoneMarker,markdownUnorderedList,markdownInlineLink 
-        \ contained display
-
-  execute 'syn match markdownTaskTodoMarker /[-+*]\%( \{1,4}\|\t\)\[ \]/ contained '
+  execute 'syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/ '
+        \ .. 'contained display '
         \ .. markdown_list_todo_conceal
 
-  execute 'syn match markdownTaskDoneMarker /[-+*]\%( \{1,4}\|\t\)\[[xX]\]/ contained '
+  execute 'syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s\@=/ '
+        \ .. 'skipwhite nextgroup=markdownTaskDoneContent '
+        \ .. 'contained display '
         \ .. markdown_list_done_conceal
+
+  syn match markdownTaskDoneContent /.*/
+        \ contains=markdownInlineLink
+        \ contained display
 
   hi link markdownTaskTodo Statement
   hi link markdownTaskDone markdownStrikeThrough
+  hi link markdownTaskDoneContent markdownStrikeThrough
 endif
 #   }}}
 
@@ -372,24 +375,31 @@ syn region markdownLink matchgroup=markdownLinkMarker
 hi link markdownLink String
 
 #
-syn region markdownInlineLink matchgroup=markdownLinkMarker 
-      \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ 
-      \ oneline contains=markdownLinkDestination 
-      \ transparent keepend contained display
+execute 'syn region markdownInlineLink matchgroup=markdownLinkMarker '
+      \ .. 'start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ '
+      \ .. 'transparent oneline contains=markdownLinkDestination '
+      \ .. 'keepend contained display'
+      \ .. markdown_link_inline_conceal
 
 #
-syn region markdownLinkRef matchgroup=markdownLinkMarker 
-      \ start=/\[/ skip=/\\[\[\]]/ end=/\\\@<!\]/ 
-      \ oneline contained display
+if markdown_link_reference_conceal->empty()
+  syn region markdownLinkRef matchgroup=markdownLinkMarker
+        \ start=/\[/ skip=/\\[\[\]]/ end=/\\\@<!\]/ 
+        \ oneline keepend contained display 
+else
+  execute 'syn match markdownLinkRef /\[\%(\\[\[\]]\|[^\[\][:space:]]\)\+\]/ '
+        \ .. 'contained display '
+        \ .. markdown_link_reference_conceal
+endif
 
 hi link markdownLinkRef Tag
 
 #
 execute 'syn region markdownLinkDestination start=/</ skip=/\\[<>]/ end=/>/ '
-      \ .. 'keepend oneline nextgroup=markdownLinkTitle skipwhite contained display ' 
+      \ 'keepend oneline nextgroup=markdownLinkTitle skipwhite contained display '
       \ .. markdown_link_destination_conceal
-execute 'syn match markdownLinkDestination /\%([^<>()[:space:][:cntrl:]]\|\[()]\)\+/ ' 
-      \ .. 'nextgroup=markdownLinkTitle skipwhite contained display'
+execute 'syn match markdownLinkDestination /\%([^<>()[:space:][:cntrl:]]\|\[()]\)\+/ '
+      \ 'nextgroup=markdownLinkTitle skipwhite contained display'
       \ .. markdown_link_destination_conceal
 
 hi link markdownLinkDestination Underlined
@@ -398,7 +408,7 @@ hi link markdownLinkDestination Underlined
 def Markdown_syntaxLinkTitle(start: string, skip: string, end: string)
   execute 'syn region markdownLinkTitle '
         \ .. printf('start=/\\\@<!%s/ skip=/\\%s/ end=/\\\@<!%s/ ', start, skip, end)
-        \ .. 'keepend contained display'
+        \ .. 'keepend contained display '
         \ .. markdown_link_title_conceal
 enddef
 
