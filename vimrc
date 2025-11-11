@@ -68,7 +68,7 @@ set smarttab shiftround
 set tabstop=4 shiftwidth=4 softtabstop=4
 
 # completion
-set complete=.,b^25,u^25,k^25,w^25
+set complete=.,w^25,b^25
 set completeopt=menuone,noinsert,fuzzy
 set pumheight=16
 set wildignore+=*/.git,*/.git/*
@@ -83,7 +83,7 @@ set wildignore+=*/Debug,*/Debug/*
 set wildignore+=*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.xlsm
 set wildignore+=*.lzh,*.gz,*.zip,*.7z
 set wildignorecase
-set wildmode=list:full
+set wildmode=longest,full
 set wildoptions+=fuzzy
 
 # file
@@ -354,7 +354,7 @@ nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
 if has('patch-9.1.1590')
   set autocomplete autocompletedelay=5 autocompletetimeout=100
-  set completefuzzycollect=keyword,files,whole_line
+  set completefuzzycollect=files
 # set completeopt+=popup completepopup=border:on
 else
   # auto-complete imitation
