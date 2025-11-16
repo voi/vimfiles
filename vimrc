@@ -200,58 +200,53 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-# {visual}p to put without yank to unnamed register
-xnoremap p P
+# paste from yank register, and jump end, and indent
+nnoremap p "0]p`]
+nnoremap P "0]P`]
 
-# continuous indent
-xnoremap < <gv
-xnoremap > >gv
+xnoremap p "_d"0gP
+xnoremap P "_d"0gP
 
-# blackhole
-nnoremap <silent> d "_d
-nnoremap <silent> D "_D
-vnoremap <silent> d "_d
+# delete to blackhole register
+nnoremap d "_d
+nnoremap D "_D
 
-# compatible D
-nnoremap <silent> Y y$
+vnoremap d "_d
 
-# paste and format-indent
-nnoremap p ]p`]
-nnoremap P ]P`]
+# yank/cut like D
+nnoremap <Leader>x y$D
 
-# clipboard
+nnoremap Y y$
+
+# system clipboard
 if has('clipboard') && 0
   set clipboard&
   set clipboard+=unnamed,unnamedplus
 else
-  nnoremap <silent> gp "*]p`]
-  nnoremap <silent> gP "*]P`]
+  nnoremap gp "*]p`]
+  nnoremap gP "*]P`]
 
-  nnoremap <silent> gy "*y
-  nnoremap <silent> gY "*y$
+  nnoremap gy "*y
+  nnoremap gY "*y$
 
-  nnoremap <silent> gc "*c
-  nnoremap <silent> gC "*C
+  nnoremap gX "*y$D
 
-  nnoremap <silent> gs "*s
-  nnoremap <silent> gS "*S
-
-  vnoremap <silent> gp "*P
-  vnoremap <silent> gy "*y
-  vnoremap <silent> gc "*c
+  vnoremap gp "*P
+  vnoremap gy "*y
 endif
-
-# visual replace
-vnoremap <silent> _ "0P`<
-
-# narrowing by fond
-nnoremap <silent> z, zMzv
 
 # auto-indent editing at empty line
 nnoremap <expr> i empty(getline('.')) ? '"_cc' : 'i'
 nnoremap <expr> I empty(getline('.')) ? '"_cc' : 'I'
 nnoremap <expr> a empty(getline('.')) ? '"_cc' : 'a'
 nnoremap <expr> A empty(getline('.')) ? '"_cc' : 'A'
+
+# continuous indent
+xnoremap < <gv
+xnoremap > >gv
+
+# narrowing by fold
+nnoremap z, zMzv
 
 # update
 nnoremap <silent> <Leader><Leader> :update<CR>
@@ -420,8 +415,8 @@ def g:Vimrc_relative_jk(jk: string)
   call setbufvar('%', '&relativenumber', rn)
 enddef
 
-nnoremap <silent> <Space>k :call g:Vimrc_relative_jk('k')<CR>
-nnoremap <silent> <Space>j :call g:Vimrc_relative_jk('j')<CR>
+nnoremap <silent> <Leader>k :call g:Vimrc_relative_jk('k')<CR>
+nnoremap <silent> <Leader>j :call g:Vimrc_relative_jk('j')<CR>
 
 # smart wrap
 def g:Vimrc_smart_wrap()
@@ -659,7 +654,6 @@ augroup vimrc_autocmd_filetype
         \ | setl foldexpr=Vimrc_markdown_foldexpr()
         \ | setl foldtext=Vimrc_foldtext()
         \ | nnoremap <buffer> <M-x> :ToggleMarkdownTask<CR>
-        \ | xnoremap <buffer> <M-x> :ToggleMarkdownTask<CR>
 
 augroup END
 
@@ -773,7 +767,7 @@ def Vimrc_custom_highlight()
     hi NormalNC     guifg=#808080            gui=italic    ctermfg=darkgrey cterm=italic
 
     if has('gui_running')
-      hi Normal     guifg=#030303 guibg=#EFEFEF gui=NONE
+      hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
       hi Terminal   guifg=#EFEFEF guibg=#303030
 
     endif
