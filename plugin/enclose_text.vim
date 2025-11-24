@@ -69,6 +69,8 @@ def EncloseText_apply(arguments: list<string>)
   else
     keepjumps execute ":'<,'>s/\\%V.*\\%V.\\?/\\=EncloseText_edit(submatch(0), enclose_text_context, true, true)/e"
   endif
+
+  normal `<
 enddef
 
 def EncloseText_complete(argload: string, cmdline: string, cursorpos: number): any
