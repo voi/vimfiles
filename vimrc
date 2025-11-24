@@ -200,12 +200,17 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-# paste from yank register, and jump end, and indent
-nnoremap p "0]p`]
-nnoremap P "0]P`]
+# paste and jump end, and indent
+nnoremap p ]p`]
+nnoremap P ]P`]
 
-xnoremap p "_d"0gP
-xnoremap P "_d"0gP
+xnoremap p gP
+
+# paste from yank register, and jump end, and indent
+nnoremap <Leader>p "0]p`]
+nnoremap <Leader>P "0]P`]
+
+xnoremap <Leader>p "0gP
 
 # delete to blackhole register
 nnoremap d "_d
@@ -229,10 +234,11 @@ else
   nnoremap gy "*y
   nnoremap gY "*y$
 
-  nnoremap gX "*y$D
+  nnoremap gX "*C<ESC>
 
-  vnoremap gp "*P
-  vnoremap gy "*y
+  xnoremap gp "*P
+  xnoremap gy "*y
+  xnoremap gX "*c<ESC>
 endif
 
 # auto-indent editing at empty line
@@ -415,8 +421,8 @@ def g:Vimrc_relative_jk(jk: string)
   call setbufvar('%', '&relativenumber', rn)
 enddef
 
-nnoremap <silent> <Leader>k :call g:Vimrc_relative_jk('k')<CR>
-nnoremap <silent> <Leader>j :call g:Vimrc_relative_jk('j')<CR>
+nnoremap <silent> <C-k> :call g:Vimrc_relative_jk('k')<CR>
+nnoremap <silent> <C-j> :call g:Vimrc_relative_jk('j')<CR>
 
 # smart wrap
 def g:Vimrc_smart_wrap()
@@ -653,7 +659,7 @@ augroup vimrc_autocmd_filetype
         \   setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
         \ | setl foldexpr=Vimrc_markdown_foldexpr()
         \ | setl foldtext=Vimrc_foldtext()
-        \ | nnoremap <buffer> <M-x> :ToggleMarkdownTask<CR>
+        \ | nnoremap <buffer> <M-t> :ToggleMarkdownTask<CR>
 
 augroup END
 
