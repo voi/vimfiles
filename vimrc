@@ -746,11 +746,12 @@ def Vimrc_custom_highlight()
   if &g:background ==# 'dark'
     hi SpecialKey   guifg=#808080  guibg=NONE gui=NONE      ctermfg=grey
     hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
-    hi Comment      guifg=#cccccc  guibg=NONE gui=NONE      ctermfg=grey
+    hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
     hi NormalNC     guifg=#BBBBBB             gui=italic    ctermfg=grey     cterm=italic
 
     if has('gui_running')
       hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
+      hi LineNr     guibg=#000000
 
       hi Folded     guifg=#DDDDDD               gui=italic
       hi FoldColumn guifg=#FFFFFF               gui=bold
@@ -774,7 +775,9 @@ def Vimrc_custom_highlight()
 
     if has('gui_running')
       hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
-      hi Terminal   guifg=#EFEFEF guibg=#303030
+      # hi Terminal   guifg=#EFEFEF guibg=#303030
+      # hi LineNr     guibg=#F5FFFA   # MintCream
+      hi LineNr     guibg=#FFFAF0   # FloralWhite
 
     endif
   endif
