@@ -200,26 +200,33 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-# paste and jump end, and indent
-nnoremap p ]p`]
-nnoremap P ]P`]
+# paste and jump end
+nnoremap p gp
+nnoremap P gP
+xnoremap p "_dgP
 
-xnoremap p gP
+# paste from register
+def Vimrc_map_expr_register_p(chr: string): string
+  call inputsave()
+  var r = (execute('register') .. "\n")->input()
+  call inputrestore()
 
-# paste from yank register, and jump end, and indent
-nnoremap <Leader>p "0]p`]
-nnoremap <Leader>P "0]P`]
+  return '"' .. r->split('\zs')->get(0, '"') .. chr
+enddef
 
-xnoremap <Leader>p "0gP
+nnoremap <expr> <Leader>p Vimrc_map_expr_register_p('p')
+nnoremap <expr> <Leader>P Vimrc_map_expr_register_p('P')
+
+xnoremap <expr> <Leader>p '"_d' .. Vimrc_map_expr_register_p('p')
 
 # delete to blackhole register
 nnoremap d "_d
 nnoremap D "_D
-
-vnoremap d "_d
+xnoremap d "_d
 
 # yank/cut like D
 nnoremap <Leader>x y$D
+nnoremap <Leader>v v$
 
 nnoremap Y y$
 
@@ -228,16 +235,15 @@ if has('clipboard') && 0
   set clipboard&
   set clipboard+=unnamed,unnamedplus
 else
-  nnoremap gp "*]p`]
-  nnoremap gP "*]P`]
+  nnoremap gp "*gp
+  nnoremap gP "*gP
+  xnoremap gp "*gp
 
   nnoremap gy "*y
   nnoremap gY "*y$
+  xnoremap gy "*y
 
   nnoremap gX "*C<ESC>
-
-  xnoremap gp "*P
-  xnoremap gy "*y
   xnoremap gX "*c<ESC>
 endif
 
