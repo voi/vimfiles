@@ -673,6 +673,22 @@ augroup vimrc_autocmd_filetype
         \ | setl foldtext=Vimrc_foldtext()
         \ | nnoremap <buffer> <M-t> :ToggleMarkdownTask<CR>
 
+  autocmd FileType markdown {
+    #
+    xnoremap <buffer> <Leader>eaC :EncloseText -a ``` ```<CR>
+    xnoremap <buffer> <Leader>eai :EncloseText -a * *<CR>
+    xnoremap <buffer> <Leader>eab :EncloseText -a ** **<CR>
+    xnoremap <buffer> <Leader>eaB :EncloseText -a *** ***<CR>
+    xnoremap <buffer> <Leader>eas :EncloseText -a ~~ ~~<CR>
+    xnoremap <buffer> <Leader>eal :EncloseText -a [ ](<lt>>)<CR>
+    #
+    inoreabbr <buffer> 2# ## 
+    inoreabbr <buffer> 3# ### 
+    inoreabbr <buffer> 4# #### 
+    inoreabbr <buffer> 5# ##### 
+    inoreabbr <buffer> 6# ###### 
+  }
+
 augroup END
 
 # syntax
