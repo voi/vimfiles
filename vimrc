@@ -802,7 +802,8 @@ def Vimrc_custom_highlight()
     hi NormalNC     guifg=#808080            gui=italic    ctermfg=darkgrey cterm=italic
 
     if has('gui_running')
-      hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
+      hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
+      # hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
       # hi Terminal   guifg=#EFEFEF guibg=#303030
       # hi LineNr     guibg=#F5FFFA   # MintCream
       hi LineNr     guibg=#FFFAF0   # FloralWhite
