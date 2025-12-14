@@ -63,14 +63,14 @@ enddef
 def ZenHanJa_to_hankaku_with_voicedmark(source: string, map: any): string
   return source->substitute(
     printf('[%s]', map.zen),
-    (m) => map.han_list[map.zen_list->index(m[0])] .. map.saffix,
+    (m) => map.han_list[map.zen_list->index(m[0])],
     'g')
 enddef
 
 def ZenHanJa_to_zenkaku_with_voicedmark(source: string, map: any): string
   return source->substitute(
     printf('[%s]%s', map.han, map.saffix),
-    (m) => map.zen_list[map.han_list->index(m[0][0 : 0])],
+    (m) => map.zen_list[map.han_list->index(m[0])],
     'g')
 enddef
 
