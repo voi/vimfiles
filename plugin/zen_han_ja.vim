@@ -104,15 +104,19 @@ def ZenHanJa_apply(converterName: string, types: string)
   var expr_part = printf("ZenHanJa_edit(submatch(0), '%s', %s_normal, %s_with_voicedmark)",
         types, converterName, converterName)
 
-  if visualmode() ==# 'v' && beginln != endln
-    keepjumps execute ":'<s/\\%V.*/\\=" .. expr_part .. "/e"
-    keepjumps execute ":'>s/.*\\%V.\\?/\\=" .. expr_part .. "/e"
+  if visualmode() ==# '[vV]'
+    if beginln != endln
+      keepjumps execute ":'<s/\\%V.*/\\=" .. expr_part .. "/e"
+      keepjumps execute ":'>s/.*\\%V.\\?/\\=" .. expr_part .. "/e"
 
-    if (endln - beginln) > 1
-      keepjumps execute ":'<+1,'>-1s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
+      if (endln - beginln) > 1
+        keepjumps execute ":'<+1,'>-1s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
+      endif
+    else
+      keepjumps execute ":'<,'>s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
     endif
   else
-    keepjumps execute ":'<,'>s/\\%V.*\\%V.\\?/\\=" .. expr_part .. "/e"
+    keepjumps execute ":s/^.*$/\\=" .. expr_part .. "/e"
   endif
 enddef
 
