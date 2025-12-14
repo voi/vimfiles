@@ -620,7 +620,7 @@ def Vimrc_markdown_foldexpr(): string
     return '>' .. string(max([head_ - 1, 1]))
   endif
 
-  if line_->empty() && getline(v:lnum + 1) =~# '^#\+'
+  if line_->substitute('^\s\+\|\s\+$', '', 'g')->empty() && getline(v:lnum + 1) =~# '^#\+'
     return '-1'
   endif
 
