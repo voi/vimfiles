@@ -243,8 +243,8 @@ else
   nnoremap gY "*y$
   xnoremap gy "*y
 
-  nnoremap gX "*C<ESC>
-  xnoremap gX "*c<ESC>
+  nnoremap gc "*C<ESC>
+  xnoremap gc "*c<ESC>
 endif
 
 # auto-indent editing at empty line
