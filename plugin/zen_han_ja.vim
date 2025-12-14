@@ -77,21 +77,21 @@ enddef
 def ZenHanJa_edit(source: string, types: string, MapForSignle: func, MapForVoicedMark: func): string
   var text = source
 
-  if types =~# 'K'
+  if types =~# '[Kk]'
     text = MapForVoicedMark(text, ZenHanJa_kana_dakuten)
     text = MapForVoicedMark(text, ZenHanJa_kana_handakuten)
     text = MapForSignle(text, ZenHanJa_kana)
   endif
 
-  if types =~# 'A'
+  if types =~# '[Aa]'
     text = MapForSignle(text, ZenHanJa_alpha)
   endif
 
-  if types =~# 'N'
+  if types =~# '[Nn]'
     text = MapForSignle(text, ZenHanJa_number)
   endif
 
-  if types =~# 'S'
+  if types =~# '[Ss]'
     text = MapForSignle(text, ZenHanJa_symbol)
   endif
 
