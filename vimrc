@@ -579,6 +579,12 @@ command! -nargs=0 ScrolloffCenterOnOff {
   set scrolloff?
 }
 
+# show syntax
+command! ShowSyntax echo synIDattr(synID(line('.'), col('.'), 1), 'name')
+
+# new vim instance
+command! -nargs=? GVim silent !start gvim <f-args>
+
 
 ################################################################
 def Vimrc_qf_keymap()
