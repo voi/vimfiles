@@ -203,7 +203,7 @@ onoremap a` 2i`
 # paste and jump end
 nnoremap p gp
 nnoremap P gP
-xnoremap p "_dgP
+xnoremap p "_dgp
 
 # paste from register
 def Vimrc_map_expr_register_p(chr: string): string
