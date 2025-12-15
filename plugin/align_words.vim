@@ -4,12 +4,12 @@ g:align_words_petterm_list = []
 
 def Align_calc_padding_tabs(token: string, align_width: number): string
   var ts = &tabstop
-  var adjust_width = (align_width % ts == 0)
+  var adjust_width = ((align_width % ts) == 0)
     ? align_width
     : ((align_width + ts) / ts) * ts
   var mergin = adjust_width - strdisplaywidth(token)
 
-  return repeat("\t", ((mergin + (mergin % ts ? ts : 0)) / ts))
+  return repeat("\t", ((mergin + ((mergin % ts) != 0 ? ts : 0)) / ts))
 enddef
 
 def Align_calc_padding_space(token: string, align_width: number): string
