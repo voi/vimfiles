@@ -214,10 +214,10 @@ def Vimrc_map_expr_register_p(chr: string): string
   return '"' .. r->split('\zs')->get(0, '"') .. chr
 enddef
 
-nnoremap <expr> <Leader>p Vimrc_map_expr_register_p('p')
-nnoremap <expr> <Leader>P Vimrc_map_expr_register_p('P')
+nnoremap <expr> <Space>p Vimrc_map_expr_register_p('p')
+nnoremap <expr> <Space>P Vimrc_map_expr_register_p('P')
 
-xnoremap <expr> <Leader>p '"_d' .. Vimrc_map_expr_register_p('p')
+xnoremap <expr> <Space>p '"_d' .. Vimrc_map_expr_register_p('p')
 
 # delete to blackhole register
 nnoremap d "_d
@@ -225,33 +225,30 @@ nnoremap D "_D
 xnoremap d "_d
 
 # yank/cut like D
-nnoremap <Leader>x y$D
-nnoremap <Leader>v v$
+nnoremap <Space>x y$D
+nnoremap <Space>v v$
 
 nnoremap Y y$
 
-# system clipboard
+# system gui clipboard manip
 if has('clipboard') && 0
   set clipboard&
   set clipboard+=unnamed,unnamedplus
 else
-  nnoremap gp "*gp
-  nnoremap gP "*gP
-  xnoremap gp "*gp
+  nnoremap gcp "*gp
+  nnoremap gcP "*gP
+  xnoremap gcp "*gp
 
-  nnoremap gy "*y
-  nnoremap gY "*y$
-  xnoremap gy "*y
+  nnoremap gcy "*y
+  nnoremap gcY "*y$
+  xnoremap gcy "*y
 
-  nnoremap gc "*C<ESC>
-  xnoremap gc "*c<ESC>
+  nnoremap gcx "*C<ESC>
+  xnoremap gcx "*c<ESC>
 endif
 
 # auto-indent editing at empty line
-nnoremap <expr> i empty(getline('.')) ? '"_cc' : 'i'
-nnoremap <expr> I empty(getline('.')) ? '"_cc' : 'I'
-nnoremap <expr> a empty(getline('.')) ? '"_cc' : 'a'
-nnoremap <expr> A empty(getline('.')) ? '"_cc' : 'A'
+nnoremap <expr> <Space>i empty(getline('.')) ? '"_cc' : 'i'
 
 # continuous indent
 xnoremap < <gv
