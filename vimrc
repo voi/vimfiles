@@ -200,12 +200,7 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-# paste and jump end
-nnoremap p gp
-nnoremap P gP
-xnoremap p "_dgp
-
-# paste from register
+#buffer paste from register
 def Vimrc_map_expr_register_p(chr: string): string
   call inputsave()
   var r = (execute('register') .. "\n")->input()
@@ -225,7 +220,7 @@ nnoremap D "_D
 xnoremap d "_d
 
 # yank/cut like D
-nnoremap <Space>x y$D
+nnoremap <Space>x C<ESC>
 nnoremap <Space>v v$
 
 nnoremap Y y$
@@ -235,16 +230,16 @@ if has('clipboard') && 0
   set clipboard&
   set clipboard+=unnamed,unnamedplus
 else
-  nnoremap gcp "*gp
-  nnoremap gcP "*gP
-  xnoremap gcp "*gp
+  nnoremap <M-p> "*gp
+  nnoremap <M-P> "*gP
+  xnoremap <M-p> "*gp
 
-  nnoremap gcy "*y
-  nnoremap gcY "*y$
-  xnoremap gcy "*y
+  nnoremap <M-y> "*y
+  nnoremap <M-Y> "*y$
+  xnoremap <M-y> "*y
 
-  nnoremap gcx "*C<ESC>
-  xnoremap gcx "*c<ESC>
+  nnoremap <M-x> "*C<ESC>
+  xnoremap <M-x> "*c<ESC>
 endif
 
 # auto-indent editing at empty line
@@ -286,13 +281,14 @@ enddef
 
 def g:Vimrc_option_menu_open()
   var items = [
+    [ 'a', 'autocomplete',  &autocomplete ],
     [ 'h', 'hlsearch',  &hlsearch ],
     [ 'i', 'incsearch', &incsearch ],
-    [ 'r', 'modifiable', &modifiable ],
-    [ 'w', 'wrap',      &wrap ],
-    [ 's', 'wrapscan',  &wrapscan ],
     [ 'p', 'paste', &paste ],
-    [ 'v', 'cursorcolumn', &cursorcolumn ]
+    [ 'r', 'modifiable', &modifiable ],
+    [ 's', 'wrapscan',  &wrapscan ],
+    [ 'w', 'wrap',      &wrap ],
+    [ 'c', 'cursorcolumn', &cursorcolumn ]
   ]->map((i, v) => ( {
         \ 'key': v[0], 
         \ 'text': printf('(%s) %s %s', v[0], (v[2] ? '*' : ' '), v[1]), 
@@ -352,6 +348,9 @@ nnoremap <silent> <F10>   :cnext<CR>zz
 nnoremap <silent> <S-F10> :cprevious<CR>zz
 nnoremap <silent> <C-F10> :botright cw<CR>
 
+#
+nnoremap <silent> gO :HelpToc<CR>
+
 # C-w + v / C-w + s like C-w + ^
 nnoremap <silent> <C-w>s  <C-w>s<C-^>
 nnoremap <silent> <C-w>v  <C-w>v<C-^>
@@ -399,7 +398,6 @@ command! -range -nargs=0 ToggleComment call Vimrc_toggle_comment(<line1>, <line2
 
 nnoremap <silent> <Leader>c :ToggleComment<CR>
 vnoremap <silent> <Leader>c :ToggleComment<CR>
-
 # indent at begin of line
 nnoremap <silent> g> :normal gI	<CR>
 xnoremap <silent> g> :v/^$/ normal gI	<CR>
@@ -894,16 +892,39 @@ if has('gui_running')
   # set cmdheight=1
   # set columns=100
   # set lines=40
-  # set linespace=1
+  set linespace=3
 
   # font rendering
   if has('win32')
     set rop=type:directx,renmode:5,taamode:1,contrast:1
-    set guifont=Cascadia_Code:h10.5,BIZ_UDゴシック:h10.5,Consolas:h10.5
-    set guifontwide=BIZ_UDゴシック:h10.5
+    set guifont=Cascadia_Code:h10.5,BIZ_UDゴシック:h11,Consolas:h11
+    set guifontwide=BIZ_UDゴシック:h11
 
     set background=light
     colorscheme retrobox
+  endif
+
+  if has('win32')
+    g:font_size = '11'
+    g:guifonts = {
+      1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
+      2: ['Consolas:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
+    }
+
+    def g:Vimrc_set_guifont(fonts: list<string>, size: string)
+      execute printf('set guifont=%s', 
+            \ fonts->get(0, '')->substitute('\%(:h\)\zs__', size, 'g'))
+      execute printf('set guifontwide=%s',
+            \ fonts->get(1, fonts->get(0, ''))->substitute('\%(:h\)\zs__', size, 'g'))
+    enddef
+
+    command! SetGuiFonts {
+      var i = g:guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->inputlist()
+
+      if 0 <= i && i < g:guifonts->len()
+        call Local_set_guifont(g:guifonts->get(i, []), g:font_size)
+      endif
+    }
   endif
 
   # ime

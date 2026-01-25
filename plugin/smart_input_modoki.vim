@@ -95,20 +95,3 @@ def SmartInputModoki_quote(chr_in: string, chr_alt: string): string
   return chr_in
 enddef
 
-inoremap <silent> <expr> [ SmartInputModoki_open_bracket('[', ']')
-inoremap <silent> <expr> ( SmartInputModoki_open_bracket('(', ')')
-inoremap <silent> <expr> { SmartInputModoki_open_bracket('{', '}')
-
-inoremap <silent> <expr> ] SmartInputModoki_close_bracket('[', ']')
-inoremap <silent> <expr> ) SmartInputModoki_close_bracket('(', ')')
-inoremap <silent> <expr> } SmartInputModoki_close_bracket('{', '}')
-
-inoremap <silent> <expr> <Space> SmartInputModoki_inside_space()
-inoremap <silent> <expr> <CR>    SmartInputModoki_inside_enter()
-
-inoremap <silent> <expr> <C-h> SmartInputModoki_backspace()
-
-inoremap <silent> <expr> ' SmartInputModoki_quote("'", '"')
-inoremap <silent> <expr> " SmartInputModoki_quote('"', "'")
-inoremap <silent> <expr> ` SmartInputModoki_quote('`', '')
-
