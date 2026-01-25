@@ -20,7 +20,7 @@ def Get_markdown_conceal(option: string): string
   if option_string->empty()
     return ''
   else
-    return ' conceal cchar=' .. get(option_string->split('\zs'), 0, '')
+    return ' conceal cchar=' .. option_string->split('\zs')->get(0, '')
   endif
 enddef
 #
