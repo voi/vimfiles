@@ -377,27 +377,6 @@ inoremap <expr> /
       \ ? '<C-x><C-f>'
       \ : '/'
 
-# toggle comment
-def Vimrc_toggle_comment(first_line: any, last_line: any)
-  var [cbegin, cend] = split(escape(&commentstring, '/?'), '\s*%s\s*', 1)
-  var pattern = printf('^\(\s*\)\V%s\m\s\?\(.*\)\s\?\V%s', cbegin, cend)
-
-  for ln in range(first_line, last_line)
-    var line = getline(ln)
-
-    if line =~# pattern
-      execute printf(':%ds/%s/\1\2/', ln, pattern)
-    elseif line !=# ''
-      execute printf(':%ds/\v^(\s*)(\S.*)/\1%s%s\2%s%s/',
-            \ ln, cbegin, (empty(cbegin) ? '' : ' '), (empty(cend) ? '' : ' '), cend)
-    endif
-  endfor
-enddef
-
-command! -range -nargs=0 ToggleComment call Vimrc_toggle_comment(<line1>, <line2>) 
-
-nnoremap <silent> <Leader>c :ToggleComment<CR>
-vnoremap <silent> <Leader>c :ToggleComment<CR>
 # indent at begin of line
 nnoremap <silent> g> :normal gI	<CR>
 xnoremap <silent> g> :v/^$/ normal gI	<CR>
@@ -848,39 +827,34 @@ var c_no_curly_error = 1
 var did_install_default_menus = 1
 var did_install_syntax_menu = 1
 
-g:loaded_gzip = 1
-g:loaded_tar = 1
-g:loaded_tarPlugin = 1
-g:loaded_zip = 1
-g:loaded_zipPlugin = 1
-g:loaded_rrhelper = 1
-g:loaded_2html_plugin = 1
-g:loaded_vimball = 1
-g:loaded_vimballPlugin = 1
-g:loaded_getscript = 1
 g:loaded_getscriptPlugin = 1
+g:loaded_gzip = 1
+g:loaded_logiPat = 1
+g:loaded_manpager_plugin = 1
+g:loaded_netrw = 1
+g:loaded_rrhelper = 1
+g:loaded_spellfile_plugin = 1
+g:loaded_tarPlugin = 1
+g:loaded_2html_plugin = 1
+g:loaded_tutor_mode_plugin = 1
+g:loaded_vimballPlugin = 1
+g:loaded_zipPlugin = 1
 
 if !has('gui_running')
   g:loaded_matchparen = 1
 endif
-
-g:loaded_netrw = 1
-g:loaded_netrwPlugin = 1
-g:loaded_netrwSettings = 1
-g:loaded_netrwFileHandlers = 1
-g:netrw_banner = 0
-g:netrw_liststyle = 1
-g:netrw_browse_split = 4
-g:netrw_preview = 1
-g:netrw_winsize = 75
 
 g:markdown_folding = 1
 g:markdown_yaml_head = 1
 
 
 ################################################################
-packadd! matchit
 packadd! cfilter
+packadd! comment
+packadd! helptoc
+packadd! hlyank
+packadd! matchit
+packadd! nohlsearch
 
 
 ################################################################
