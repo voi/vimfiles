@@ -71,21 +71,56 @@ xnoremap <silent> <Leader>ed" :EncloseText -d -t " "<CR>
 xnoremap <silent> <Leader>ed' :EncloseText -d -t ' '<CR>
 xnoremap <silent> <Leader>ed` :EncloseText -d -t ` `<CR>
 
-# smart_input_modoki
-inoremap <silent> <expr> [ SmartInputModoki_open_bracket('[', ']')
-inoremap <silent> <expr> ( SmartInputModoki_open_bracket('(', ')')
-inoremap <silent> <expr> { SmartInputModoki_open_bracket('{', '}')
+### input_helper
+import 'input_helper.vim'
 
-inoremap <silent> <expr> ] SmartInputModoki_close_bracket('[', ']')
-inoremap <silent> <expr> ) SmartInputModoki_close_bracket('(', ')')
-inoremap <silent> <expr> } SmartInputModoki_close_bracket('{', '}')
+inoremap <silent> <expr> ( input_helper.Map('(', [
+      \ ['\%#[^()]',  "()\<Left>"],
+      \ ['\%#$',      "()\<Left>"]])
+inoremap <silent> <expr> [ input_helper.Map('[', [
+      \ ['\%#[^\[\]]',  "[]\<Left>"],
+      \ ['\%#$',        "[]\<Left>"]])
+inoremap <silent> <expr> { input_helper.Map('{', [
+      \ ['\%#[^{}]',  "{}\<Left>"],
+      \ ['\%#$',      "{}\<Left>"]])
 
-inoremap <silent> <expr> <Space> SmartInputModoki_inside_space()
-inoremap <silent> <expr> <CR>    SmartInputModoki_inside_enter()
+inoremap <silent> <expr> ) input_helper.Map(')', [['(\%#)', "\<Right>"]])
+inoremap <silent> <expr> ] input_helper.Map(']', [['\[\%#\]', "\<Right>"]])
+inoremap <silent> <expr> } input_helper.Map('}', [['{\%#}', "\<Right>"]])
 
-inoremap <silent> <expr> <C-h> SmartInputModoki_backspace()
+inoremap <silent> <expr> <Space> input_helper.Map("\<Space>", [
+      \ ['(\%#)',    "  \<Left>"],
+      \ ['\[\%#\]',  "  \<Left>"],
+      \ ['{\%#}',    "  \<Left>"]])
+inoremap <silent> <expr> <CR> input_helper.Map("\<CR>", [
+      \ ['(\%#)',    "\<CR>\<Up>\<End>\<CR>"],
+      \ ['\[\%#\]',  "\<CR>\<Up>\<End>\<CR>"],
+      \ ['{\%#}',    "\<CR>\<Up>\<End>\<CR>"]])
+inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", [
+      \ ['[\%#]',   "\<Del>\<BS>"],
+      \ ['(\%#)',   "\<Del>\<BS>"],
+      \ ['{\%#}',   "\<Del>\<BS>"],
+      \ ['"\%#"',   "\<Del>\<BS>"],
+      \ ["'\\%#'",  "\<Del>\<C-h>"],
+      \ ['\[\s\%#\s\]', "\<Del>\<BS>"],
+      \ ['(\s\%#\s)', "\<Del>\<BS>"],
+      \ ['{\s\%#\s}', "\<Del>\<BS>"]])
 
-inoremap <silent> <expr> ' SmartInputModoki_quote("'", '"')
-inoremap <silent> <expr> " SmartInputModoki_quote('"', "'")
-inoremap <silent> <expr> ` SmartInputModoki_quote('`', '')
+inoremap <silent> <expr> ' input_helper.Map("'", [
+      \ ["\\%#'", "\<Right>"],
+      \ ['"[^"]*\%#[^"]*"', "'"],
+      \ ['`[^`]*\%#[^`]*`', "'"],
+      \ ['\%#', "''\<Left>"]])
+
+inoremap <silent> <expr> " input_helper.Map('"', [
+      \ ['\%#"', "\<Right>"],
+      \ ["'[^']*\\%#[^']*'",  '"'],
+      \ ['`[^`]*\%#[^`]*`',   '"'],
+      \ ['\%#', '""' .. "\<Left>"]])
+
+inoremap <silent> <expr> ` input_helper.Map('`', [
+      \ ['\%#`', "\<Right>"],
+      \ ["'[^']*\\%#[^']*'",  '`'],
+      \ ['"[^"]*\%#[^"]*"',   '`'],
+      \ ['\%#', "``\<Left>"]])
 
