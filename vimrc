@@ -217,14 +217,17 @@ nnoremap <expr> <Space>P Vimrc_map_expr_register_p('P')
 
 xnoremap <expr> <Space>p '"_d' .. Vimrc_map_expr_register_p('p')
 
+# paste yank register
+xnoremap _ "0p
+
 # delete to blackhole register
 nnoremap d "_d
 nnoremap D "_D
 xnoremap d "_d
 
 # yank/cut like D
-nnoremap <Space>x C<ESC>
-nnoremap <Space>v v$
+nnoremap <M-X> C<ESC>
+nnoremap <M-v> v$
 
 nnoremap Y y$
 
@@ -248,6 +251,9 @@ endif
 # auto-indent editing at empty line
 nnoremap <expr> <Space>i empty(getline('.')) ? '"_cc' : 'i'
 
+# read only
+nnoremap <silent> <M-m> :set modifiable!<CR>
+
 # continuous indent
 xnoremap < <gv
 xnoremap > >gv
@@ -257,53 +263,6 @@ nnoremap z, zMzv
 
 # update
 nnoremap <silent> <Leader><Leader> :update<CR>
-
-# switch modes.
-def Vimrc_option_menu_action(winid: number, key: string, items: list<any>): bool
-  if key ==# "\<CR>"
-    var item = items->get(line('.', winid) - 1, {})
-    call execute(item->get('cmd', 'echo'))
-    call popup_close(winid)
-
-    return true
-
-  elseif key !=# 'j' && key !=# 'k' && key !=# "\<ESC>"
-    for item in items
-      if key ==# item->get('key', '')
-        call execute(item->get('cmd', 'echo'))
-        call popup_close(winid)
-
-        return true
-      endif
-    endfor
-
-  endif
-
-  return popup_filter_menu(winid, key)
-enddef
-
-def g:Vimrc_option_menu_open()
-  var items = [
-    [ 'a', 'autocomplete',  &autocomplete ],
-    [ 'h', 'hlsearch',  &hlsearch ],
-    [ 'i', 'incsearch', &incsearch ],
-    [ 'p', 'paste', &paste ],
-    [ 'r', 'modifiable', &modifiable ],
-    [ 's', 'wrapscan',  &wrapscan ],
-    [ 'w', 'wrap',      &wrap ],
-    [ 'c', 'cursorcolumn', &cursorcolumn ]
-  ]->map((i, v) => ( {
-        \ 'key': v[0], 
-        \ 'text': printf('(%s) %s %s', v[0], (v[2] ? '*' : ' '), v[1]), 
-        \ 'cmd': printf('setl %s!', v[1]) } )
-  )->extend(get(g:, 'vimrc_option_menu_custom_items', []))
-
-  var winid = popup_menu(items, {
-    filter: (winid, key) => Vimrc_option_menu_action(winid, key, items)
-  })
-enddef
-
-nnoremap <silent> <Leader>o :call g:Vimrc_option_menu_open()<CR>
 
 # buffer
 nnoremap <silent> [b :bprev<CR>
@@ -372,13 +331,6 @@ else
   endfor
 endif
 
-# path complete
-inoremap <expr> /
-      \ ((complete_info(['mode']).mode == 'file') &&
-      \  (complete_info(['selected']).selected >= 0))
-      \ ? '<C-x><C-f>'
-      \ : '/'
-
 # indent at begin of line
 nnoremap <silent> g> :normal gI	<CR>
 xnoremap <silent> g> :v/^$/ normal gI	<CR>
@@ -423,7 +375,7 @@ def g:Vimrc_smart_wrap()
   endif
 enddef
 
-nnoremap <silent> <Space>w :call g:Vimrc_smart_wrap()<CR>
+nnoremap <silent> <M-w> :call g:Vimrc_smart_wrap()<CR>
 
 ################################################################
 # command! -nargs=? -complete=filetype Temp 
