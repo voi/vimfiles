@@ -869,19 +869,26 @@ if has('gui_running')
 
   # indent guide
   def GVimrc_indent_guide()
-    if &expandtab
+    if &expandtab && &softtabstop != get(w:, 'win_tabstop', 0)
       setlocal conceallevel=2 # concealcursor=iv
 
+      for id in get(w:, 'win_match_id_s', [])
+        call matchdelete(id)
+      endfor
+
+      w:win_tabstop = &softtabstop
+      w:win_match_id_s = []
+
       for i in range(1, 16)
-        call matchadd(
-          'Conceal', printf('\%%(^ \{%d}\)\zs ', i * &softtabstop), 0, -1, {'conceal': '¦'})
+        call add(w:win_match_id_s, matchadd(
+          'Conceal', printf('\%%(^ \{%d}\)\zs ', i * &softtabstop), 0, -1, {'conceal': '¦'}))
       endfor
     endif
   enddef
 
   augroup gvimrc_autocmd_indent_guide
     autocmd!
-    autocmd FileType * call GVimrc_indent_guide()
+    autocmd WinEnter * call GVimrc_indent_guide()
     autocmd VimEnter,ColorScheme * highlight Conceal gui=NONE guifg=#AAAAAA guibg=NONE
   augroup END
 
