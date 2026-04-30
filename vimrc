@@ -74,14 +74,6 @@ set pumheight=16
 set wildignore+=*/.git,*/.git/*
 set wildignore+=*/.svn,*/.svn/*
 set wildignore+=_FOSSIL_
-set wildignore+=*.bmp,*.png,*.jpg,*.jpeg
-set wildignore+=*.o,*.obj,*.exe,*.dll,*.lib,*.pdb,*.ilk,*.exp,*.sdf
-set wildignore+=*/OBJ,*/OBJ/*
-set wildignore+=*/OBJ_DEBUG,*/OBJ_DEBUG/*
-set wildignore+=*/Release,*/Release/*
-set wildignore+=*/Debug,*/Debug/*
-set wildignore+=*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.xlsm
-set wildignore+=*.lzh,*.gz,*.zip,*.7z
 set wildignorecase
 set wildmode=longest,full
 set wildoptions+=fuzzy
