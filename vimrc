@@ -32,12 +32,13 @@ set display=lastline
 set colorcolumn=80,100
 set guioptions+=cM
 set guioptions-=t
-# |¦»▸>￫↲
+# |¦»▸>￫↲ƶ
 set listchars=tab:￫\ ,trail:.,extends:»,precedes:«,nbsp:%,conceal:↲
 set showcmd
 set showbreak=▸\ 
 set shortmess=coOIWtT
 set matchpairs& matchpairs+=<:>
+set cursorline
 set cursorlineopt=number
 
 # folding
@@ -47,6 +48,7 @@ enddef
 
 set foldtext=Vimrc_foldtext()
 set fillchars=fold:\ 
+set fillchars+=vert:\:
 set fillchars+=foldopen:▾,foldsep:.,foldclose:▸
 
 # format
@@ -349,8 +351,7 @@ nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
 if has('patch-9.1.1590')
   set autocomplete autocompletedelay=5 autocompletetimeout=100
-  set completefuzzycollect=files
-# set completeopt+=popup completepopup=border:on
+
 else
   # auto-complete imitation
   def Vimrc_Keymap_Complete(chr: string): string
@@ -733,6 +734,9 @@ def Vimrc_custom_highlight()
   hi StatusLine_Command   guifg=#FFFFFF guibg=#030303 ctermfg=Black ctermbg=Yellow
   hi StatusLine_Select    guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
 
+  # vertical border
+  hi vertsplit guifg=fg guibg=bg
+
   # space
   hi link TrailingSpace NonText
   hi Extraspace guibg=#8B008B ctermbg=darkmagenta
@@ -803,8 +807,8 @@ augroup vimrc_autocmd_colors_highlight
   autocmd!
   autocmd ColorScheme       * call Vimrc_custom_highlight()
   autocmd VimEnter,WinEnter * call Vimrc_custom_syntax()
-  autocmd WinEnter,BufWinEnter * setlocal cursorline wincolor=
-  autocmd WinLeave             * setlocal nocursorline wincolor=NormalNC
+  autocmd WinEnter,BufWinEnter * setlocal cursorlineopt=both wincolor=
+  autocmd WinLeave             * setlocal cursorlineopt=number wincolor=NormalNC
 augroup END
 
 
@@ -853,12 +857,14 @@ packadd! nohlsearch
 if has('gui_running')
   # options
   $LANG = 'ja'
-  set cursorline
   set guioptions=gr
   # set cmdheight=1
   # set columns=100
   # set lines=40
   set linespace=3
+  set background=light
+
+  colorscheme retrobox
 
   # font rendering
   if has('win32')
@@ -866,11 +872,6 @@ if has('gui_running')
     set guifont=Cascadia_Code:h10.5,BIZ_UDゴシック:h11,Consolas:h11
     set guifontwide=BIZ_UDゴシック:h11
 
-    set background=light
-    colorscheme retrobox
-  endif
-
-  if has('win32')
     g:font_size = '11'
     g:guifonts = {
       1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
