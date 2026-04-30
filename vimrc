@@ -833,10 +833,14 @@ if has('gui_running')
     set guifont=Cascadia_Code:h10.5,BIZ_UDゴシック:h11,Consolas:h11
     set guifontwide=BIZ_UDゴシック:h11
 
+    # - ‐ ─ ― ー 　 → ⇒
+    # 1 i I T l | 0 o O θ Θ , . ; : _
+    #
     g:font_size = '11'
     g:guifonts = {
       1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
-      2: ['Consolas:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
+      2: ['Cascadia_Code:h10.5,UD_デジタル_教科書体_N:h__', 'UD_デジタル_教科書体_N:h__'],
+      3: ['Consolas:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
     }
 
     def g:Vimrc_set_guifont(fonts: list<string>, size: string)
@@ -844,13 +848,14 @@ if has('gui_running')
             \ fonts->get(0, '')->substitute('\%(:h\)\zs__', size, 'g'))
       execute printf('set guifontwide=%s',
             \ fonts->get(1, fonts->get(0, ''))->substitute('\%(:h\)\zs__', size, 'g'))
+      execute 'set ambiwidth=double'
     enddef
 
     command! SetGuiFonts {
-      var i = g:guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->inputlist()
+      var i = g:guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->sort()->inputlist()
 
-      if 0 <= i && i < g:guifonts->len()
-        call Local_set_guifont(g:guifonts->get(i, []), g:font_size)
+      if g:guifonts->has_key(i)
+        call g:Vimrc_set_guifont(g:guifonts->get(i, []), g:font_size)
       endif
     }
   endif
