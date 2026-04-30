@@ -28,17 +28,18 @@ def Popup_win_resize(winid: number, items: list<any>)
   call popup_move(winid, { minheight: h_, maxheight: h_, maxwidth: w_ })
 enddef
 
-def PopupEditee_set_list(winid: number, caption: string, items: list<any>)
-  if !caption->empty() | call popup_setoptions(winid, { title: caption }) | endif
-
-  call popup_settext(winid, items)
-  call Popup_win_resize(winid, items)
+def PopupEditee_set_list(winid: number, ctx: any)
+  call popup_setoptions(winid, {
+    title: printf(' %s (%d) %s%s %s%s ', ctx.name, ctx.active->len(),
+      (ctx.pattern->empty() ? '' : '< '), ctx.pattern,
+      (ctx.filter->empty() ? '' : '< '), ctx.filter)
+  })
+  call popup_settext(winid, ctx.active)
+  call Popup_win_resize(winid, ctx.active)
 enddef
 
 def PopupEditee_path_to_candidate(icon: string, path: string): string
-  var chunks = path->substitute('^\(.*\)[\//]\([^\//]\+\)$', '\1\n\2', '')->split('\n')
-
-  return printf('%s %s (%s)', icon, get(chunks, 1, path), get(chunks, 0, '.'))
+  return printf('%s %s (%s)', icon, path->fnamemodify(':t'), path->fnamemodify(':h:~'))
 enddef
 
 def PopupEditee_files_make_list(root: string): list<any>
@@ -49,7 +50,8 @@ def PopupEditee_files_make_list(root: string): list<any>
         ((v.type =~# pattern_type_file) && (v.name !~# pattern_ignore_file)))
     })
     ->map((i, v) => ({
-      text: printf('%s %s (%s)', ((v.type =~# pattern_type_dir) ? icons.dir : icons.file), v.name, root),
+      text: printf('%s %s (%s)',
+        ((v.type =~# pattern_type_dir) ? icons.dir : icons.file), v.name, root->fnamemodify(':~')),
       path: root .. path_slash .. v.name
     }))
 enddef
@@ -67,7 +69,7 @@ def PopupEditee_files_action_open(command_format: string, winid: number, ctx: an
       ctx.source = children
       ctx.active = children
 
-      call PopupEditee_set_list(winid, printf(' Files (%d): %s ', ctx.active->len(), path), ctx.active)
+      call PopupEditee_set_list(winid, ctx)
     endif
   else
     call popup_close(winid)
@@ -78,7 +80,7 @@ enddef
 
 var popup_editee_file_open_handlers = {
   "\<CR>": function(PopupEditee_files_action_open, ['edit %s']),
-  't': function(PopupEditee_files_action_open, ['tabedit %s'])
+  "\<C-t>": function(PopupEditee_files_action_open, ['tabedit %s'])
 }
 
 def PopupEditee_files_action_up(winid: number, ctx: any)
@@ -93,7 +95,7 @@ def PopupEditee_files_action_up(winid: number, ctx: any)
   ctx.active = ctx.source
 
   #
-  call PopupEditee_set_list(winid, printf(' Files / %d : %s ', ctx.active->len(), root), ctx.active)
+  call PopupEditee_set_list(winid, ctx)
 enddef
 
 def PopupEditee_buffers_action_open(command_format: string, winid: number, ctx: any)
@@ -123,37 +125,69 @@ def PopupEditee_action_fuzzy(winid: number, ctx: any)
 
   if empty(chars) | return | endif
 
+  ctx.filter = chars
   ctx.active = ctx.active->matchfuzzy(chars, { key: 'text' })
 
-  call PopupEditee_set_list(winid, '', ctx.active)
+  call PopupEditee_set_list(winid, ctx)
 enddef
 
-def PopupEditee_action_include(winid: number, ctx: any)
+def PopupEditee_action_match(winid: number, ctx: any)
   var text = input('include: ')
 
   if empty(text) | return | endif
 
-  ctx.active = ctx.active->copy()->filter((i, v) => v->get('text', '') =~? text)
+  ctx.pattern = text
+  ctx.active = ctx.active->filter(((i, v) => v->get('text', '') =~? text))
 
-  call PopupEditee_set_list(winid, '', ctx.active)
+  call PopupEditee_set_list(winid, ctx)
 enddef
 
 def PopupEditee_action_reset(winid: number, ctx: any)
-  ctx.active = ctx.source
+  ctx.filter = ''
+  ctx.pattern = ''
+  ctx.active = ctx.source->copy()
 
-  call PopupEditee_set_list(winid, '', ctx.active)
+  call PopupEditee_set_list(winid, ctx)
+enddef
+
+def PopupEditee_action_fuzzy_incremental(winid: number, key: string, ctx: any)
+  ctx.filter ..= key
+  ctx.active = ctx.active->matchfuzzy(ctx.filter, { key: 'text' })
+
+  call PopupEditee_set_list(winid, ctx)
+enddef
+
+def PopupEditee_action_fuzzy_back(winid: number, ctx: any)
+  ctx.filter = ctx.filter->slice(0, -1)
+
+  if ctx.filter->len() > 0
+    ctx.active = ctx.source->matchfuzzy(ctx.filter, { key: 'text' })
+  elseif ctx.pattern->len() > 0
+    ctx.active = ctx.source->copy()->filter(((i, v) => v->get('text', '') =~? ctx.pattern))
+  else
+    ctx.active = ctx.source
+  endif
+
+  call PopupEditee_set_list(winid, ctx)
 enddef
 
 def PopupEditee_action(winid: number, key: string, ctx: any): bool
   var handlers = get(ctx, 'handlers', {})
 
-  if     key ==# 'f' | call PopupEditee_action_fuzzy(winid, ctx)
-  elseif key ==# 'i' | call PopupEditee_action_include(winid, ctx)
-  elseif key ==# 'u' | call PopupEditee_action_reset(winid, ctx)
+  if     key ==# "\<C-f>" | call PopupEditee_action_fuzzy(winid, ctx)
+  elseif key ==# "\<C-i>" | call PopupEditee_action_match(winid, ctx)
+  elseif key ==# "\<C-u>" | call PopupEditee_action_reset(winid, ctx)
   elseif handlers->has_key(key)
     var Handler = get(handlers, key, ((w, c) => 1))
 
     call Handler(winid, ctx)
+
+  elseif key =~# '[0-9A-Za-z_.@\-]'
+    call PopupEditee_action_fuzzy_incremental(winid, key, ctx)
+
+  elseif key ==# "\<C-h>"
+    call PopupEditee_action_fuzzy_back(winid, ctx)
+
   else
     return popup_filter_menu(winid, key)
   endif
@@ -162,11 +196,16 @@ def PopupEditee_action(winid: number, key: string, ctx: any): bool
 enddef
 
 def PopupEditee_open(caption: string, items: list<any>, handler_s: dict<func>)
-  var ctx = { source: items, active: items, handlers: handler_s }
+  var ctx = {
+    source: items, active: items->copy(), handlers: handler_s,
+    name: caption, filter: '', pattern: ''
+  }
   var winid = popup_menu(items, {
-    title: caption,
+    title: printf(" %s (%d) ", caption, items->len()),
     filter: (winid, key) => PopupEditee_action(winid, key, ctx),
-    borderchars: []
+    borderchars: ( has('gui_running')
+          \ ?  ['─', '│', '─', '│', '┌', '┐', '┘', '└']
+          \ : ['-', ' ', '-', ' ', '*', '*', '*', '*'])
   })
 
   call Popup_win_resize(winid, items)
@@ -178,10 +217,9 @@ def PopupEditee_do_files(root_dir: string)
   var root = root_dir->empty() ? getcwd() : root_dir
   var items = PopupEditee_files_make_list(root)
   var handlers = { '^': function(PopupEditee_files_action_up) }
-  ->extend(popup_editee_file_open_handlers)
+    ->extend(popup_editee_file_open_handlers)
 
-  call PopupEditee_open(
-    printf(' Files / %d : %s ', items->len(), root), items, handlers)
+  call PopupEditee_open('Files', items, handlers)
 enddef
 
 def PopupEditee_do_mru()
@@ -197,7 +235,7 @@ def PopupEditee_do_mru()
         path: v
     }))
 
-  call PopupEditee_open(' Mru ', items, popup_editee_file_open_handlers)
+  call PopupEditee_open('Mru', items, popup_editee_file_open_handlers)
 enddef
 
 def PopupEditee_do_buffers()
@@ -209,18 +247,20 @@ def PopupEditee_do_buffers()
       var bn_ = bufname(v)
 
       if getbufvar(v, '&buftype', '')->empty()
-        bn_ = printf('%s (%s)', bn_->fnamemodify(':t'), bn_->fnamemodify(':p:h'))
+        bn_ = printf('%s (%s)', bn_->fnamemodify(':t'), bn_->fnamemodify(':p:h:~'))
       endif
 
       return { text: printf('%4d %s %s', v, icons.buf, bn_), bufnr: v }
     } )
   var handlers = {
     "\<CR>": function(PopupEditee_buffers_action_open, ['buffer %d']),
-    "t": function(PopupEditee_buffers_action_open, ['split | buffer %d | wincmd T']),
-    "d": function(PopupEditee_buffers_action_open, ['bw %d'])
+    "\<C-t>": function(PopupEditee_buffers_action_open, ['split | buffer %d | wincmd T']),
+    "\<C-s>": function(PopupEditee_buffers_action_open, ['split | buffer %d']),
+    "\<C-v>": function(PopupEditee_buffers_action_open, ['vsplit | buffer %d']),
+    "\<C-d>": function(PopupEditee_buffers_action_open, ['bw %d'])
   }
 
-  call PopupEditee_open(' Buffers ', items, handlers)
+  call PopupEditee_open('Buffers', items, handlers)
 enddef
 
 def PopupEditee_do_windows()
@@ -261,7 +301,7 @@ def PopupEditee_do_windows()
   #
   var handlers = { "\<CR>": function(PopupEditee_windows_action_enter) }
 
-  call PopupEditee_open(' Windows ', items, handlers)
+  call PopupEditee_open('Windows', items, handlers)
 enddef
 
 def PopupEditee_do_lines()
@@ -271,17 +311,20 @@ def PopupEditee_do_lines()
     var lines = getbufline(bnr, 1, '$')
       ->map((i, v) => ({ text: v, bufnr: bnr, linenr: (i + 1) }) )
       ->filter((i, v) => v.text !~# '^\s*$')
-    var ctx = {
-      source: lines,
-      active: lines,
-      handlers: { "\<CR>": function(PopupEditee_lines_action_enter) }
-    }
-    var winid = popup_menu(ctx.active, {
-      title: printf(' Lines / %d ', lines->len()),
-      filter: (winid, key) => PopupEditee_action(winid, key, ctx)
-    })
+    var handlers = { "\<CR>": function(PopupEditee_lines_action_enter) }
 
-    call Popup_win_resize(winid, lines)
+    call PopupEditee_open('Lines', lines, handlers)
+#      var ctx = {
+#        source: lines, active: lines->copy(),
+#        handlers: { "\<CR>": function(PopupEditee_lines_action_enter) },
+#        name: 'Lines', filter: '', pattern: ''
+#      }
+#      var winid = popup_menu(ctx.active, {
+#        title: ctx.name,
+#        filter: (winid, key) => PopupEditee_action(winid, key, ctx)
+#      })
+#  
+#      call Popup_win_resize(winid, lines)
   endif
 enddef
 
@@ -339,7 +382,8 @@ def PopupEditee_get_glob_cache(bang: string, root_dir: string): list<any>
 
     execute 'silent close'
 
-    echomsg printf('glob / %d : %f : %s', ln, reltimefloat(reltime(start_time)), root)
+    echomsg printf('glob / %d : %f : %s',
+      ln, reltimefloat(reltime(start_time)), root->fnamemodify(':~'))
   endif
 
   return [bnr, root]
@@ -355,8 +399,7 @@ def PopupEditee_do_glob(bang: string, root_dir: string)
       path: v
     }))
 
-  call PopupEditee_open(printf(' Glob / %d : %s', items->len(), root),
-    items, popup_editee_file_open_handlers)
+  call PopupEditee_open('Glob', items, popup_editee_file_open_handlers)
 enddef
 
 def PopupEditee_open_glob_cache(bang: string, root_dir: string)
