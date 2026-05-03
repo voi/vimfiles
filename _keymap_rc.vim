@@ -5,42 +5,57 @@ augroup vimrc_local_autocmd
   autocmd VimEnter * Root
 augroup END
 
-### cursorline
+
+# ###############################
+# ## vimrc
+# cursorline
 nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
 nnoremap <silent> <Leader>L  :CursorLineReverseOnOff<CR>
 nnoremap <silent> <Leader>s  :ScrolloffCenterOnOff<CR>
 
-### zoom in / out
+
+# zoom in / out
 if has('gui_running') && has('win32')
   nnoremap <silent> <Leader>+ :ZoomIn<CR>
   nnoremap <silent> <Leader>- :ZoomOut<CR>
   nnoremap <silent> <Leader>0 :ZoomReset<CR>
 endif
 
-### popup
-nnoremap <silent> <C-p>f     :PopupFiles<CR>
-nnoremap <silent> <C-p>F     :PopupFiles %:h<CR>
-nnoremap <silent> <C-p>h     :PopupMru<CR>
-nnoremap <silent> <C-p>b     :PopupBuffers<CR>
-nnoremap <silent> <C-p>w     :PopupWindows<CR>
-nnoremap <silent> <C-p>l     :PopupLines<CR>
-nnoremap <silent> <C-p>g     :PopupGlob<CR>
-nnoremap <silent> <C-p>G     :PopupGlob %:h<CR>
-nnoremap <silent> <C-p><C-g> :PopupGlob!<CR>
 
-### word highlight
+# ###############################
+# comb it
+nnoremap <silent> <C-p>f     :CombItFiles<CR>
+nnoremap <silent> <C-p>F     :CombItFiles %:h<CR>
+nnoremap <silent> <C-p>h     :CombItMru<CR>
+nnoremap <silent> <C-p>b     :CombItBuffers<CR>
+nnoremap <silent> <C-p>w     :CombItWindows<CR>
+nnoremap <silent> <C-p>l     :CombItLines<CR>
+nnoremap <silent> <C-p>g     :CombItGlob<CR>
+nnoremap <silent> <C-p>G     :CombItGlob %:h<CR>
+nnoremap <silent> <C-p><C-g> :CombItGlob!<CR>
+
+
+# ###############################
+# word highlight
 nnoremap          <Leader>wa :WordHLAdd 
 nnoremap <silent> <Leader>ww :WordHLAdd expand('<cword>')<CR>
 nnoremap <silent> <Leader>wd :WordHLDelete<CR>
 xnoremap <silent> <Leader>w  :WordHLVisualAdd<CR>
 
-### code snippet
+
+# ###############################
+# code snippet
 nnoremap <C-s> :VSCodeSnippetInsert 
 inoremap <C-s> <C-o>:VSCodeSnippetInsert 
 xnoremap <C-s> :VSCodeSnippetReplace 
 
-### word surround
+
+# ###############################
+# word surround
 g:enclose_text_pattern_list = []
+g:enclose_text_char_map = {
+  '(': ')', '[': ']', '{': '}', '<': '>', "'": "'", '"': '"', '`': '`'
+}
 
 xnoremap <Leader>eaa :EncloseText -a 
 xnoremap <Leader>edd :EncloseText -d 
@@ -71,7 +86,9 @@ xnoremap <silent> <Leader>ed" :EncloseText -d -t " "<CR>
 xnoremap <silent> <Leader>ed' :EncloseText -d -t ' '<CR>
 xnoremap <silent> <Leader>ed` :EncloseText -d -t ` `<CR>
 
-### input_helper
+
+# ###############################
+# input_helper
 import 'input_helper.vim'
 
 inoremap <silent> <expr> ( input_helper.Map('(', [
@@ -97,14 +114,14 @@ inoremap <silent> <expr> <CR> input_helper.Map("\<CR>", [
       \ ['\[\%#\]',  "\<CR>\<Up>\<End>\<CR>"],
       \ ['{\%#}',    "\<CR>\<Up>\<End>\<CR>"]])
 inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", [
-      \ ['[\%#]',   "\<Del>\<BS>"],
-      \ ['(\%#)',   "\<Del>\<BS>"],
-      \ ['{\%#}',   "\<Del>\<BS>"],
-      \ ['"\%#"',   "\<Del>\<BS>"],
+      \ ['\[\%#\]', "\<Del>\<C-h>"],
+      \ ['(\%#)',   "\<Del>\<C-h>"],
+      \ ['{\%#}',   "\<Del>\<C-h>"],
+      \ ['"\%#"',   "\<Del>\<C-h>"],
       \ ["'\\%#'",  "\<Del>\<C-h>"],
-      \ ['\[\s\%#\s\]', "\<Del>\<BS>"],
-      \ ['(\s\%#\s)', "\<Del>\<BS>"],
-      \ ['{\s\%#\s}', "\<Del>\<BS>"]])
+      \ ['\[\s\%#\s\]', "\<Del>\<C-h>"],
+      \ ['(\s\%#\s)', "\<Del>\<C-h>"],
+      \ ['{\s\%#\s}', "\<Del>\<C-h>"]])
 
 inoremap <silent> <expr> ' input_helper.Map("'", [
       \ ["\\%#'", "\<Right>"],
@@ -123,4 +140,6 @@ inoremap <silent> <expr> ` input_helper.Map('`', [
       \ ["'[^']*\\%#[^']*'",  '`'],
       \ ['"[^"]*\%#[^"]*"',   '`'],
       \ ['\%#', "``\<Left>"]])
+
+command! InputHelperLog echo input_helper.logs
 
