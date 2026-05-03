@@ -115,14 +115,14 @@ def g:Vimrc_tabline(): string
   var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡ ')
   var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝 ')
   var icon_prev = get(g:, 'Vimrc_tabline_icon_prev', '◀️')
-  var icon_post = get(g:, 'Vimrc_tabline_icon_post', '▶️')
+  var icon_next = get(g:, 'Vimrc_tabline_icon_next', '▶️')
 
   #
   var tabs = printf('%s %s %s %s',
     icon_page,
     ((tabnr - 1) > 0 ? icon_prev : ''),
     ((tabcount > 1) ? tabnr->string() : ''),
-    ((tabcount - tabnr) > 0 ? icon_post : ''))
+    ((tabcount - tabnr) > 0 ? icon_next : ''))
 
   #
   var active = printf('%s%s ',
