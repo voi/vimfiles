@@ -155,7 +155,7 @@ def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
     redraw
 
     #
-    var ln = 1
+    var lnum = 1
     var dirs = [root]
     #
     var max_candidates = get(g:, 'fuzzy_choice_glob_max_candidates', 10000)
@@ -174,16 +174,16 @@ def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
           call dirs->add(fullname)
 
         elseif (entry.type =~# '\v^(file|link)$') && (entry.name !~# pattern_ignore_file)
-          ln += (appendbufline(bnr, ln, fullname) ? 1 : 0)
+          lnum += (appendbufline(bnr, lnum, fullname) ? 1 : 0)
         endif
 
-        if ln > max_candidates
+        if lnum > max_candidates
           dirs = []
           break
         endif
       endfor
 
-      call setbufline(bnr, 1, printf('>> %d : %s', ln, dir))
+      call setbufline(bnr, 1, printf('>> %d : %s', lnum, dir))
       redraw
     endwhile
 
@@ -191,7 +191,8 @@ def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
 
     execute 'silent close'
 
-    echomsg printf('glob / %d : %f : %s', ln, reltimefloat(reltime(start_time)), root->fnamemodify(':~'))
+    echomsg printf('glob / %d : %f : %s',
+      lnum, reltimefloat(reltime(start_time)), root->fnamemodify(':~'))
   endif
 
   return [bnr, root]
