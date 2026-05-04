@@ -5,6 +5,7 @@ vim9script
 # g:Vimrc_tabline_icon_page = '🔖'
 # g:vimrc_tabline_icon_mod = '⚡'
 # g:vimrc_tabline_icon_nor = '📝'
+# g:vimrc_tabline_icon_dir = '📁'
 # g:Vimrc_tabline_icon_prev = '◀️' # ⏮️⏪⬅️◀️
 # g:Vimrc_tabline_icon_post = '▶️' # ⏭️⏩➡️▶️
 
@@ -29,16 +30,24 @@ vim9script
 
 
 # ###############################
-# ## comb_ib.vim
-# g:comb_it_icon_file  = '📝'
-# g:comb_it_icon_dir   = '📁'
-# g:comb_it_icon_empty = '🈳'
-# g:comb_it_icon_buff  = '📜'
+# ## fuzzy_choice.vim
+# g:fuzzy_choice_icon_file  = '📝'
+# g:fuzzy_choice_icon_dir   = '📁'
+# g:fuzzy_choice_icon_empty = '🈳'
+# g:fuzzy_choice_icon_buff  = '📜'
 
-# g:comb_it_glob_max_candidates = 10000
+# g:fuzzy_choice_glob_max_candidates = 10000
 
-# g:comb_it_glob_regex_ignore_dir = '\v^\.%(git|jj|svn|hg|bzr)$'
-# g:comb_it_glob_regex_ignore_file = '\v^_FOSSIL_$'
+# g:fuzzy_choice_glob_regex_ignore_dir = '\v^\.%(git|jj|svn|hg|bzr)$'
+# g:fuzzy_choice_glob_regex_ignore_file = '\v^_FOSSIL_$'
+
+# g:fuzzy_choice_vim_mru_bookmark = '~/_vim_mru_pinned.txt'
+
+
+# ###############################
+# insert_vscode_snippet
+# g:code_snippet_glob_pathes = '/vscode/data/user-data/User/snippets'
+#   ->expand()->fnamemodify(':p')
 
 
 # ###############################
@@ -55,4 +64,3 @@ g:vcs_root_target_files = ['_FOSSIL_', 'vimrc']
 # ###############################
 # ## align words
 g:align_words_petterm_list = []
-

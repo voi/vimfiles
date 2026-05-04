@@ -24,15 +24,15 @@ endif
 
 # ###############################
 # comb it
-nnoremap <silent> <C-p>f     :CombItFiles<CR>
-nnoremap <silent> <C-p>F     :CombItFiles %:h<CR>
-nnoremap <silent> <C-p>h     :CombItMru<CR>
-nnoremap <silent> <C-p>b     :CombItBuffers<CR>
-nnoremap <silent> <C-p>w     :CombItWindows<CR>
-nnoremap <silent> <C-p>l     :CombItLines<CR>
-nnoremap <silent> <C-p>g     :CombItGlob<CR>
-nnoremap <silent> <C-p>G     :CombItGlob %:h<CR>
-nnoremap <silent> <C-p><C-g> :CombItGlob!<CR>
+nnoremap <silent> <C-p>f     :FuzzyChoiceFiles<CR>
+nnoremap <silent> <C-p>F     :FuzzyChoiceFiles %:h<CR>
+nnoremap <silent> <C-p>h     :FuzzyChoiceMru<CR>
+nnoremap <silent> <C-p>b     :FuzzyChoiceBuffers<CR>
+nnoremap <silent> <C-p>w     :FuzzyChoiceWindows<CR>
+nnoremap <silent> <C-p>l     :FuzzyChoiceLines<CR>
+nnoremap <silent> <C-p>g     :FuzzyChoiceGlob<CR>
+nnoremap <silent> <C-p>G     :FuzzyChoiceGlob %:h<CR>
+nnoremap <silent> <C-p><C-g> :FuzzyChoiceGlob!<CR>
 
 
 # ###############################
