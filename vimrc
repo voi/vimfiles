@@ -112,8 +112,9 @@ def g:Vimrc_tabline(): string
 
   #
   var icon_page = get(g:, 'vimrc_tabline_icon_page', '🔖')
-  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡ ')
-  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝 ')
+  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡')
+  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝')
+  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📁')
   var icon_prev = get(g:, 'Vimrc_tabline_icon_prev', '◀️')
   var icon_next = get(g:, 'Vimrc_tabline_icon_next', '▶️')
 
@@ -125,12 +126,13 @@ def g:Vimrc_tabline(): string
     ((tabcount - tabnr) > 0 ? icon_next : ''))
 
   #
-  var active = printf('%s%s ',
+  var active = printf('%s %s ',
     (&modified ? icon_mod : icon_nor),
     (bufname->empty() ? '...' : bufname))
+  var here = printf('%s %s/', icon_dir, bufpath->fnamemodify(':h:t'))
 
   #
-  return '%(%#TabLine#' .. tabs .. '%#TabLineSel#' .. active  .. '%)%<%T%#TabLineFill#'
+  return '%(%#TabLine#' .. tabs .. '%#TabLineSel#' .. active  .. '%)%<' .. here .. '%T%#TabLineFill#'
 enddef
 
 set showtabline=2 tabline=%!g:Vimrc_tabline()
