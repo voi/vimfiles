@@ -206,11 +206,8 @@ def FuzzyChoice_open(caption: string, items: list<any>, user_handlers: dict<func
   var winid = popup_menu(items, {
     title: printf(" %s (%d) ", caption, items->len()),
     filter: (winid, key) => FuzzyChoice_action(winid, key, ctx),
-    borderchars: ( has('gui_running')
-          \ ?  ['─', '│', '─', '│', '┌', '┐', '┘', '└']
-          \ : ['-', ' ', '-', ' ', '*', '*', '*', '*'])
+    borderchars: get(g:, 'fuzzy_choice_borderchars', [])
   })
-
   call Popup_win_resize(winid, items)
 enddef
 
