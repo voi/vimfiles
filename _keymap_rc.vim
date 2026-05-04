@@ -52,39 +52,26 @@ xnoremap <C-s> :VSCodeSnippetReplace
 
 # ###############################
 # word surround
-g:enclose_text_pattern_list = []
-g:enclose_text_char_map = {
-  '(': ')', '[': ']', '{': '}', '<': '>', "'": "'", '"': '"', '`': '`'
-}
-
 xnoremap <Leader>eaa :EncloseText -a 
-xnoremap <Leader>edd :EncloseText -d 
-xnoremap <Leader>err :EncloseText -r 
+xnoremap <Leader>ed  :EncloseText -d -p<CR>
+xnoremap <Leader>er  :EncloseText -r -p 
 
 xnoremap <Leader>eac :EncloseText -a -c<CR>
 xnoremap <Leader>edc :EncloseText -d -c<CR>
 
-xnoremap <silent> <Leader>ea( :EncloseText -a -t (     )<CR>
-xnoremap <silent> <Leader>ea[ :EncloseText -a -t [     ]<CR>
-xnoremap <silent> <Leader>ea{ :EncloseText -a -t {     }<CR>
-xnoremap <silent> <Leader>ea< :EncloseText -a -t <     ><CR>
+xnoremap <silent> <Leader>ea( :EncloseText -a -t -p (<CR>
+xnoremap <silent> <Leader>ea[ :EncloseText -a -t -p [<CR>
+xnoremap <silent> <Leader>ea{ :EncloseText -a -t -p {<CR>
+xnoremap <silent> <Leader>ea< :EncloseText -a -t -p <<CR>
 
-xnoremap <silent> <Leader>ea) :EncloseText -a -t (\  \ )<CR>
-xnoremap <silent> <Leader>ea] :EncloseText -a -t [\  \ ]<CR>
-xnoremap <silent> <Leader>ea} :EncloseText -a -t {\  \ }<CR>
-xnoremap <silent> <Leader>ea> :EncloseText -a -t <\  \ ><CR>
+xnoremap <silent> <Leader>ea) :EncloseText -a -t -p )<CR>
+xnoremap <silent> <Leader>ea] :EncloseText -a -t -p ]<CR>
+xnoremap <silent> <Leader>ea} :EncloseText -a -t -p }<CR>
+xnoremap <silent> <Leader>ea> :EncloseText -a -t -p ><CR>
 
-xnoremap <silent> <Leader>ea" :EncloseText -a    " "<CR>
-xnoremap <silent> <Leader>ea' :EncloseText -a    ' '<CR>
-xnoremap <silent> <Leader>ea` :EncloseText -a    ` `<CR>
-
-xnoremap <silent> <Leader>ed( :EncloseText -d -t ( )<CR>
-xnoremap <silent> <Leader>ed[ :EncloseText -d -t [ ]<CR>
-xnoremap <silent> <Leader>ed{ :EncloseText -d -t { }<CR>
-xnoremap <silent> <Leader>ed< :EncloseText -d -t < ><CR>
-xnoremap <silent> <Leader>ed" :EncloseText -d -t " "<CR>
-xnoremap <silent> <Leader>ed' :EncloseText -d -t ' '<CR>
-xnoremap <silent> <Leader>ed` :EncloseText -d -t ` `<CR>
+xnoremap <silent> <Leader>ea" :EncloseText -a -p "<CR>
+xnoremap <silent> <Leader>ea' :EncloseText -a -p '<CR>
+xnoremap <silent> <Leader>ea` :EncloseText -a -p `<CR>
 
 
 # ###############################

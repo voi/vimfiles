@@ -36,6 +36,8 @@ vim9script
 # g:fuzzy_choice_icon_empty = '🈳'
 # g:fuzzy_choice_icon_buff  = '📜'
 
+# g:fuzzy_choice_borderchars = []
+
 # g:fuzzy_choice_glob_max_candidates = 10000
 
 # g:fuzzy_choice_glob_regex_ignore_dir = '\v^\.%(git|jj|svn|hg|bzr)$'
@@ -52,15 +54,11 @@ vim9script
 
 # ###############################
 # ## gf improved
-g:smart_gf_executable_binary_pattern = '\v\.%(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$'
+#  g:smart_gf_executable_binary_pattern = '\v\.%(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$' 
 
 
 # ###############################
 # ## find root
-g:vcs_root_target_dirs = ['.svn', '.git']
-g:vcs_root_target_files = ['_FOSSIL_', 'vimrc']
+#  g:vcs_root_target_dirs = ['.svn', '.git'] 
+#  g:vcs_root_target_files = ['_FOSSIL_', 'vimrc'] 
 
-
-# ###############################
-# ## align words
-g:align_words_petterm_list = []
