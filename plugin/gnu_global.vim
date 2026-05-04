@@ -8,7 +8,7 @@ const global_util_gtag_cmd_grep = '-g -q -a --result=ctags'
 const global_util_gtag_cmd_tags = '   -q -a --result=ctags'
 
 def GlobalUtil_make_cmd(base: string, alt: string, word: string): list<string>
-  var bin_name = 'global'
+  var bin_name = get(g:, 'gnu_global_vim_bin_name', 'global')
 
   return [
     [bin_name, base, word]->join(' '),
