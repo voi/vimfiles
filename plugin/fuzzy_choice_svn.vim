@@ -8,7 +8,8 @@ import 'fuzzy_choice.vim'
 #
 def Local_fuzzy_svn_status_do(command_format: string, winid: number, ctx: any, item: any)
   call popup_close(winid)
-  call system(command_format, item->get('path', '-h'))
+
+  echomsg printf(command_format, item->get('path', '-h'))->system()
 enddef
 
 
@@ -21,7 +22,7 @@ var local_fuzzy_svn_handlers = {
 
 #
 def Local_fuzzy_svn_status(option: string)
-  var dir = getcwd()
+  var dir = getcwd()->fnamemodify(':p')
   var items = printf('svn status %s %s', option, dir)->system()
     ->iconv(&termencoding, &encoding)
     ->split('\n')

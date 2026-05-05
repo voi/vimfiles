@@ -8,7 +8,8 @@ import 'fuzzy_choice.vim'
 #
 def Local_fuzzy_git_status_do(command_format: string, winid: number, ctx: any, item: any)
   call popup_close(winid)
-  call system(command_format, item->get('item', '-h'))
+
+  echomsg printf(command_format, item->get('item', '-h'))->system()
 enddef
 
 
@@ -25,7 +26,7 @@ def Local_fuzzy_git_status(option: string)
   var items = printf('git status -s %s', option)->system()
     ->iconv(&termencoding, &encoding)
     ->split('\n')
-    ->map((i, v) => ({ text: v, path: v->slice(4)->fnamemodify(':p'), item: v->slice(4) }))
+    ->map((i, v) => ({ text: v, path: v->slice(3)->fnamemodify(':p'), item: v->slice(3) }))
 
   fuzzy_choice.DoAsFilesEx('git status', items, local_fuzzy_git_handlers)
 enddef

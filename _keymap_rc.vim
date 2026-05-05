@@ -23,7 +23,7 @@ endif
 
 
 # ###############################
-# comb it
+# fuzzy choice
 nnoremap <silent> <C-p>f     :FuzzyChoiceFiles<CR>
 nnoremap <silent> <C-p>F     :FuzzyChoiceFiles %:h<CR>
 nnoremap <silent> <C-p>h     :FuzzyChoiceMru<CR>
@@ -33,6 +33,11 @@ nnoremap <silent> <C-p>l     :FuzzyChoiceLines<CR>
 nnoremap <silent> <C-p>g     :FuzzyChoiceGlob<CR>
 nnoremap <silent> <C-p>G     :FuzzyChoiceGlob %:h<CR>
 nnoremap <silent> <C-p><C-g> :FuzzyChoiceGlob!<CR>
+
+nnoremap <silent> <C-p>vss  :FuzzySvnStatus<CR>
+nnoremap <silent> <C-p>vsl  :FuzzySvnLs -R<CR>
+nnoremap <silent> <C-p>vgs  :FuzzyGitStatus<CR>
+nnoremap <silent> <C-p>vgl  :FuzzyGitLs<CR>
 
 
 # ###############################
