@@ -188,7 +188,7 @@ enddef
 
 #
 command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
-  var [bnr, root] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
+  var [bnr, _] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
 
   call fuzzy_choice.DoAsFiles('Glob', getbufline(bnr, 1, '$'))
 }
@@ -197,7 +197,7 @@ command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
 # ###############################
 #
 command! -nargs=? -complete=dir -bang FuzzyChoiceGlobCache {
-  var [bnr, root] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
+  var [bnr, _] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
 
   execute 'silent botright :16split'
   execute 'silent buffer ' .. bnr
