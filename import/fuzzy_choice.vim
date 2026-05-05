@@ -239,7 +239,7 @@ var fuzzy_choice_last_cache_buffer = tempname()
 
 
 export def GetCache(root_dir: string, need_cache: bool, Cacher: func): list<any>
-  var root = (root_dir->empty() ? getcwd() : root_dir)
+  var root = (root_dir->empty() ? getcwd() : root_dir)->expand()->fnamemodify(':p')
   var bnr = bufadd(fuzzy_choice_last_cache_buffer)
 
   call bnr->bufload()
@@ -253,7 +253,6 @@ export def GetCache(root_dir: string, need_cache: bool, Cacher: func): list<any>
     call Cacher(bnr, root)
   endif
 
-
   return [bnr, root]
 enddef
 
@@ -266,6 +265,16 @@ enddef
 
 
 #
+export def DoAsFilesEx(caption: string, items: list<any>, user_handlers: dict<func> = {})
+  var handlers = {}
+    ->extend(fuzzy_choice_handlers_path)
+    ->extend(user_handlers)
+
+  call FuzzyChoice_open(caption, items, handlers)
+enddef
+
+
+#
 export def DoAsFiles(caption: string, pathes: list<string>, user_handlers: dict<func> = {})
   call FuzzyChoice_update_variables()
 
@@ -273,11 +282,8 @@ export def DoAsFiles(caption: string, pathes: list<string>, user_handlers: dict<
     text: printf('%s %s (%s)', icons.file, v->fnamemodify(':t'), v->fnamemodify(':h:~')),
     path: v
   }))
-  var handlers = {}
-    ->extend(fuzzy_choice_handlers_path)
-    ->extend(user_handlers)
 
-  call FuzzyChoice_open(caption, items, handlers)
+  call DoAsFilesEx(caption, items, user_handlers)
 enddef
 
 
