@@ -2,6 +2,7 @@ vim9script
 
 import 'fuzzy_choice.vim'
 
+
 # ###############################
 #
 command! -nargs=? -complete=dir FuzzyChoiceFiles {
@@ -130,43 +131,29 @@ command! -nargs=0 FuzzyChoiceLines {
 
 # ###############################
 #
-var fuzzy_choice_glob_last_cache_buffer = tempname()
+def FuzzyChoice_glob_make_cache(bnr: number, root: string)
+  #
+  call deletebufline(bnr, 1, '$')
+  call setbufline(bnr, 1, '      0')
 
+  execute 'silent botright :1split'
+  execute 'silent buffer ' .. bnr
+  redraw
 
-#
-def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
-  var root = (root_dir->empty() ? getcwd() : root_dir)
-  var bnr = bufadd(fuzzy_choice_glob_last_cache_buffer)
+  #
+  var lnum = 1
+  var dirs = [root]
+  #
+  var max_candidates = get(g:, 'fuzzy_choice_glob_max_candidates', 10000)
+  var pattern_ignore_dir = get(g:, 'fuzzy_choice_glob_regex_ignore_dir', '\v^\.%(git|jj|svn|hg|bzr)$')
+  var pattern_ignore_file = get(g:, 'fuzzy_choice_glob_regex_ignore_file', '\v^_FOSSIL_$')
+  #
+  var start_time = reltime()
 
-  call bnr->bufload()
+  while !dirs->empty()
+    var dir = dirs->remove(0)
 
-  if bang->empty()
-    call setbufvar(bnr, '&buftype', 'nofile')
-    call setbufvar(bnr, '&bufhidden', 'hide')
-    call setbufvar(bnr, '&swapfile', 0)
-    call setbufvar(bnr, 'path', root)
-
-    #
-    call deletebufline(bnr, 1, '$')
-    call setbufline(bnr, 1, '      0')
-
-    execute 'silent botright :1split'
-    execute 'silent buffer ' .. bnr
-    redraw
-
-    #
-    var lnum = 1
-    var dirs = [root]
-    #
-    var max_candidates = get(g:, 'fuzzy_choice_glob_max_candidates', 10000)
-    var pattern_ignore_dir = get(g:, 'fuzzy_choice_glob_regex_ignore_dir', '\v^\.%(git|jj|svn|hg|bzr)$')
-    var pattern_ignore_file = get(g:, 'fuzzy_choice_glob_regex_ignore_file', '\v^_FOSSIL_$')
-    #
-    var start_time = reltime()
-
-    while !dirs->empty()
-      var dir = dirs->remove(0)
-
+    try
       for entry in readdirex(dir)
         var fullname = dir->expand()->fnamemodify(':p') .. entry.name
 
@@ -182,26 +169,26 @@ def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
           break
         endif
       endfor
+    catch
+      break
+    endtry
 
-      call setbufline(bnr, 1, printf('>> %d : %s', lnum, dir))
-      redraw
-    endwhile
+    call setbufline(bnr, 1, printf('>> %d : %s', lnum, dir))
+    redraw
+  endwhile
 
-    call deletebufline(bnr, 1)
+  call deletebufline(bnr, 1)
 
-    execute 'silent close'
+  execute 'silent close'
 
-    echomsg printf('glob / %d : %f : %s',
-      lnum, reltimefloat(reltime(start_time)), root->fnamemodify(':~'))
-  endif
-
-  return [bnr, root]
+  echomsg printf('fuzzy choice cache / %d : %f : %s',
+    lnum, reltimefloat(reltime(start_time)), root->fnamemodify(':~'))
 enddef
 
 
 #
 command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
-  var [bnr, root] = FuzzyChoice_get_glob_cache('<bang>', <q-args>)
+  var [bnr, root] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
 
   call fuzzy_choice.DoAsFiles('Glob', getbufline(bnr, 1, '$'))
 }
@@ -210,7 +197,7 @@ command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
 # ###############################
 #
 command! -nargs=? -complete=dir -bang FuzzyChoiceGlobCache {
-  var [bnr, root] = FuzzyChoice_get_glob_cache('<bang>', <q-args>)
+  var [bnr, root] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
 
   execute 'silent botright :16split'
   execute 'silent buffer ' .. bnr
