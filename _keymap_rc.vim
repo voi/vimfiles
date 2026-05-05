@@ -88,9 +88,9 @@ inoremap <silent> <expr> { input_helper.Map('{', [
       \ ['\%#[^{}]',  "{}\<Left>"],
       \ ['\%#$',      "{}\<Left>"]])
 
-inoremap <silent> <expr> ) input_helper.Map(')', [['(\%#)', "\<Right>"]])
-inoremap <silent> <expr> ] input_helper.Map(']', [['\[\%#\]', "\<Right>"]])
-inoremap <silent> <expr> } input_helper.Map('}', [['{\%#}', "\<Right>"]])
+inoremap <silent> <expr> ) input_helper.Map(')', [['\%#)', "\<Right>"]])
+inoremap <silent> <expr> ] input_helper.Map(']', [['\%#\]', "\<Right>"]])
+inoremap <silent> <expr> } input_helper.Map('}', [['\%#}', "\<Right>"]])
 
 inoremap <silent> <expr> <Space> input_helper.Map("\<Space>", [
       \ ['(\%#)',    "  \<Left>"],
