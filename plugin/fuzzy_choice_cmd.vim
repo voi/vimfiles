@@ -174,7 +174,7 @@ def FuzzyChoice_get_glob_cache(bang: string, root_dir: string): list<any>
           call dirs->add(fullname)
 
         elseif (entry.type =~# '\v^(file|link)$') && (entry.name !~# pattern_ignore_file)
-          lnum += (appendbufline(bnr, lnum, fullname) ? 1 : 0)
+          lnum += (0 == appendbufline(bnr, lnum, fullname) ? 1 : 0)
         endif
 
         if lnum > max_candidates
