@@ -344,7 +344,7 @@ xnoremap <silent> <expr> g< printf(":g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'))
 
 # in-file search list
-nnoremap <silent> g/ :vimgrep //gj %<CR>
+nnoremap <silent> g/ :lvimgrep //gj %<CR>
 
 # relative j/k
 def g:Vimrc_relative_jk(jk: string)
