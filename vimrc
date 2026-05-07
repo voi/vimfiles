@@ -894,7 +894,7 @@ if has('gui_running')
 
   augroup gvimrc_autocmd_indent_guide
     autocmd!
-    autocmd WinEnter * call GVimrc_indent_guide()
+    autocmd WinEnter,FileType * call GVimrc_indent_guide()
     autocmd VimEnter,ColorScheme * highlight Conceal gui=NONE guifg=#AAAAAA guibg=NONE
   augroup END
 
