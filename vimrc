@@ -711,6 +711,7 @@ def Vimrc_custom_highlight()
     hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
     hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
     hi NormalNC     guifg=#BBBBBB             gui=italic    ctermfg=grey     cterm=italic
+    hi Folded       guifg=#666666  guibg=NONE
 
     if has('gui_running')
       hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
@@ -735,6 +736,7 @@ def Vimrc_custom_highlight()
     hi ZenkakuSpace guifg=grey               gui=underline ctermfg=grey     cterm=underline
     hi Comment      guifg=#808080 guibg=NONE gui=NONE      ctermfg=darkgrey
     hi NormalNC     guifg=#808080            gui=italic    ctermfg=darkgrey cterm=italic
+    hi Folded       guifg=#D8D8D8  guibg=NONE
 
     if has('gui_running')
       hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
