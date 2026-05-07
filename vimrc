@@ -361,23 +361,25 @@ nnoremap <silent> <C-k> :call g:Vimrc_relative_jk('k')<CR>
 nnoremap <silent> <C-j> :call g:Vimrc_relative_jk('j')<CR>
 
 # smart wrap
-def g:Vimrc_smart_wrap()
+command! ToggleWrap {
   if getbufvar('%', '&wrap')
     setl nowrap
-    nunmap <silent> gj
-    nunmap <silent> gk
-    nunmap <silent> j
-    nunmap <silent> k
+    nunmap <silent> <buffer> gj
+    nunmap <silent> <buffer> gk
+    nunmap <silent> <buffer> j
+    nunmap <silent> <buffer> k
   else
     setl wrap
-    nnoremap <silent> gj j
-    nnoremap <silent> gk k
-    nnoremap <silent> j  gj
-    nnoremap <silent> k  gk
+    nnoremap <silent> <buffer> gj j
+    nnoremap <silent> <buffer> gk k
+    nnoremap <silent> <buffer> j  gj
+    nnoremap <silent> <buffer> k  gk
   endif
-enddef
 
-nnoremap <silent> <M-w> :call g:Vimrc_smart_wrap()<CR>
+  setl wrap?
+}
+
+nnoremap <silent> <M-w> :ToggleWrap<CR>
 
 ################################################################
 # command! -nargs=? -complete=filetype Temp 
