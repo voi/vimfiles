@@ -104,7 +104,7 @@ def FuzzyChoice_action(winid: number, key: string, ctx: any): bool
   elseif key ==# "\<C-h>" || key ==# "\<BS>"
     call FuzzyChoice_action_fuzzy_back(winid, ctx)
   #
-  elseif key =~# '[0-9A-Za-z_.@\-]'
+  elseif key =~# '^[0-9A-Za-z_.@\-]$'
     call FuzzyChoice_action_fuzzy_incremental(winid, key, ctx)
   #
   elseif handlers->has_key(key)
