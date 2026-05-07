@@ -78,20 +78,16 @@ def FuzzyChoice_command_windows()
   var icon = get(g:, 'fuzzy_choice_icon_buff',  '📜')
 
   for tnr in range(1, tabpagenr('$'))
-    for wnr in tnr->tabpagewinnr('$')->range()->map((i, v) => v + 1)
-      var bnr = wnr->winbufnr()
-
+    for bnr in tnr->tabpagebuflist()->sort()->uniq()
       if !bnr->getbufvar('&buftype', '')->empty()
         continue
       endif
 
       var bname = bnr->bufname()
       var caption = printf('%s (%s)', bname->fnamemodify(':t'), bname->fnamemodify(':p:h'))
+      var winid = bnr->win_findbuf()->filter((i, v) => v->win_id2tabwin()[0] == tnr)->get(0, 0)
 
-      call items->add({
-        'text': printf("[%2d,%2d]%s %s", tnr, wnr, icon, caption),
-        'winid': win_getid(wnr, tnr)
-      })
+      call items->add({ 'text': printf("[%2d]%s %s", tnr, icon, caption), 'winid': winid })
     endfor
   endfor
 
