@@ -334,12 +334,12 @@ else
 endif
 
 # indent at begin of line
-nnoremap <silent> g> :normal gI	<CR>
-xnoremap <silent> g> :v/^$/ normal gI	<CR>
+nnoremap <silent> > :normal gI	<CR>
+xnoremap <silent> > :v/^$/ normal gI	<CR>
 
-nnoremap <silent> <expr> g< printf(":normal s/^%s//\<CR>",
+nnoremap <silent> <expr> < printf(":normal s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'))
-xnoremap <silent> <expr> g< printf(":g/^%s/ s/^%s//\<CR>",
+xnoremap <silent> <expr> < printf(":g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'),
       \ (&et ? repeat(' ', &sw) : '\t'))
 
