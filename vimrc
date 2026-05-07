@@ -333,6 +333,13 @@ else
   endfor
 endif
 
+# path completion
+inoremap <expr> / 
+      \ ((complete_info(['mode']).mode == 'file') &&
+      \  (complete_info(['selected']).selected >= 0))
+      \ ? '<C-x><C-f>'
+      \ : '/'
+
 # indent at begin of line
 nnoremap <silent> > :normal gI	<CR>
 xnoremap <silent> > :v/^$/ normal gI	<CR>
