@@ -147,7 +147,9 @@ def FuzzyChoice_action_filer_up(winid: number, ctx: any, item: any)
 
 
   ctx._source = FuzzyChoice_filer_new_source(root)
-  ctx._active = ctx._source
+  ctx._active = ctx._source->copy()
+  ctx._filter = ''
+  ctx._pattern = ''
 
   call Popup_win_update(winid, ctx)
 enddef
@@ -166,6 +168,8 @@ def FuzzyChoice_action_filer_enter( Handler: func, winid: number, ctx: any, item
     else
       ctx._source = children
       ctx._active = children->copy()
+      ctx._filter = ''
+      ctx._pattern = ''
 
       call Popup_win_update(winid, ctx)
     endif
