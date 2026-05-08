@@ -849,8 +849,8 @@ if has('gui_running')
     # - ‐ ─ ― ー 　 → ⇒
     # 1 i I T l | 0 o O θ Θ , . ; : _
     #
-    g:font_size = '11'
-    g:guifonts = {
+    g:vimrc_font_size = '11'
+    g:vimrc_guifonts = {
       1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
       2: ['Cascadia_Code:h10.5,UD_デジタル_教科書体_N:h__', 'UD_デジタル_教科書体_N:h__'],
       3: ['Consolas:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
@@ -865,10 +865,10 @@ if has('gui_running')
     enddef
 
     command! SetGuiFonts {
-      var i = g:guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->sort()->inputlist()
+      var i = g:vimrc_guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->sort()->inputlist()
 
-      if g:guifonts->has_key(i)
-        call g:Vimrc_set_guifont(g:guifonts->get(i, []), g:font_size)
+      if g:vimrc_guifonts->has_key(i)
+        call g:Vimrc_set_guifont(g:vimrc_guifonts->get(i, []), g:vimrc_font_size)
       endif
     }
   endif
