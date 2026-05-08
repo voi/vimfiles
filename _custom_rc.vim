@@ -21,7 +21,6 @@ vim9script
 # g:markdown_github_wiki_syntax_enabled = 0
 #
 # g:markdown_link_reference_cchar = '🔖'
-# g:markdown_link_inline_cchar = '🏷️' # 🏷️🔗
 # g:markdown_link_destination_cchar = '🏷️' # 🏷️🔗
 # g:markdown_link_title_cchar = '…' # …🪧🏷️🔗🔖
 # g:markdown_link_item_cchar = '▪️' # ▪️🔸🔹

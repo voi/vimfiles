@@ -9,10 +9,13 @@ endif
 syn sync minlines=50 maxlines=75
 syn case ignore
 
+
 # 
 var is_latex_syntax_enabled = get(g:, 'markdown_latex_syntax_enabled', 1)
 var is_gfm_syntax_enabled = get(g:, 'markdown_gfm_extension_syntax_enabled', 1)
 var is_github_wiki_syntax_enabled = get(g:, 'markdown_github_wiki_syntax_enabled', 1)
+
+
 #
 def Get_markdown_conceal(option: string): string
   var option_string = get(g:, option, '')
@@ -23,11 +26,14 @@ def Get_markdown_conceal(option: string): string
     return ' conceal cchar=' .. option_string->split('\zs')->get(0, '')
   endif
 enddef
+
+
 #
-var markdown_link_inline_conceal = Get_markdown_conceal('markdown_link_inline_cchar')
 var markdown_link_reference_conceal = Get_markdown_conceal('markdown_link_reference_cchar')
 var markdown_link_destination_conceal = Get_markdown_conceal('markdown_link_destination_cchar')
 var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_cchar')
+
+
 #
 var markdown_list_item_conceal = Get_markdown_conceal('markdown_link_item_cchar')
 var markdown_list_todo_conceal = Get_markdown_conceal('markdown_link_todo_cchar')
@@ -318,6 +324,7 @@ call Markdown_syntaxEmphasis('Emphasis', 1)
 call Markdown_syntaxEmphasis('Strong', 2)
 call Markdown_syntaxEmphasis('StrongEmphasis', 3)
 
+
 #
 if has('gui_running')
   hi markdownEmphasis  gui=italic
@@ -374,25 +381,21 @@ syn region markdownLink matchgroup=markdownLinkMarker
 
 hi link markdownLink String
 
+
 #
 execute 'syn region markdownInlineLink matchgroup=markdownLinkMarker '
       \ .. 'start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ '
       \ .. 'transparent oneline contains=markdownLinkDestination '
       \ .. 'keepend contained display'
-      \ .. markdown_link_inline_conceal
+
 
 #
-if markdown_link_reference_conceal->empty()
-  syn region markdownLinkRef matchgroup=markdownLinkMarker
-        \ start=/\[/ skip=/\\[\[\]]/ end=/\\\@<!\]/ 
-        \ oneline keepend contained display 
-else
-  execute 'syn match markdownLinkRef /\[\%(\\[\[\]]\|[^\[\][:space:]]\)\+\]/ '
-        \ .. 'contained display '
-        \ .. markdown_link_reference_conceal
-endif
+execute 'syn match markdownLinkRef /\[\%(\\[\[\]]\|[^\[\][:space:]]\)\+\]/ '
+      \ .. 'contained display '
+      \ .. markdown_link_reference_conceal
 
 hi link markdownLinkRef Tag
+
 
 #
 execute 'syn region markdownLinkDestination start=/</ skip=/\\[<>]/ end=/>/ '
@@ -403,6 +406,7 @@ execute 'syn match markdownLinkDestination /\%([^<>()[:space:][:cntrl:]]\|\[()]\
       \ .. markdown_link_destination_conceal
 
 hi link markdownLinkDestination Underlined
+
 
 #
 def Markdown_syntaxLinkTitle(start: string, skip: string, end: string)
@@ -471,11 +475,15 @@ endif
 #   6.10 Raw HTML {{{
 runtime! syntax/xml.vim
 
+
+# 
 syn clear xmlTag
 syn region xmlTag matchgroup=xmlTag 
       \ start=/<\%([^ \/!?<>"'@+=]\+[[:space:]>]\)\@=/ end=/>/ 
       \ contains=xmlError,xmlTagName,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
+
+#
 syn clear xmlEndTag
 syn region xmlEndTag matchgroup=xmlTag 
       \ start=/<\/\%([^ \/!?<>"'@+=]\+[[:space:]>]\)\@=/ end=/>/ 
@@ -505,6 +513,7 @@ hi link markdownLineBreak ErrorMsg
 if is_github_wiki_syntax_enabled
   syn cluster markdownInline add=markdownIssueRef,markdownMentions,markdownEmoji
 
+
   #   Issue reference within a repository (Github) {{{
   syn match markdownIssueRef /\%(\_^\|\s\)\@<=#\d\+\%(\_$\|\s\)\@=/ 
         \ display
@@ -514,12 +523,14 @@ if is_github_wiki_syntax_enabled
   hi link markdownIssueRef Tag
   #   }}}
 
+
   #   Username @mentions (Github) {{{
   syn match markdownMentions /\%(\_^\|\s\)\@<=@[[:alnum:]_-]\+\%(\_$\|\s\)\@=/ 
         \ display
 
   hi link markdownMentions Identifier
   #   }}}
+
 
   #   Emoji (Github) {{{
   syn match markdownEmoji /\%(\_^\|\s\)\@<=:\a\w*\a:\%(\_$\|\s\)\@=/ 
