@@ -19,7 +19,11 @@ command! -nargs=0 FuzzyChoiceMru {
   var items = (filereadable(bookmark) ? readfile(bookmark) : [])
     ->extend(v:oldfiles->copy())
 
-  call fuzzy_choice.DoAsFiles('Mru', items)
+  if items->empty()
+    echomsg 'FuzzyChoiceMru : no candidates.'
+  else
+    call fuzzy_choice.DoAsFiles('Mru', items)
+  endif
 }
 
 
@@ -185,8 +189,13 @@ enddef
 #
 command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
   var [bnr, _] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
+  var items = getbufline(bnr, 1, '$')
 
-  call fuzzy_choice.DoAsFiles('Glob', getbufline(bnr, 1, '$'))
+  if items->empty()
+    echomsg 'FuzzyChoiceGlob : no candidates.'
+  else
+    call fuzzy_choice.DoAsFiles('Glob', items)
+  endif
 }
 
 
