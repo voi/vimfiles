@@ -261,10 +261,6 @@ nnoremap <expr> <Space>i empty(getline('.')) ? '"_cc' : 'i'
 # read only
 nnoremap <silent> <M-m> :set modifiable!<CR>
 
-# continuous indent
-xnoremap < <gv
-xnoremap > >gv
-
 # narrowing by fold
 nnoremap z, zMzv
 
@@ -349,7 +345,7 @@ inoremap <expr> /
 nnoremap <silent> > :normal gI	<CR>
 xnoremap <silent> > :v/^$/ normal gI	<CR>
 
-nnoremap <silent> <expr> < printf(":normal s/^%s//\<CR>",
+nnoremap <silent> <expr> < printf(":s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'))
 xnoremap <silent> <expr> < printf(":g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'),
