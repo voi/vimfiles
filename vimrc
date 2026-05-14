@@ -170,7 +170,7 @@ def g:Vimrc_statusline(): string
     .. (&modifiable ? '' : icon_ro)
     .. ' %#StatusLine#'
 
-  var mid = ' %t ' .. icon_pwd .. getcwd()->fnamemodify(':p:h:t') .. '/'
+  var mid = icon_nor .. '%t ' .. icon_pwd .. getcwd()->fnamemodify(':p:h:t') .. '/'
   var right = '%#StatusLine_Modes#'
     .. ' %y ' .. &fileencoding .. ' ' .. &fileformat
     .. '%#StatusLine_CursorPos#> %l, %v - %04B'
