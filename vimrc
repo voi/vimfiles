@@ -854,10 +854,12 @@ if has('gui_running')
     g:vimrc_guifonts = {
       1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
       2: ['Cascadia_Code:h10.5,UD_デジタル_教科書体_N:h__', 'UD_デジタル_教科書体_N:h__'],
-      3: ['Consolas:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
+      3: ['BIZ_UDゴシック:h__'],
+      4: ['UD_デジタル_教科書体_N:h__'],
+      5: ['Consolas:h__,ＭＳ_ゴシック:h__', 'ＭＳ_ゴシック:h__'],
     }
 
-    def g:Vimrc_set_guifont(fonts: list<string>, size: string)
+    def Vimrc_set_guifont(fonts: list<string>, size: string)
       execute printf('set guifont=%s', 
             \ fonts->get(0, '')->substitute('\%(:h\)\zs__', size, 'g'))
       execute printf('set guifontwide=%s',
@@ -865,11 +867,14 @@ if has('gui_running')
       execute 'set ambiwidth=double'
     enddef
 
-    command! SetGuiFonts {
-      var i = g:vimrc_guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->sort()->inputlist()
+    command! -nargs=? SetGuiFonts {
+      var arg = '<args>'
+      var i = arg->empty()
+            \ ? g:vimrc_guifonts->items()->map((i, v) => v[0] .. "\t" .. v[1]->string())->sort()->inputlist()
+            \ : arg->str2nr()
 
       if g:vimrc_guifonts->has_key(i)
-        call g:Vimrc_set_guifont(g:vimrc_guifonts->get(i, []), g:vimrc_font_size)
+        call Vimrc_set_guifont(g:vimrc_guifonts->get(i, []), g:vimrc_font_size)
       endif
     }
   endif
