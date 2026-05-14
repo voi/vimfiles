@@ -2,16 +2,14 @@ vim9script
 
 # ###############################
 # ## vimrc
-# g:Vimrc_tabline_icon_page = '🔖'
-# g:vimrc_tabline_icon_mod = '⚡'
-# g:vimrc_tabline_icon_nor = '📝'
-# g:vimrc_tabline_icon_dir = '📁'
-# g:Vimrc_tabline_icon_prev = '◀️' # ⏮️⏪⬅️◀️
-# g:Vimrc_tabline_icon_post = '▶️' # ⏭️⏩➡️▶️
-
-# g:vimrc_statusline_icon_pwd = '📍'
-# g:vimrc_statusline_icon_ro  = '⚡'
-# g:vimrc_statusline_icon_mod = '❎'
+# g:Vimrc_info_icon_page = '🔖'
+# g:Vimrc_info_icon_prev = '◀️' # ⏮️⏪⬅️◀️
+# g:Vimrc_info_icon_next = '▶️' # ⏭️⏩➡️▶️
+# g:vimrc_info_icon_nor = '📝'
+# g:vimrc_info_icon_dir = '📁'
+# g:vimrc_info_icon_pwd = '📍'
+# g:vimrc_info_icon_mod = '⚡'
+# g:vimrc_info_icon_ro  = '❎'
 
 
 # ###############################

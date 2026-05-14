@@ -111,12 +111,12 @@ def g:Vimrc_tabline(): string
   var tabcount = tabpagenr('$')
 
   #
-  var icon_page = get(g:, 'vimrc_tabline_icon_page', '🔖')
-  var icon_mod = get(g:, 'vimrc_tabline_icon_mod', '⚡')
-  var icon_nor = get(g:, 'vimrc_tabline_icon_nor', '📝')
-  var icon_dir = get(g:, 'vimrc_tabline_icon_dir', '📁')
-  var icon_prev = get(g:, 'Vimrc_tabline_icon_prev', '◀️')
-  var icon_next = get(g:, 'Vimrc_tabline_icon_next', '▶️')
+  var icon_page = get(g:, 'vimrc_info_icon_page', '🔖')
+  var icon_mod  = get(g:, 'vimrc_info_icon_mod', '⚡')
+  var icon_nor  = get(g:, 'vimrc_info_icon_nor', '📝')
+  var icon_dir  = get(g:, 'vimrc_info_icon_dir', '📁')
+  var icon_prev = get(g:, 'Vimrc_info_icon_prev', '◀️') # 
+  var icon_next = get(g:, 'Vimrc_info_icon_next', '▶️') # 
 
   #
   var tabs = printf('%s %s %s %s',
@@ -156,9 +156,10 @@ def g:Vimrc_statusline(): string
   elseif md == 't'  | left = '%#StatusLine_Command#' .. ' TRM '
   endif
 
-  var icon_pwd = get(g:, 'vimrc_statusline_icon_pwd', '📍')
-  var icon_mod = get(g:, 'vimrc_statusline_icon_mod', '⚡')
-  var icon_ro  = get(g:, 'vimrc_statusline_icon_ro',  '❎')
+  var icon_nor = get(g:, 'vimrc_info_icon_nor', '📝:')
+  var icon_pwd = get(g:, 'vimrc_info_icon_pwd', '📍')
+  var icon_mod = get(g:, 'vimrc_info_icon_mod', '⚡')
+  var icon_ro  = get(g:, 'vimrc_info_icon_ro',  '❎')
 
   left ..= '%#StatusLine_Modes#'
     .. (&modified ? icon_mod : '')
