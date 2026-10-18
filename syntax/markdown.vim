@@ -35,9 +35,9 @@ var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_ccha
 
 
 #
-var markdown_list_item_conceal = Get_markdown_conceal('markdown_link_item_cchar')
-var markdown_list_todo_conceal = Get_markdown_conceal('markdown_link_todo_cchar')
-var markdown_list_done_conceal = Get_markdown_conceal('markdown_link_done_cchar')
+var markdown_list_item_conceal = Get_markdown_conceal('markdown_list_item_cchar')
+var markdown_list_todo_conceal = Get_markdown_conceal('markdown_list_todo_cchar')
+var markdown_list_done_conceal = Get_markdown_conceal('markdown_list_done_cchar')
 
 
 ################################################################
