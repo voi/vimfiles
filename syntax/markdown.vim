@@ -347,7 +347,7 @@ if is_gfm_syntax_enabled
 
   syn region markdownStrikeThrough 
         \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
-        \ contains=markdownInlineLink oneline display
+        \ contains=markdownLink oneline display
 
   if has('gui_running')
     hi markdownStrikeThrough  gui=strikethrough guifg=#999999
