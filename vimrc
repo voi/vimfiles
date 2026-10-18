@@ -35,7 +35,7 @@ set guioptions-=t
 # |¦»▸>￫↲ƶ
 set listchars=tab:￫\ ,trail:.,extends:»,precedes:«,nbsp:%,conceal:↲
 set showcmd
-set showbreak=▸\ 
+set showbreak=»\ 
 set shortmess=coOIWtT
 set matchpairs& matchpairs+=<:>
 set cursorline
@@ -70,7 +70,7 @@ set smarttab shiftround
 set tabstop=4 shiftwidth=4 softtabstop=4
 
 # completion
-set complete=.,w^25,b^25
+set complete=.^15,w^15,b^15,u^15
 set completeopt=menuone,noinsert,fuzzy
 set pumheight=16
 set wildignore+=*/.git,*/.git/*
@@ -85,7 +85,9 @@ set wildoptions+=fuzzy
 set autoread
 
 set noswapfile
-set viminfo-=<50,s10,h,c
+set viminfo='100,<50,s0,h,rA:,rB:
+
+&viminfo = printf('%s,r%s,r%s', &viminfo, $TEMP, $VIM)
 
 # buffer
 set hidden
@@ -132,6 +134,7 @@ enddef
 
 set showtabline=2 tabline=%!g:Vimrc_tabline()
 
+
 # status line
 def g:Vimrc_statusline(): string
   #
@@ -164,6 +167,7 @@ enddef
 
 set laststatus=2 statusline=%!g:Vimrc_statusline()
 
+
 if has('vcon') | set termguicolors | endif
 if has('conceal') | set conceallevel=2 | endif
 if has('win32')
@@ -173,7 +177,7 @@ if has('win32')
   set grepprg=findstr\ /NSR
 endif
 
-if !has('gui_running') | set mouse=  | endif
+ if !has('gui_running') | set mouse=n  | endif
 
 # optional
 # set autochdir
@@ -183,6 +187,7 @@ if !has('gui_running') | set mouse=  | endif
 # set scrolloff=999
 # set splitbelow
 # set splitright
+
 
 ###############################
 # a"/a'/a` trim whitespaces, a(/a{/a[ don't trim whitespaces.
