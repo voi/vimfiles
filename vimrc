@@ -565,11 +565,22 @@ def Vimrc_qf_keymap()
   nnoremap <buffer> <C-v> <C-w><CR>
 enddef
 
+
 # filetype
 def Vimrc_markdown_foldexpr(): string
   var line_ = getline(v:lnum)
   var head_ = line_->matchstr('^#\+\s\@=')->len()
   var synx_ = synIDattr(synID(v:lnum, 1, 1), 'name')
+
+  if synx_ =~# 'markdownFrontMatterMarker'
+    if v:lnum == 1
+      return '+1'
+    elseif line_ =~# '^\%(---\|\.\.\.\)\s*$'
+      return '-1'
+    else
+      return '='
+    endif
+  endif
 
   if head_ > 0 && synx_ !~# 'markdown\w*CodeBlock'
     return '>' .. string(max([head_ - 1, 1]))
