@@ -383,10 +383,10 @@ hi link markdownLink String
 
 
 #
-execute 'syn region markdownInlineLink matchgroup=markdownLinkMarker '
-      \ .. 'start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ '
-      \ .. 'transparent oneline contains=markdownLinkDestination '
-      \ .. 'keepend contained display'
+syn region markdownInlineLink matchgroup=markdownLinkMarker 
+      \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ 
+      \ transparent oneline contains=markdownLinkDestination 
+      \ keepend contained display
 
 
 #
