@@ -10,17 +10,25 @@ command! GoToFileEx {
     path = expand('<cfile>')
   endif
 
-  if path =~# get(g:, 'smart_gf_executable_binary_pattern', '\v\.(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$') ||
-        \ path =~# '\v([[:alpha:]{2,}])(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
+  if path =~# '\v([[:alpha:]{2,}])(:\/\/[_0-9A-Za-z\/:%#\$&\?\(\)~\.=\+\-]+)'
     execute 'silent! normal gx'
   else
-    if path->filereadable()
-      execute 'silent! tabnew' path
+    var local_path = path->expand()->fnamemodify(':p')
+
+    if isdirectory(local_path) ||
+          \ path =~# get(g:, 'gf_ex_executable_binary_pattern', '\v\.(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$')
+      call dist#vim9#Open(local_path)
     else
-      if input('? file is not found, create it? (y) > ') ==? 'y'
-        execute 'silent! tabnew' path
+      var cmd = get(g:, 'gf_ex_file_open_command', 'e')
+
+      if path->expand()->fnamemodify(':p')->filereadable()
+        execute 'silent!' cmd local_path
       else
-        echomsg "can't go to:" path
+        if input(path .. "\n? file is not found, create it? (y) > ") ==? 'y'
+          execute 'silent!' cmd local_path
+        else
+          echomsg "can't go to:" local_path
+        endif
       endif
     endif
   endif
