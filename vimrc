@@ -134,37 +134,30 @@ set showtabline=2 tabline=%!g:Vimrc_tabline()
 
 # status line
 def g:Vimrc_statusline(): string
-  var md = mode()
-  var left = '...'
+  #
+  var mode = mode()
 
-  if     md == 'n'  | left = '%#StatusLine_Normal#'  .. ' NOR '
-  elseif md == 'i'  | left = '%#StatusLine_Insert#'  .. ' INS '
-  elseif md == 'R'  | left = '%#StatusLine_Replace#' .. ' REP '
-  elseif md == 'v'  | left = '%#StatusLine_Visual#'  .. ' VIS '
-  elseif md == 'V'  | left = '%#StatusLine_Visual#'  .. ' VIS '
-  elseif md == '' | left = '%#StatusLine_Visual#'  .. ' VIS '
-  elseif md == 's'  | left = '%#StatusLine_Visual#'  .. ' SEL '
-  elseif md == 'S'  | left = '%#StatusLine_Visual#'  .. ' SEL '
-  elseif md == '' | left = '%#StatusLine_Visual#'  .. ' SEL '
-  elseif md == 'c'  | left = '%#StatusLine_Command#' .. ' CMD '
-  elseif md == '!'  | left = '%#StatusLine_Command#' .. ' EXE '
-  elseif md == 't'  | left = '%#StatusLine_Command#' .. ' TRM '
+  if     mode == 'n'      | mode = '%#CustomLine_Normal# NOR '
+  elseif mode == 'i'      | mode = '%#CustomLine_Insert# INS '
+  elseif mode == 'R'      | mode = '%#CustomLine_Replace# REP '
+  elseif mode =~ '[vV]' | mode = '%#CustomLine_Visual# VIS '
+  elseif mode =~ '[sS]' | mode = '%#CustomLine_Visual# SEL '
+  elseif mode == 'c'      | mode = '%#CustomLine_Command# CMD '
+  elseif mode == '!'      | mode = '%#CustomLine_Command# EXE '
+  elseif mode == 't'      | mode = '%#CustomLine_Command# TRM '
+  else                    | mode = '%#ErrorMsg# ??? '
   endif
 
-  var icon_nor = get(g:, 'vimrc_info_icon_nor', '📝:')
-  var icon_pwd = get(g:, 'vimrc_info_icon_pwd', '📍')
-  var icon_mod = get(g:, 'vimrc_info_icon_mod', '⚡')
-  var icon_ro  = get(g:, 'vimrc_info_icon_ro',  '❎')
+  #
+  var left = mode .. '%#CustomLine_Modes#'
+    .. printf("%%{&modifiable?'':'%s'}", get(g:, 'vimrc_info_icon_ro',  '❎'))
+    .. printf("%%{&modified?'%s':'%s'}", get(g:, 'vimrc_info_icon_mod', '⚡ '), get(g:, 'vimrc_info_icon_nor', '📝 '))
+    .. '%t'
 
-  left ..= '%#StatusLine_Modes#'
-    .. (&modified ? icon_mod : '')
-    .. (&modifiable ? '' : icon_ro)
-    .. ' %#StatusLine#'
+  var mid = '%#StatusLineNC#》' .. expand('%:p:~')
 
-  var mid = icon_nor .. '%t ' .. icon_pwd .. getcwd()->fnamemodify(':p:h:t') .. '/'
-  var right = '%#StatusLine_Modes#'
-    .. ' %y ' .. &fileencoding .. ' ' .. &fileformat
-    .. '%#StatusLine_CursorPos#> %l, %v - %04B'
+  var right = '%#CustomLine_Modes#〉%l,%c %04B'
+    .. '%#CustomLine_CursorPos#》%y ' .. &fileencoding .. ' ' .. &fileformat
 
   return '%(' .. left .. '%)%<' .. mid .. '%=%(' .. right .. '%)'
 enddef
