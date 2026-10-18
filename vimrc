@@ -429,9 +429,6 @@ command! -bang BufTidyUp {
 # lcd at current file directory
 command! -bang Here :call execute(('<bang>'->empty() ? 'l' : 't') .. 'cd %:p:h')
 
-# print file location
-command! Where echo expand('%')->fnamemodify(':p:h')
-
 # print full file path
 command! Me echo expand('%')->fnamemodify(':p')
 
