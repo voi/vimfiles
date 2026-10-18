@@ -1,7 +1,8 @@
 ﻿vim9script
 
-set ambiwidth=double
 
+# https://muuumin.net/unicode-width/
+# https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt
 call setcellwidths([
   [0x2030, 0x203F, 2],
   [0x2049, 0x2049, 2],
@@ -198,3 +199,4 @@ call setcellwidths([
   [0xFE566, 0xFE568, 2],
   [0xFF500, 0xFFD46, 2]
 ])
+
