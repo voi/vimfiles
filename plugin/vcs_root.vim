@@ -28,6 +28,7 @@ def VcsRoot_find_root(dirs: list<string>, files: list<string>): string
   return root
 enddef
 
+
 def VcsRoot_lcd(bang: string, arguments: list<string>)
   var dirs = arguments
   var files = arguments
@@ -46,5 +47,12 @@ def VcsRoot_lcd(bang: string, arguments: list<string>)
   endif
 enddef
 
+
 command! -bang -nargs=? Root call VcsRoot_lcd('<bang>', [<f-args>])
+
+
+augroup vcs_root_autocmd
+  autocmd!
+  autocmd  BufWinEnter * if get(g:, 'vcs_root_auto_chdir', 0) | call VcsRoot_lcd('', []) | endif
+augroup END
 

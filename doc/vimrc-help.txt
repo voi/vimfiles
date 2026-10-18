@@ -52,7 +52,7 @@
 *g:enclose_test_debug*
                                         number (default: 0)
 
-
+        When not 0, echo debug mesasge on executing EncloseText command.
 
 *g:fuzzy_choice_icon_file*
                                         string (default '📄')
@@ -113,6 +113,10 @@
                                         string (default '\v\.%(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$')
 
 
+*g:vcs_root_auto_chdir*
+                                        number (default: 0)
+
+        When not 0, execute |Root|! command on |BufWinEnter| auto-command.
 
 *g:vcs_root_target_dirs*
                                         string (default ['.svn', '.git'])
