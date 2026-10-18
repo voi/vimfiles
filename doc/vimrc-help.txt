@@ -1,0 +1,400 @@
+*vimrc-help.txt* for my vimrc scripts   Last change: 2026-10-01
+
+        command and various reference provided my vimrc
+
+
+==============================================================================
+1. global variables
+
+*g:vimrc_info_icon_page*
+                                        string (default: '📄')
+
+        icon letter indecating the tabe page.
+        show in tab-line.
+
+*g:vimrc_info_icon_current_page*
+                                        string (default: '🔖')
+
+        icon letter indecating the current tabe page.
+        show in tab-line.
+
+*g:vimrc_info_icon_nor*
+                                        string (default: '📝')
+
+        icon letter indicating the file.
+        show in tab-line and status-line.
+
+*g:vimrc_info_icon_dir*
+                                        string (default: '📁')
+
+        icon letter indicating the directory.
+        show in tab-line and status-line.
+
+*g:vimrc_info_icon_mod*
+                                        string (default: '⚡')
+
+        icon letter indicating that a current buffer is modified or not.
+        show in tab-line and status-line.
+
+*g:vimrc_info_icon_ro*
+                                        string (default: '❎')
+
+        icon letter indicating that a current buffer is read-only or not.
+        show in status-line.
+
+*g:code_snippet_glob_pathes*
+                                        string (default |rtp|)
+
+        directory path contained snippet json file of visual studio code.
+
+                '~/vscode/data/user-data/User/snippets'->expand()->fnamemodify(':p')
+
+*g:enclose_test_debug*
+                                        number (default: 0)
+
+
+
+*g:fuzzy_choice_icon_file*
+                                        string (default '📄')
+
+        icon letter indicating the file.
+
+*g:fuzzy_choice_icon_dir*
+                                        string (default '📁')
+
+        icon letter indicating the directory.
+
+*g:fuzzy_choice_icon_empty*
+                                        string (default '🈳')
+
+        icon letter indicating the empty directory.
+
+*g:fuzzy_choice_icon_buff*
+                                        string (default '📜')
+
+        icon letter indicating the buffer.
+
+*g:fuzzy_choice_borderchars*
+                                        list[string] (default [])
+
+        same as a borderchears property of |popup_create-arguments|.
+
+*g:fuzzy_choice_glob_max_candidates*
+                                        number (default 10000)
+
+        The maximum number of files that can be recursively listed by the
+        |FuzzyChoiceMru| command.
+
+*g:fuzzy_choice_glob_regex_ignore_dir*
+                                        string (default '\v^\.%(git|jj|svn|hg|bzr)$')
+
+        A regular expression that matches file names to be ignored when listing
+        files using the |FuzzyChoiceMru| command.
+
+*g:fuzzy_choice_glob_regex_ignore_file*
+                                        string (default '\v^_FOSSIL_$')
+
+        A regular expression that matches directory names to be ignored when
+        listing files using the |FuzzyChoiceMru| command.
+
+*g:fuzzy_choice_vim_mru_bookmark*
+                                        string (default '~/_vim_mru_pinned.txt')
+
+        A file in the file list used as a bookmark. When you enter the
+        |FuzzyChoiceMru| command, the contents of the bookmark file list are
+        listed as suggestions.
+
+*g:gf_ex_executable_binary_pattern*
+                                        string (default '\v\.%(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$')
+
+
+
+*g:gf_ex_file_open_command*
+                                        string (default '\v\.%(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$')
+
+
+
+*g:vcs_root_target_dirs*
+                                        string (default ['.svn', '.git'])
+
+
+
+*g:vcs_root_target_files*
+                                        string (default ['_FOSSIL_', 'vimrc'])
+
+
+
+
+
+==============================================================================
+2. command
+
+*Align*
+
+
+
+*MyCalendar*
+
+
+
+*EncloseText*
+
+
+
+*FuzzyChoiceFiles*
+
+
+
+*FuzzyChoiceMru*
+
+
+
+*FuzzyChoiceBuffers*
+
+
+
+*FuzzyChoiceWindows*
+
+
+
+*FuzzyChoiceLines*
+
+
+
+*FuzzyChoiceGlob*
+
+
+
+*FuzzyChoiceGlobCache*
+
+
+
+*FuzzyGitStatus*
+
+
+
+*FuzzyGitLs*
+
+
+
+*FuzzySvnStatus*
+
+
+
+*FuzzySvnLs*
+
+
+
+*GoToFileEx*
+
+
+
+*GitGrep*
+
+
+
+*GitGui*
+
+
+
+*GTags*
+
+
+
+*GFTags*
+
+
+
+*VSCodeSnippetInsert*
+
+
+
+*VSCodeSnippetReplace*
+
+
+
+*MarkAndSignToggle*
+
+
+
+*MarkAndSignClear*
+
+
+
+*MarkAndSignPopup*
+
+
+
+*TSvnLog*
+
+
+
+*TSvnDiff*
+
+
+
+*TSvnBlame*
+
+
+
+*TSvnAdd*
+
+
+
+*TSvnStatus*
+
+
+
+*TSvnUpdate*
+
+
+
+*TSvnCommit*
+
+
+
+*SvnLs*
+
+
+
+*SvnStatus*
+
+
+
+*SvnUpdate*
+
+
+
+*SvnLog*
+
+
+
+*SvnDiff*
+
+
+
+*SvnBlame*
+
+
+
+*SvnAdd*
+
+
+
+*SvnRevert*
+
+
+
+*SvnResolved*
+
+
+
+*SvnHelp*
+
+
+
+*GitLs*
+
+
+
+*GitStatus*
+
+
+
+*GitGrep*
+
+
+
+*GitLog*
+
+
+
+*GitDiff*
+
+
+
+*GitBlame*
+
+
+
+*GitAdd*
+
+
+
+*GitRevert*
+
+
+
+*GitHelp*
+
+
+
+*FossilLs*
+
+
+
+*FossilStatus*
+
+
+
+*FossilChange*
+
+
+
+*FossilGrep*
+
+
+
+*FossilDiff*
+
+
+
+*FossilBlame*
+
+
+
+*FossilAdd*
+
+
+
+*FossilRevert*
+
+
+
+*FossilLog*
+
+
+
+*FossilHelp*
+
+
+
+*Root*
+
+
+
+*WordHLAdd*
+
+
+
+*WordHLVisualAdd*
+
+
+
+*WordHLDelete*
+
+
+
+*WordHLClear*
+
+
+
+*Hankaku*
+
+
+
+*Zenkaku*
+
+
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,\":sw=8:ts=8:sts=8:ft=help:norl:et:

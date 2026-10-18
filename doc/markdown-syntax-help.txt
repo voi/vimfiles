@@ -1,0 +1,81 @@
+*markdown-syntax-help.txt* for commonmark and gfm syntax  Last change: 2026-10-01
+
+        markdown syntax (commonmark / github flavered markdown / github wiki)
+
+
+==============================================================================
+1. global variables
+
+*g:markdown_latex_syntax_enabled*
+                                        number (default: 1)
+
+        When not 0, LaTex syntax is enabled.
+        When 0, LaTex syntax is disabled.
+
+*g:markdown_gfm_extension_syntax_enabled*
+                                        number (default: 1)
+
+        When not 0, GFM extension syntax is enabled.
+        When 0, GFM extension syntax is disabled.
+
+        - 4.10 Tables (extension)
+        - 5.3 Task list items (extension)
+        - 6.5 Strikethrough (extension)
+
+*g:markdown_github_wiki_syntax_enabled*
+                                        number (default: 1)
+
+        When not 0, github wiki syntax is enabled.
+        When 0, github wiki syntax is disabled.
+
+        - mention
+        - issue
+
+*g:markdown_strong_emphasis_oneline*
+                                        number (default: 0)
+
+        When 0, the strong emphasis syntax is valid only within a single
+        line.
+        When not 0, the strong emphasis syntax is valid across multiple lines.
+
+*g:markdown_link_reference_cchar*
+                                        string (default: '')
+
+        When not '', the link reference syntax becomes “conceal,” and the
+        specified characters are used.
+
+*g:markdown_link_destination_cchar*
+                                        string (default: '')
+
+        When not '', the link destination syntax becomes “conceal,” and the
+        specified characters are used.
+
+*g:markdown_link_title_cchar*
+                                        string (default: '')
+
+        When not '', the link title syntax becomes “conceal,” and the
+        specified characters are used.
+
+*g:markdown_list_item_cchar*
+                                        string (default: '')
+
+        When not '', the list item syntax becomes “conceal,” and the
+        specified characters are used.
+
+*g:markdown_list_todo_cchar*
+                                        string (default: '')
+
+        When not '', the unchecked task list item syntax becomes “conceal,”
+        and the specified characters are used.
+
+*g:markdown_list_done_cchar*
+                                        string (default: '')
+
+        When not '', the checked task list item syntax becomes “conceal,”
+        and the specified characters are used.
+
+
+
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,\":sw=8:ts=8:sts=8:ft=help:norl:et:
+
