@@ -593,125 +593,19 @@ def Vimrc_markdown_foldexpr(): string
   return '='
 enddef
 
-augroup vimrc_autocmd_filetype
-  autocmd!
 
-  if has('win32')
-    autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 setl fenc=cp932 ff=dos
-    autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setf xml
-  endif
+def Custom_highlight()
+  #
+  hi def CustomLine_Modes     guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
+  hi def CustomLine_CursorPos guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
+  hi def CustomLine_Normal    guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
+  hi def CustomLine_Insert    guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
+  hi def CustomLine_Replace   guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
+  hi def CustomLine_Visual    guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
+  hi def CustomLine_Command   guifg=#FFFFFF guibg=#030303 ctermfg=Black ctermbg=Yellow
+  hi def CustomLine_Select    guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
 
-  autocmd BufReadPost * if bufnr('$') == 1 | execute('lcd %:p:h') | endif
-
-  autocmd FileType help nnoremap <buffer> q :pclose<CR><C-w>c
-
-  # comment
-  autocmd FileType * &commentstring = substitute(&commentstring, '%s', ' %s ', '')
-
-  # complete
-  autocmd FileType * if &l:omnifunc == '' | setl omnifunc=syntaxcomplete#Complete | endif
-  autocmd FileType c,cpp 
-        \ setl omnifunc=syntaxcomplete#Complete
-
-  # options
-  autocmd FileType c,cpp,cs,java,javascript 
-        \ setl cindent cinoptions=:1s,l1,t0,(0,)0,W1s,u0,+0,g0
-  autocmd FileType html,xhtml,xml,javascript,vim 
-        \ setl tabstop=2 softtabstop=2 shiftwidth=2 expandtab
-  autocmd FileType html,xhtml,xml inoremap <buffer> </ </<C-x><C-o>
-  autocmd FileType javascript setl cinoptions+=J1
-  autocmd FileType cpp        setl commentstring=//\ %s
-  autocmd FileType dosbatch   setl commentstring=@rem\ %s
-  autocmd FileType vim        setl fenc=utf8 ff=unix
-  autocmd FileType changelog  setl textwidth=0
-
-  # quickfix
-  autocmd FileType help,qf nnoremap <buffer> q :pclose<CR><C-w>c
-  autocmd FileType qf setl cursorlineopt=both
-  autocmd FileType qf call Vimrc_qf_keymap() 
-
-  # markdown
-  command! -range ToggleMarkdownTask s/\%([-+*]\%( \{1,4}\|\t\)\[\)\@<=[ xX]\%(\]\s\)\@=/\=(submatch(0) == ' ' ? 'x' : ' ')/
-
-  autocmd FileType markdown 
-        \   setl comments+=nb:> formatoptions-=c formatoptions+=jro completeslash=slash
-        \ | setl foldexpr=Vimrc_markdown_foldexpr()
-        \ | setl foldtext=Vimrc_foldtext()
-        \ | nnoremap <buffer> <M-t> :ToggleMarkdownTask<CR>
-
-  autocmd FileType markdown {
-    #
-    xnoremap <buffer> <Leader>eaC :EncloseText -a ``` ```<CR>
-    xnoremap <buffer> <Leader>eai :EncloseText -a * *<CR>
-    xnoremap <buffer> <Leader>eab :EncloseText -a ** **<CR>
-    xnoremap <buffer> <Leader>eaB :EncloseText -a *** ***<CR>
-    xnoremap <buffer> <Leader>eas :EncloseText -a ~~ ~~<CR>
-    xnoremap <buffer> <Leader>eal :EncloseText -a [ ](<lt>>)<CR>
-    #
-    inoreabbr <buffer> 2# ## 
-    inoreabbr <buffer> 3# ### 
-    inoreabbr <buffer> 4# #### 
-    inoreabbr <buffer> 5# ##### 
-    inoreabbr <buffer> 6# ###### 
-  }
-
-augroup END
-
-# syntax
-augroup vimrc_autocmd_user_syntax
-  autocmd!
-
-  # datetime
-  autocmd VimEnter,WinEnter * hi def Bold gui=bold
-        \ | hi def link DateTime Number
-        \ | call matchadd('DateTime', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
-        \ | call matchadd('DateTime', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
-        \ | call matchadd('DateTime', '\%(2[0-3]\|[0-1][0-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
-
-  # quickfix
-  autocmd QuickFixCmdPost grep,grepadd,vimgrep,vimgrepadd botright copen
-  autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep,lvimgrepadd botright lopen
-
-  # command-line
-  autocmd CmdwinEnter * nnoremap <buffer> q <C-w>c
-
-  # c/cpp
-  autocmd FileType c,cpp
-        \   syn keyword Type __int16 __int32 __int64 __fastcall
-        \ | syn keyword Type int16_t uint16_t int32_t uint32_t int64_t uint64_t
-        \ | syn keyword Typedef BYTE WORD DWORD SHORT USHORT LONG ULONG LONGLONG ULONGLONG
-        \ | syn keyword Typedef WPARAM LPARAM WINAPI UINT_PTR
-        \ | syn keyword Boolean BOOL TRUE FALSE
-
-  # c like
-  autocmd FileType c,cpp,cs,java,javascript 
-        \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
-        \ | syn match Operator /;/
-        \ | syn match Operator /[<>!=~+\-\*\/]=/
-        \ | syn match Operator /||\|&&\|++\|--/
-        \ | syn match Operator /::\ze\w/
-        \ | syn match Operator /\>[\*&]/
-        \ | syn match Operator /\*\</
-        \ | syn match Operator /[!&]\s*\</
-        \ | syn match Operator /[!&]\s*\ze(/
-        \ | syn match Operator /\%(->\|\.\)\</
-
-  # log
-  autocmd FileType log 
-        \   syn match LogDumpNonZero /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/
-        \ | syn match LogDumpZero    /\<00\>/
-        \ | syn match LogDumpSpace   /\<20\>/
-        \ | syn match LogErrWord     /\cERR\%[OR]/
-        \ | hi def link LogDumpZero    SpecialKey
-        \ | hi def link LogDumpNonZero String
-        \ | hi def link LogDumpSpace   Comment
-        \ | hi def link LogErrWord     Error
-
-augroup END
-
-
-################################################################
-def Vimrc_custom_highlight()
+  #
   hi clear SpecialKey
 
   # cursor
@@ -721,17 +615,6 @@ def Vimrc_custom_highlight()
   if has('multi_byte_ime')
     hi CursorIM gui=NONE guifg=#FFFFFF guibg=#8000FF
   endif
-
-  # statusline
-  hi StatusLine_Modes     guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
-  hi StatusLine_CursorPos guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
-
-  hi StatusLine_Normal    guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
-  hi StatusLine_Insert    guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
-  hi StatusLine_Replace   guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
-  hi StatusLine_Visual    guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
-  hi StatusLine_Command   guifg=#FFFFFF guibg=#030303 ctermfg=Black ctermbg=Yellow
-  hi StatusLine_Select    guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
 
   # vertical border
   hi vertsplit guifg=fg guibg=bg
@@ -746,6 +629,7 @@ def Vimrc_custom_highlight()
     hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
     hi NormalNC     guifg=#BBBBBB             gui=italic    ctermfg=grey     cterm=italic
     hi Folded       guifg=#666666  guibg=NONE
+    hi CursorLine                  guibg=#3A4B5C            ctermbg=235
 
     if has('gui_running')
       hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
@@ -781,9 +665,7 @@ def Vimrc_custom_highlight()
 
     endif
   endif
-enddef
 
-def Vimrc_custom_syntax()
   # extra whitespaces
   #   u00A0 ' ' no-break space
   #   u2000 ' ' en quad
@@ -804,12 +686,125 @@ def Vimrc_custom_syntax()
   call matchadd('TrailingSpace', '\s\{2,\}$')
 enddef
 
-augroup vimrc_autocmd_colors_highlight
+
+#
+augroup autocmd_vimrc
   autocmd!
-  autocmd ColorScheme       * call Vimrc_custom_highlight()
-  autocmd VimEnter,WinEnter * call Vimrc_custom_syntax()
-  autocmd WinEnter,BufWinEnter * setlocal cursorlineopt=both wincolor=
-  autocmd WinLeave             * setlocal cursorlineopt=number wincolor=NormalNC
+
+  #
+  autocmd VimEnter,WinEnter    * call Custom_highlight()
+  autocmd WinEnter,BufWinEnter * setlocal wincolor=
+  autocmd WinLeave             * setlocal wincolor=NormalNC
+
+  # 
+  if has('win32')
+    autocmd BufWritePre *.c,*.cpp,*.h,*.hpp,*.def,*.bat,*.ini,*.env,*.js,*.vbs,*.ps1 
+          \ setl fenc=cp932 ff=dos
+    autocmd BufNewFile,BufRead *.vcproj,*.sln,*.xaml setf xml
+  endif
+
+  # comment
+  autocmd FileType * {
+    call setbufvar('%', '&commentstring',
+          \ getbufvar('%', '&commentstring')->substitute('%s', ' %s ', '')->substitute('\s\{2,}', ' ', 'g'))
+  }
+
+  # complete
+  autocmd FileType * if &l:omnifunc == '' | setl omnifunc=syntaxcomplete#Complete | endif
+
+  # options
+  autocmd FileType c,cpp,cs,java,javascript 
+        \ setl cindent cinoptions=:1s,l1,t0,(0,)0,W1s,u0,+0,g0
+  autocmd FileType cpp,cs,java
+        \ setl commentstring=//\ %s
+  autocmd FileType javascript 
+        \ setl tabstop=2 softtabstop=2 shiftwidth=2 expandtab cinoptions+=J1 cinoptions+=W4
+
+  autocmd FileType changelog 
+        \ setl textwidth=0
+  autocmd FileType dosbatch 
+        \ setl commentstring=@rem\ %s
+  autocmd FileType html,xhtml,xml 
+        \   setl tabstop=2 softtabstop=2 shiftwidth=2 expandtab
+        \ | inoremap <buffer> </ </<C-x><C-o>
+  autocmd FileType vim 
+        \ setl fenc=utf8 ff=unix tabstop=2 softtabstop=2 shiftwidth=2 expandtab
+
+  # quickfix
+  autocmd FileType help,qf nnoremap <buffer> q :pclose<CR><C-w>c
+  autocmd FileType qf setl cursorlineopt=both
+  autocmd FileType qf call Vimrc_qf_keymap()
+
+  # markdown
+  autocmd FileType markdown {
+    #
+    setl foldlevel=3
+    setl comments=nb:*,nb:+,nb:-,nb:>
+    setl formatoptions-=c formatoptions+=jro completeslash=slash
+    setl foldexpr=Vimrc_markdown_foldexpr() foldtext=Vimrc_foldtext()
+    #
+    nnoremap <buffer> <M-t> :s/\%([-+*] \{1,3}\[\)\@<=[ xX]\%(\]\s\)\@=/\=(submatch(0) == ' ' ? 'x' : ' ')/<CR>
+    #
+    xnoremap <buffer> <Leader>eaC :EncloseText -a ``` ```<CR>
+    xnoremap <buffer> <Leader>eai :EncloseText -a * *<CR>
+    xnoremap <buffer> <Leader>eab :EncloseText -a ** **<CR>
+    xnoremap <buffer> <Leader>eaB :EncloseText -a *** ***<CR>
+    xnoremap <buffer> <Leader>eas :EncloseText -a ~~ ~~<CR>
+    xnoremap <buffer> <Leader>eal :EncloseText -a [ ](<lt>>)<CR>
+    #
+    inoremap <buffer> <expr> -[ '- [ ] '
+    #
+    inoreabbr <buffer> <expr> 2# '## '
+    inoreabbr <buffer> <expr> 3# '### '
+    inoreabbr <buffer> <expr> 4# '#### '
+    inoreabbr <buffer> <expr> 5# '##### '
+    inoreabbr <buffer> <expr> 6# '###### '
+  }
+
+
+  # datetime
+  autocmd VimEnter,WinEnter * hi def Bold gui=bold
+        \ | hi def link DateTime Number
+        \ | call matchadd('DateTime', '[12]0\d\{2}-\%(1[0-2]\|0[1-9]\)-\%(3[01]\|[12][0-9]\|0[1-9]\)')
+        \ | call matchadd('DateTime', '[12]0\d\{2}\/\%(1[0-2]\|0[1-9]\)\/\%(3[01]\|[12][0-9]\|0[1-9]\)')
+        \ | call matchadd('DateTime', '\%(2[0-3]\|[0-1][0-9]\):\%([0-5][0-9]\)\%(:\%([0-5][0-9]\)\%(\.\d\{1,3}\)\?\)\?')
+
+  # quickfix
+  autocmd QuickFixCmdPost grep,grepadd,vimgrep,vimgrepadd botright copen
+  autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep,lvimgrepadd botright lopen
+
+  # c/cpp
+  autocmd FileType c,cpp
+        \   syn keyword Type __int16 __int32 __int64 __fastcall
+        \ | syn keyword Type int16_t uint16_t int32_t uint32_t int64_t uint64_t
+        \ | syn keyword Typedef BYTE WORD DWORD SHORT USHORT LONG ULONG LONGLONG ULONGLONG
+        \ | syn keyword Typedef WPARAM LPARAM WINAPI UINT_PTR
+        \ | syn keyword Boolean BOOL TRUE FALSE
+
+  # c like
+  autocmd FileType c,cpp,cs,java,javascript 
+        \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
+        \ | syn match Operator /;/
+        \ | syn match Operator /[<>!=~+\-\*\/]=/
+        \ | syn match Operator /||\|&&\|++\|--/
+        \ | syn match Operator /::\ze\w/
+        \ | syn match Operator /\>[\*&]/
+        \ | syn match Operator /\*\</
+        \ | syn match Operator /[!&]\s*\</
+        \ | syn match Operator /[!&]\s*\ze(/
+        \ | syn match Operator /\%(->\|\.\)\</
+
+  # log
+  autocmd FileType log 
+        \   syn match LogDumpNonZero /\<\%([13-9A-F]0\|\x[1-9A-F]\)\>/
+        \ | syn match LogDumpZero    /\<00\>/
+        \ | syn match LogDumpSpace   /\<20\>/
+        \ | syn match LogErrWord     /\cERR\%[OR]/
+        \ | hi def link LogDumpZero    SpecialKey
+        \ | hi def link LogDumpNonZero String
+        \ | hi def link LogDumpSpace   Comment
+        \ | hi def link LogErrWord     Error
+
 augroup END
 
 
