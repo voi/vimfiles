@@ -110,10 +110,10 @@ hi link markdownCodeBlock Comment
 #   4.5 Fenced code blocks {{{
 syn region markdownFencedCodeBlock matchgroup=Delimiter 
       \ start=/\z(`\{3,}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1`*\s*$/ 
-      \ keepend contained display
+      \ keepend contained display contains=markdownBlockquoteContained
 syn region markdownFencedCodeBlock matchgroup=Delimiter 
       \ start=/\z(\~\{3,}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/ end=/\z1\~*\s*$/ 
-      \ keepend contained display
+      \ keepend contained display contains=markdownBlockquoteContained
 
 syn sync match markdownFencedCodeBlockMarker 
       \ grouphere markdownFencedCodeBlock "[`\~]\{3,}" 
@@ -159,7 +159,7 @@ if is_latex_syntax_enabled
 
   syn region markdownLatexBlock matchgroup=Delimiter
         \ start=/\z(\$\{2}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1\s*$/ 
-        \ keepend contained
+        \ keepend contained contains=markdownBlockquoteContained
 
   syn sync match markdownLatexBlockMarker 
         \ grouphere markdownLatexBlock "[`\$]\{2}" 
@@ -191,6 +191,13 @@ syn match markdownBlockquote />/
       \ contained display
 
 hi link markdownBlockquote Directory
+
+
+# HACK: 
+syn match markdownBlockquoteContained /\%(^\s*\)\zs\%(>\s*\)\+/ 
+      \ contained display
+
+hi link markdownBlockquoteContained markdownBlockquote
 #   }}}
 
 
