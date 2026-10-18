@@ -1,6 +1,5 @@
 vim9script
 
-g:align_words_petterm_list = []
 
 def Align_calc_padding_tabs(token: string, align_width: number): string
   var ts = &tabstop
@@ -88,7 +87,7 @@ def Align_apply(startl: number, endl: number, arguments: list<string>)
 enddef
 
 def Align_complete(ArgLead: string, CmdLine: string, CursorPos: number): any
-  return g:align_words_petterm_list
+  return ['-g', '-t', '-a', '-r', '-c']
 enddef
 
 command! -range -nargs=+ -complete=customlist,Align_complete Align
