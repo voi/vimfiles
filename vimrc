@@ -848,11 +848,15 @@ packadd! hlyank
 packadd! matchit
 packadd! nohlsearch
 
+g:helptoc = {}
+g:helptoc.popup_borderchars = ['-', '|', '-', '|', '+', '+', '+', '+']
+
 
 ################################################################
 if has('gui_running')
   # options
   $LANG = 'ja'
+
   set guioptions=gr
   # set cmdheight=1
   # set columns=100
