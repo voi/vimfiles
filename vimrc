@@ -433,9 +433,9 @@ command! -bang Here :call execute(('<bang>'->empty() ? 'l' : 't') .. 'cd %:p:h')
 command! Me echo expand('%')->fnamemodify(':p')
 
 # zoom in / out and reset
-var vimrc_zoom_guifont_original = []
-
 if has('gui_running') && has('win32')
+  var vimrc_zoom_guifont_original = []
+
   command! ZoomIn {
     if vimrc_zoom_guifont_original->empty()
       vimrc_zoom_guifont_original = [&guifont, &guifontwide]
