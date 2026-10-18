@@ -199,33 +199,30 @@ onoremap a" 2i"
 onoremap a' 2i'
 onoremap a` 2i`
 
-#buffer paste from register
-def Vimrc_map_expr_register_p(chr: string): string
-  call inputsave()
-  var r = (execute('register') .. "\n")->input()
-  call inputrestore()
-
-  return '"' .. r->split('\zs')->get(0, '"') .. chr
-enddef
-
-nnoremap <expr> <Space>p Vimrc_map_expr_register_p('p')
-nnoremap <expr> <Space>P Vimrc_map_expr_register_p('P')
-
-xnoremap <expr> <Space>p '"_d' .. Vimrc_map_expr_register_p('p')
 
 # paste yank register
-xnoremap _ "0p
+xnoremap <Space>p "0p
+xnoremap <Space>P "0P
+
+xnoremap <Space>p "0p
+
 
 # delete to blackhole register
 nnoremap d "_d
 nnoremap D "_D
 xnoremap d "_d
 
+nnoremap c "_c
+nnoremap C "_C
+xnoremap c "_c
+
+
 # yank/cut like D
-nnoremap <M-X> C<ESC>
-nnoremap <M-v> v$
+nnoremap <Space>X C<ESC>
+nnoremap <Space>V v$
 
 nnoremap Y y$
+
 
 # system gui clipboard manip
 if has('clipboard') && 0
@@ -244,21 +241,27 @@ else
   xnoremap <M-x> "*c<ESC>
 endif
 
+
 # auto-indent editing at empty line
 nnoremap <expr> <Space>i empty(getline('.')) ? '"_cc' : 'i'
+
 
 # read only
 nnoremap <silent> <M-m> :set modifiable!<CR>
 
+
 # narrowing by fold
 nnoremap z, zMzv
+
 
 # update
 nnoremap <silent> <Leader><Leader> :update<CR>
 
+
 # buffer
 nnoremap <silent> [b :bprev<CR>
 nnoremap <silent> ]b :bnext<CR>
+
 
 # window
 nnoremap <silent> <C-Down>  <C-w>j
@@ -276,8 +279,8 @@ nnoremap <silent> [t :tabprev<CR>
 nnoremap <silent> ]t :tabnext<CR>
 
 # text operations
-nnoremap <silent> <Leader>d :copy .-1<CR>
-xnoremap <silent> <Leader>d :copy '<-1<CR>gv
+nnoremap <silent> <M-d> :copy .-1<CR>
+xnoremap <silent> <M-d> :copy '<-1<CR>gv
 
 nnoremap <silent> <M-k> :move .-2<CR>
 nnoremap <silent> <M-j> :move .+1<CR>
@@ -302,26 +305,31 @@ nnoremap <silent> <F10>   :cnext<CR>zz
 nnoremap <silent> <S-F10> :cprevious<CR>zz
 nnoremap <silent> <C-F10> :botright cw<CR>
 
+
 #
 nnoremap <silent> gO :HelpToc<CR>
+
 
 # C-w + v / C-w + s like C-w + ^
 nnoremap <silent> <C-w>s  <C-w>s<C-^>
 nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
-if has('patch-9.1.1590')
-  set autocomplete autocompletedelay=5 autocompletetimeout=100
 
-else
-  # auto-complete imitation
-  def Vimrc_Keymap_Complete(chr: string): string
-    return chr .. ( pumvisible() ? '' : "\<C-x>\<C-p>\<C-n>" )
-  enddef
+# auto-complete imitation
+def Vimrc_Keymap_Complete(chr: string): string
+  return chr .. ( pumvisible() ? '' : "\<C-x>\<C-p>\<C-n>" )
+enddef
 
-  for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
-    exec printf("imap <silent> <expr> %s Vimrc_Keymap_Complete('%s')", k, k)
-  endfor
+for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
+  exec printf("imap <silent> <expr> %s Vimrc_Keymap_Complete('%s')", k, k)
+endfor
+
+
+# skk like
+if has('win32')
+  inoremap <silent> <C-j> <C-^>
 endif
+
 
 # path completion
 inoremap <expr> / 
@@ -330,32 +338,35 @@ inoremap <expr> /
       \ ? '<C-x><C-f>'
       \ : '/'
 
-# indent at begin of line
-nnoremap <silent> > :normal gI	<CR>
-xnoremap <silent> > :v/^$/ normal gI	<CR>
 
-nnoremap <silent> <expr> < printf(":s/^%s//\<CR>",
+# indent at begin of line
+nnoremap <silent> > :keeppattern normal gI	<CR>
+xnoremap <silent> > :keeppattern v/^$/ normal gI	<CR>
+
+nnoremap <silent> <expr> < printf(":keeppattern s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'))
-xnoremap <silent> <expr> < printf(":g/^%s/ s/^%s//\<CR>",
+xnoremap <silent> <expr> < printf(":keeppattern g/^%s/ s/^%s//\<CR>",
       \ (&et ? repeat(' ', &sw) : '\t'),
       \ (&et ? repeat(' ', &sw) : '\t'))
+
 
 # in-file search list
 nnoremap <silent> g/ :lvimgrep //gj %<CR>
 
+
 # relative j/k
-def g:Vimrc_relative_jk(jk: string)
-  var rn = getbufvar('%', '&relativenumber')
+command! -bang RelativeJK {
   setl relativenumber | redraw
 
   var off = input('offset > ')
-  if !off->empty() | call execute('normal ' .. off .. jk) | endif
+  if !off->empty() | call execute('normal ' .. off .. ('<bang>'->empty() ? 'j' : 'k')) | endif
 
-  call setbufvar('%', '&relativenumber', rn)
-enddef
+  setl norelativenumber | redraw
+}
 
-nnoremap <silent> <C-k> :call g:Vimrc_relative_jk('k')<CR>
-nnoremap <silent> <C-j> :call g:Vimrc_relative_jk('j')<CR>
+nnoremap <silent> <C-k> :RelativeJK!<CR>
+nnoremap <silent> <C-j> :RelativeJK<CR>
+
 
 # smart wrap
 command! ToggleWrap {
@@ -537,6 +548,11 @@ def Vimrc_qf_keymap()
     nnoremap <buffer> <expr> i printf(":Cfilter  /%s/\<CR>", input('> ', ''))
     nnoremap <buffer> <expr> I printf(":Cfilter! /%s/\<CR>", input('> ', ''))
   endif
+
+  #
+  nnoremap <buffer> <C-t> <C-w><CR><C-w>T
+  nnoremap <buffer> <C-s> <C-w><CR>
+  nnoremap <buffer> <C-v> <C-w><CR>
 enddef
 
 # filetype
