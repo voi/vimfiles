@@ -515,9 +515,9 @@ if is_github_wiki_syntax_enabled
 
 
   #   Issue reference within a repository (Github) {{{
-  syn match markdownIssueRef /\%(\_^\|\s\)\@<=#\d\+\%(\_$\|\s\)\@=/ 
+  syn match markdownIssueRef /\%(\_^\|[^#[:alnum:]_-]\)\@<=#\d\+\%(\_$\|[^#[:alnum:]_-]\)\@=/ 
         \ display
-  syn match markdownIssueRef /\%(\_^\|\s\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\_$\|\s\)\@=/ 
+  syn match markdownIssueRef /\%(\_^\|[^#[:alnum:]_-]\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\_$\|[^#[:alnum:]_-]\)\@=/ 
         \ display
 
   hi link markdownIssueRef Tag
@@ -525,7 +525,7 @@ if is_github_wiki_syntax_enabled
 
 
   #   Username @mentions (Github) {{{
-  syn match markdownMentions /\%(\_^\|\s\)\@<=@[[:alnum:]_-]\+\%(\_$\|\s\)\@=/ 
+  syn match markdownMentions /\%(\_^\|[^@[:alnum:]_-]\)\@<=@[[:alnum:]_-]\+\%(\_$\|[^@[:alnum:]_-]\)\@=/ 
         \ display
 
   hi link markdownMentions Identifier
@@ -533,7 +533,7 @@ if is_github_wiki_syntax_enabled
 
 
   #   Emoji (Github) {{{
-  syn match markdownEmoji /\%(\_^\|\s\)\@<=:\a\w*\a:\%(\_$\|\s\)\@=/ 
+  syn match markdownEmoji /\%(\_^\|[^:[:alnum:]_-]\)\@<=:\a\w*\a:\%(\_$\|[^[:alnum:]_-]\)\@=/ 
         \ display
 
   hi link markdownEmoji Constant
