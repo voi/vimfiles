@@ -274,9 +274,11 @@ inoremap <silent> <C-Up>    <C-o><C-w>k
 inoremap <silent> <C-Left>  <C-o><C-w>h
 inoremap <silent> <C-Right> <C-o><C-w>l
 
+
 # tabpage
 nnoremap <silent> [t :tabprev<CR>
 nnoremap <silent> ]t :tabnext<CR>
+
 
 # text operations
 nnoremap <silent> <M-d> :copy .-1<CR>
@@ -288,6 +290,7 @@ nnoremap <silent> <M-j> :move .+1<CR>
 xnoremap <silent> <M-k> :move '<-2<CR>gv
 xnoremap <silent> <M-j> :move '>+1<CR>gv
 
+
 # popup menu
 inoremap <silent> <expr> <CR>  pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
 inoremap <silent> <expr> <C-n> pumvisible() ? "\<Down>" : "\<C-n>"
@@ -295,6 +298,7 @@ inoremap <silent> <expr> <C-p> pumvisible() ? "\<Up>" : "\<C-p>"
 
 inoremap <silent> <expr> <C-Space> pumvisible() ? "" : "\<C-x>\<C-o>"
 inoremap <silent> <expr> <C-f>     pumvisible() ? "" : "\<C-x>\<C-f>"
+
 
 # navigation
 nnoremap <silent> <F9>    :lnext<CR>zz
@@ -388,6 +392,7 @@ command! ToggleWrap {
 }
 
 nnoremap <silent> <M-w> :ToggleWrap<CR>
+
 
 ################################################################
 # command! -nargs=? -complete=filetype Temp 
@@ -524,6 +529,14 @@ command! ShowSyntax echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 
 # new vim instance
 command! -nargs=? GVim silent !start gvim <f-args>
+
+# clear oldfiles
+command! ClearOldFiles {
+  var back = &viminfo
+
+  &viminfo = back->substitute(",\zs'\d\+\|'\d\+\ze,", "", '') | wviminfo!
+  &viminfo = back | rviminfo!
+}
 
 
 ################################################################
