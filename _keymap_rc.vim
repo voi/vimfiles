@@ -1,10 +1,5 @@
 vim9script
 
-augroup vimrc_local_autocmd
-  autocmd!
-  autocmd VimEnter * Root
-augroup END
-
 
 # ###############################
 # ## vimrc
@@ -36,6 +31,7 @@ nnoremap <silent> <C-p><C-g> :FuzzyChoiceGlob!<CR>
 
 nnoremap <silent> <C-p>vss  :FuzzySvnStatus<CR>
 nnoremap <silent> <C-p>vsl  :FuzzySvnLs -R<CR>
+
 nnoremap <silent> <C-p>vgs  :FuzzyGitStatus<CR>
 nnoremap <silent> <C-p>vgl  :FuzzyGitLs<CR>
 
@@ -80,32 +76,46 @@ xnoremap <silent> <Leader>ea` :EncloseText -a -p `<CR>
 
 
 # ###############################
+#
+nnoremap <silent> <Leader>m :MarkAndSignToggle<CR>
+nnoremap <silent> <Leader>M :MarkAndSignToggle!<CR>
+nnoremap <silent> <M-m>     :MarkAndSignPopup<CR>
+
+
+# ###############################
 # input_helper
 import 'input_helper.vim'
 
-inoremap <silent> <expr> ( input_helper.Map('(', [
+g:input_helper_map_left_parenthesis = [
       \ ['\%#[^()]',  "()\<Left>"],
-      \ ['\%#$',      "()\<Left>"]])
-inoremap <silent> <expr> [ input_helper.Map('[', [
+      \ ['\%#$',      "()\<Left>"]]
+g:input_helper_map_right_parenthesis = [
+      \ ['\%#)', "\<Right>"]
+      \ ]
+
+g:input_helper_map_left_square_bracket = [
       \ ['\%#[^\[\]]',  "[]\<Left>"],
-      \ ['\%#$',        "[]\<Left>"]])
-inoremap <silent> <expr> { input_helper.Map('{', [
+      \ ['\%#$',        "[]\<Left>"]]
+g:input_helper_map_right_square_bracket = [
+      \ ['\%#\]', "\<Right>"]
+      \ ]
+
+g:input_helper_map_left_curly_bracket = [
       \ ['\%#[^{}]',  "{}\<Left>"],
-      \ ['\%#$',      "{}\<Left>"]])
+      \ ['\%#$',      "{}\<Left>"]]
+g:input_helper_map_right_curly_bracket = [
+      \ ['\%#}', "\<Right>"]
+      \ ]
 
-inoremap <silent> <expr> ) input_helper.Map(')', [['\%#)', "\<Right>"]])
-inoremap <silent> <expr> ] input_helper.Map(']', [['\%#\]', "\<Right>"]])
-inoremap <silent> <expr> } input_helper.Map('}', [['\%#}', "\<Right>"]])
-
-inoremap <silent> <expr> <Space> input_helper.Map("\<Space>", [
+g:input_helper_map_space = [
       \ ['(\%#)',    "  \<Left>"],
       \ ['\[\%#\]',  "  \<Left>"],
-      \ ['{\%#}',    "  \<Left>"]])
-inoremap <silent> <expr> <CR> input_helper.Map("\<CR>", [
+      \ ['{\%#}',    "  \<Left>"]]
+g:input_helper_map_enter = [
       \ ['(\%#)',    "\<CR>\<Up>\<End>\<CR>"],
       \ ['\[\%#\]',  "\<CR>\<Up>\<End>\<CR>"],
-      \ ['{\%#}',    "\<CR>\<Up>\<End>\<CR>"]])
-inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", [
+      \ ['{\%#}',    "\<CR>\<Up>\<End>\<CR>"]]
+g:input_helper_map_backspace = [
       \ ['\[\%#\]', "\<Del>\<C-h>"],
       \ ['(\%#)',   "\<Del>\<C-h>"],
       \ ['{\%#}',   "\<Del>\<C-h>"],
@@ -113,25 +123,38 @@ inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", [
       \ ["'\\%#'",  "\<Del>\<C-h>"],
       \ ['\[\s\%#\s\]', "\<Del>\<C-h>"],
       \ ['(\s\%#\s)', "\<Del>\<C-h>"],
-      \ ['{\s\%#\s}', "\<Del>\<C-h>"]])
+      \ ['{\s\%#\s}', "\<Del>\<C-h>"]]
 
-inoremap <silent> <expr> ' input_helper.Map("'", [
+g:input_helper_map_single_quote = [
       \ ["\\%#'", "\<Right>"],
       \ ['"[^"]*\%#[^"]*"', "'"],
       \ ['`[^`]*\%#[^`]*`', "'"],
-      \ ['\%#', "''\<Left>"]])
-
-inoremap <silent> <expr> " input_helper.Map('"', [
+      \ ['\%#', "''\<Left>"]]
+g:input_helper_map_double_quote = [
       \ ['\%#"', "\<Right>"],
       \ ["'[^']*\\%#[^']*'",  '"'],
       \ ['`[^`]*\%#[^`]*`',   '"'],
-      \ ['\%#', '""' .. "\<Left>"]])
-
-inoremap <silent> <expr> ` input_helper.Map('`', [
+      \ ['\%#', '""' .. "\<Left>"]]
+g:input_helper_map_back_quote = [
       \ ['\%#`', "\<Right>"],
       \ ["'[^']*\\%#[^']*'",  '`'],
       \ ['"[^"]*\%#[^"]*"',   '`'],
-      \ ['\%#', "``\<Left>"]])
+      \ ['\%#', "``\<Left>"]]
 
-command! InputHelperLog echo input_helper.logs
+inoremap <silent> <expr> ( input_helper.Map('(', g:input_helper_map_left_parenthesis)
+inoremap <silent> <expr> ) input_helper.Map(')', g:input_helper_map_right_parenthesis)
+
+inoremap <silent> <expr> ] input_helper.Map(']', g:input_helper_map_right_square_bracket)
+inoremap <silent> <expr> [ input_helper.Map('[', g:input_helper_map_left_square_bracket)
+
+inoremap <silent> <expr> { input_helper.Map('{', g:input_helper_map_left_curly_bracket)
+inoremap <silent> <expr> } input_helper.Map('}', g:input_helper_map_right_curly_bracket)
+
+inoremap <silent> <expr> <Space> input_helper.Map("\<Space>", g:input_helper_map_space)
+inoremap <silent> <expr> <CR> input_helper.Map("\<CR>", g:input_helper_map_enter)
+inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", g:input_helper_map_backspace)
+
+inoremap <silent> <expr> ' input_helper.Map("'", g:input_helper_map_single_quote)
+inoremap <silent> <expr> " input_helper.Map('"', g:input_helper_map_double_quote)
+inoremap <silent> <expr> ` input_helper.Map('`', g:input_helper_map_back_quote)
 
