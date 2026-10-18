@@ -104,39 +104,30 @@ set cryptmethod=blowfish2
 # tab line
 def g:Vimrc_tabline(): string
   #
-  var tabnr = tabpagenr()
-  var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
-  var bufpath = bufnr->bufname()->fnamemodify(':p')
-  var bufname = bufpath->fnamemodify(':t')
-  var tabcount = tabpagenr('$')
-
-  #
-  var icon_page = get(g:, 'vimrc_info_icon_page', '🔖')
-  var icon_mod  = get(g:, 'vimrc_info_icon_mod', '⚡')
+  var icon_page = get(g:, 'vimrc_info_icon_page', '📄')
+  var icon_page_cur = get(g:, 'vimrc_info_icon_current_page', '🔖')
   var icon_nor  = get(g:, 'vimrc_info_icon_nor', '📝')
   var icon_dir  = get(g:, 'vimrc_info_icon_dir', '📁')
-  var icon_prev = get(g:, 'Vimrc_info_icon_prev', '◀️') # 
-  var icon_next = get(g:, 'Vimrc_info_icon_next', '▶️') # 
 
   #
-  var tabs = icon_page
+  var right = '%#TabLineSel# ' .. icon_nor .. '%t '
+
+  var tabnr = tabpagenr()
+  var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
+  var mid = '%#TabLine#' .. icon_dir .. getcwd(bufnr, tabnr)->fnamemodify(':~')
+
+  var tabcount = tabpagenr('$')
+  var left = ''
 
   if tabcount > 1
-    tabs = '%#TabLineSel#' .. printf('%s%02d%s',
-    (tabnr > 1 ? icon_prev : '['),
-    tabnr,
-    (tabcount - tabnr > 0 ? icon_next : ']'))
-    tabs ..= '%#TabLine#'
+    var tabs = repeat(icon_page, tabcount)->split('\zs')
+
+    tabs[tabnr - 1] = icon_page_cur
+
+    left = tabs->join('') .. '%#TabLineFill#'
   endif
 
-  #
-  var active = printf('%s%s ',
-    (&modified ? icon_mod : icon_nor),
-    (bufname->empty() ? '...' : bufname))
-  var here = printf('%s%s/', icon_dir, bufpath->fnamemodify(':h:t'))
-
-  #
-  return '%(%#TabLine#' .. tabs .. ' %#TabLineSel#' .. active  .. '%)%<' .. here .. '%T%#TabLineFill#'
+  return '%(' .. right .. '%)%<' .. mid .. '%=%(' .. left .. ' %)'
 enddef
 
 set showtabline=2 tabline=%!g:Vimrc_tabline()
