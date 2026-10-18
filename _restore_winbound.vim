@@ -1,6 +1,6 @@
 vim9script
 
-set viminfo+=!
+set viminfo^=!
 
 g:RESTORE_WINBOUND_SAVE_VAR = ''
 
