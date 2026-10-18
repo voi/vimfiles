@@ -116,7 +116,7 @@
 *g:vcs_root_auto_chdir*
                                         number (default: 0)
 
-        When not 0, execute |Root|! command on |BufWinEnter| auto-command.
+        When not 0, execute |Root| command on |BufWinEnter| auto-command.
 
 *g:vcs_root_target_dirs*
                                         string (default ['.svn', '.git'])
