@@ -116,7 +116,7 @@ def g:Vimrc_tabline(): string
 
   var tabnr = tabpagenr()
   var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
-  var mid = '%#TabLine#' .. icon_dir .. getcwd(bufnr, tabnr)->fnamemodify(':~')
+  var mid = '%#TabLine#' .. icon_dir .. "%{fnamemodify(getcwd(), ':~')}"
 
   var tabcount = tabpagenr('$')
   var left = ''
@@ -157,7 +157,7 @@ def g:Vimrc_statusline(): string
     .. printf("%%{&modified?'%s':'%s'}", get(g:, 'vimrc_info_icon_mod', '⚡ '), get(g:, 'vimrc_info_icon_nor', '📝 '))
     .. '%t'
 
-  var mid = '%#StatusLineNC#》' .. expand('%:p:~')
+  var mid = '%#StatusLineNC#》' .. "%{expand('%:~:h')}"
 
   var right = '%#CustomLine_Modes#〉%l,%c %04B'
     .. '%#CustomLine_CursorPos#》%y ' .. &fileencoding .. ' ' .. &fileformat
