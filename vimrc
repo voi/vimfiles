@@ -665,25 +665,6 @@ def Custom_highlight()
 
     endif
   endif
-
-  # extra whitespaces
-  #   u00A0 ' ' no-break space
-  #   u2000 ' ' en quad
-  #   u2001 ' ' em quad
-  #   u2002 ' ' en space
-  #   u2003 ' ' em space
-  #   u2004 ' ' three-per em space
-  #   u2005 ' ' four-per em space
-  #   u2006 ' ' six-per em space
-  #   u2007 ' ' figure space
-  #   u2008 ' ' punctuation space
-  #   u2009 ' ' thin space
-  #   u200A ' ' hair space
-  #   u200B '​' zero-width space
-  call matchadd('ExtraSpace', '[\u00A0\u2000-\u200B]')
-  #   u3000 '　' ideographic (zenkaku) space
-  call matchadd('ZenkakuSpace', '　')
-  call matchadd('TrailingSpace', '\s\{2,\}$')
 enddef
 
 
@@ -692,7 +673,27 @@ augroup autocmd_vimrc
   autocmd!
 
   #
-  autocmd VimEnter,WinEnter    * call Custom_highlight()
+  autocmd VimEnter,ColorScheme * call Custom_highlight()
+  autocmd VimEnter,WinEnter * {
+    # extra whitespaces
+    #   u00A0 ' ' no-break space
+    #   u2000 ' ' en quad
+    #   u2001 ' ' em quad
+    #   u2002 ' ' en space
+    #   u2003 ' ' em space
+    #   u2004 ' ' three-per em space
+    #   u2005 ' ' four-per em space
+    #   u2006 ' ' six-per em space
+    #   u2007 ' ' figure space
+    #   u2008 ' ' punctuation space
+    #   u2009 ' ' thin space
+    #   u200A ' ' hair space
+    #   u200B '​' zero-width space
+    call matchadd('ExtraSpace', '[\u00A0\u2000-\u200B]')
+    #   u3000 '　' ideographic (zenkaku) space
+    call matchadd('ZenkakuSpace', '　')
+    call matchadd('TrailingSpace', '\s\{2,\}$')
+  }
   autocmd WinEnter,BufWinEnter * setlocal wincolor=
   autocmd WinLeave             * setlocal wincolor=NormalNC
 
