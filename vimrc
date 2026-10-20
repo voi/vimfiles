@@ -739,7 +739,7 @@ augroup autocmd_vimrc
   autocmd FileType markdown {
     #
     setl foldlevel=3
-    setl comments=nb:*,nb:+,nb:-,nb:>
+    setl comments=nb:>
     setl formatoptions-=c formatoptions+=jro completeslash=slash
     setl foldexpr=Vimrc_markdown_foldexpr() foldtext=Vimrc_foldtext()
     #
