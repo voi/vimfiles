@@ -160,7 +160,7 @@ def g:Vimrc_statusline(): string
   var mid = '%#StatusLineNC#》' .. "%{expand('%:~:h')}"
 
   var right = '%#CustomLine_Modes#〉%l,%c %04B'
-    .. '%#CustomLine_CursorPos#》%y ' .. &fileencoding .. ' ' .. &fileformat
+    .. '%#CustomLine_CursorPos#》%y %{&fileencoding} %{&fileformat}'
 
   return '%(' .. left .. '%)%<' .. mid .. '%=%(' .. right .. '%)'
 enddef
