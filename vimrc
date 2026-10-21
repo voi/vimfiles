@@ -730,18 +730,18 @@ augroup autocmd_vimrc
   autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep,lvimgrepadd botright lopen
 
   # c/cpp
-
-  # c like
   autocmd FileType c,cpp 
         \   syn keyword Boolean BOOL TRUE FALSE
+        \ | syn match Operator /::\ze\w/
+        \ | syn match Operator /\>[\*&]/
+        \ | syn match Operator /\*\</
+
+  # c like language operators
   autocmd FileType c,cpp,cs,java,javascript 
         \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
         \ | syn match Operator /;/
         \ | syn match Operator /[<>!=~+\-\*\/]=/
         \ | syn match Operator /||\|&&\|++\|--/
-        \ | syn match Operator /::\ze\w/
-        \ | syn match Operator /\>[\*&]/
-        \ | syn match Operator /\*\</
         \ | syn match Operator /[!&]\s*\</
         \ | syn match Operator /[!&]\s*\ze(/
         \ | syn match Operator /\%(->\|\.\)\</
