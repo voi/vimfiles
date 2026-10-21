@@ -479,12 +479,6 @@ command! -nargs=0 CursorLineReverseOnOff {
   endif
 }
 
-# switch scrolloff always center
-command! -nargs=0 ScrolloffCenterOnOff {
-  if &scrolloff != 0 | set scrolloff=0 | else | set scrolloff=999 | endif
-  set scrolloff?
-}
-
 # show syntax
 command! ShowSyntax echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 

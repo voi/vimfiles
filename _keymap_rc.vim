@@ -6,7 +6,6 @@ vim9script
 # cursorline
 nnoremap <silent> <Leader>l  :CursorLineOnOff<CR>
 nnoremap <silent> <Leader>L  :CursorLineReverseOnOff<CR>
-nnoremap <silent> <Leader>s  :ScrolloffCenterOnOff<CR>
 
 
 # zoom in / out
