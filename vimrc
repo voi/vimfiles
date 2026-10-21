@@ -177,7 +177,7 @@ if has('win32')
   set grepprg=findstr\ /NSR
 endif
 
- if !has('gui_running') | set mouse=n  | endif
+if !has('gui_running') | set mouse=n  | endif
 
 # optional
 # set autochdir
@@ -395,10 +395,6 @@ nnoremap <silent> <M-w> :ToggleWrap<CR>
 
 
 ################################################################
-# command! -nargs=? -complete=filetype Temp 
-#     \ execute printf('tabe %s_%s | setf %s', tempname(), strftime('%Y-%m-%d_%H-%M-%S'),
-#     \   ('<args>' ==# '' ? (&filetype ==# 'qf' ? 'text' : &filetype) : '<args>'))
-
 # <http://d.hatena.ne.jp/fuenor/20100115/1263551230>
 command! -nargs=+ -bang -complete=file Rename {
       var old = bufname('%')->fnamemodify(':p')
@@ -429,7 +425,7 @@ command! -bang BufTidyUp {
 # lcd at current file directory
 command! -bang Here :call execute(('<bang>'->empty() ? 'l' : 't') .. 'cd %:p:h')
 
-# print full file path
+# print full path of current file
 command! Me echo expand('%')->fnamemodify(':p')
 
 # open powershell (terminal is cmd.exe)
