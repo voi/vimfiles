@@ -281,8 +281,8 @@ nnoremap <silent> ]t :tabnext<CR>
 
 
 # text operations
-nnoremap <silent> <M-d> :copy .-1<CR>
-xnoremap <silent> <M-d> :copy '<-1<CR>gv
+nnoremap <silent> <M-o> :copy .-1<CR>
+xnoremap <silent> <M-o> :copy '<-1<CR>gv
 
 nnoremap <silent> <M-k> :move .-2<CR>
 nnoremap <silent> <M-j> :move .+1<CR>
