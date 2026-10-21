@@ -730,14 +730,10 @@ augroup autocmd_vimrc
   autocmd QuickFixCmdPost lgrep,lgrepadd,lvimgrep,lvimgrepadd botright lopen
 
   # c/cpp
-  autocmd FileType c,cpp
-        \   syn keyword Type __int16 __int32 __int64 __fastcall
-        \ | syn keyword Type int16_t uint16_t int32_t uint32_t int64_t uint64_t
-        \ | syn keyword Typedef BYTE WORD DWORD SHORT USHORT LONG ULONG LONGLONG ULONGLONG
-        \ | syn keyword Typedef WPARAM LPARAM WINAPI UINT_PTR
-        \ | syn keyword Boolean BOOL TRUE FALSE
 
   # c like
+  autocmd FileType c,cpp 
+        \   syn keyword Boolean BOOL TRUE FALSE
   autocmd FileType c,cpp,cs,java,javascript 
         \   syn match Operator /\s\zs[+\-\*\/<>=|&]\ze\s/
         \ | syn match Operator /;/
