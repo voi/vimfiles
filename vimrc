@@ -52,7 +52,7 @@ set fillchars+=vert:\:
 set fillchars+=foldopen:▾,foldsep:.,foldclose:▸
 
 # format
-set formatoptions+=jnmM2
+set formatoptions+=j formatoptions+=n formatoptions+=m formatoptions+=M formatoptions+=2
 set formatoptions-=l
 set nrformats-=octal
 
@@ -699,7 +699,8 @@ augroup autocmd_vimrc
     #
     setl foldlevel=3
     setl comments=nb:>
-    setl formatoptions-=c formatoptions+=jro completeslash=slash
+    setl formatoptions+=j formatoptions+=r formatoptions+=o formatoptions-=c
+    setl completeslash=slash
     setl foldexpr=Vimrc_markdown_foldexpr() foldtext=Vimrc_foldtext()
     #
     nnoremap <buffer> <M-t> :s/\%([-+*] \{1,3}\[\)\@<=[ xX]\%(\]\s\)\@=/\=(submatch(0) == ' ' ? 'x' : ' ')/<CR>
