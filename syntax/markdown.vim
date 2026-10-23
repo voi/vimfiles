@@ -385,6 +385,7 @@ syn region markdownLink matchgroup=markdownLinkMarker
       \ start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
       \ nextgroup=markdownInlineLink,markdownLinkRef 
       \ keepend oneline display
+      \ contains=@markdownInline
 
 hi link markdownLink String
 
