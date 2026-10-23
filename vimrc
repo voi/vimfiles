@@ -440,14 +440,14 @@ if has('win32')
 endif
 
 # file list at cwd.
-command! -bang -nargs=? QFiles {
-  var path = '<bang>'->empty() ? getcwd() : expand('%:h')->fnamemodify(':p')
-  var expr = [<f-args>]
-  var list = globpath(path, (expr->empty() ? '*' : expr[0]), 0, 1)
-    ->filter((i, v) => !v->isdirectory())
+command! -nargs=? -complete=dir QFiles {
+  var root = get([<f-args>], 0, getcwd())
+  var list = readdirex(root, (e) => (e.type ==# 'file' || e.type ==# 'link'))
+    ->map((i, v) => (root .. '/' .. v.name)->fnamemodify(':p') )
 
-  call setqflist([], 'r', { lines: list, efm: '%f', title: getcwd() })
-  cwindow
+  call setloclist(0, [], 'r', { lines: list, efm: '%f', title: root })
+  execute 'lwindow'
+
   call matchadd('Conceal', '||\s*$')
 
   setl concealcursor=nvic
