@@ -483,7 +483,7 @@ command! -nargs=0 CursorLineReverseOnOff {
 command! ShowSyntax echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 
 # new vim instance
-command! -nargs=? GVim silent !start gvim <f-args>
+command! -nargs=? -complete=file GVim silent !start gvim <f-args>
 
 # clear oldfiles
 command! ClearOldFiles {
