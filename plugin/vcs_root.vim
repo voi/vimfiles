@@ -53,6 +53,10 @@ command! -bang -nargs=? Root call VcsRoot_lcd('<bang>', [<f-args>])
 
 augroup vcs_root_autocmd
   autocmd!
-  autocmd  BufWinEnter * if get(g:, 'vcs_root_auto_chdir', 0) | call VcsRoot_lcd('', []) | endif
+  autocmd  BufWinEnter * {
+    if get(g:, 'vcs_root_auto_chdir', 0) && &buftype ==# ''
+      call VcsRoot_lcd('', [])
+    endif
+  }
 augroup END
 
