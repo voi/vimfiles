@@ -216,6 +216,10 @@ nnoremap c "_c
 nnoremap C "_C
 xnoremap c "_c
 
+nnoremap s "_s
+nnoremap S "_S
+xnoremap s "_s
+
 
 # yank/cut like D
 nnoremap <Space>X C<ESC>
