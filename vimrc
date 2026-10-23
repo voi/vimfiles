@@ -201,8 +201,8 @@ onoremap a` 2i`
 
 
 # paste yank register
-xnoremap <Space>p "0p
-xnoremap <Space>P "0P
+nnoremap <Space>p "0p
+nnoremap <Space>P "0P
 
 xnoremap <Space>p "0p
 
