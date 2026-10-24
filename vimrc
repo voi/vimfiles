@@ -814,13 +814,6 @@ if has('gui_running')
   $LANG = 'ja'
 
   set guioptions=gr
-  # set cmdheight=1
-  # set columns=100
-  # set lines=40
-  set linespace=3
-  set background=light
-
-  colorscheme retrobox
 
   # ime
   if has('multi_byte_ime') || has('xim')
@@ -856,7 +849,4 @@ if has('gui_running')
 
 else
   set cursorlineopt=both
-  set background=dark
-
-  colorscheme retrobox
 endif
