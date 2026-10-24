@@ -40,11 +40,11 @@ if has('gui_running') && has('win32')
   }
 
   # zoom in / out and reset
-  var vimrc_zoom_guifont_original = []
+  g:vimrc_zoom_guifont_original = []
 
   command! ZoomIn {
-    if vimrc_zoom_guifont_original->empty()
-      vimrc_zoom_guifont_original = [&guifont, &guifontwide]
+    if g:vimrc_zoom_guifont_original->empty()
+      g:vimrc_zoom_guifont_original = [&guifont, &guifontwide]
     endif
 
     var SizeUp = (setfont) => setfont->substitute('\%(:h\)\zs\(\d\+\)', (m) => m[1]->str2nr() + 1, 'g')
@@ -54,8 +54,8 @@ if has('gui_running') && has('win32')
   }
 
   command! ZoomOut {
-    if vimrc_zoom_guifont_original->empty()
-      vimrc_zoom_guifont_original = [&guifont, &guifontwide]
+    if g:vimrc_zoom_guifont_original->empty()
+      g:vimrc_zoom_guifont_original = [&guifont, &guifontwide]
     endif
 
     var SizeDown = (setfont) => setfont->substitute('\%(:h\)\zs\(\d\+\)', (m) => max([1, m[1]->str2nr() - 1]), 'g')
@@ -65,11 +65,11 @@ if has('gui_running') && has('win32')
   }
 
   command! ZoomReset {
-    if !vimrc_zoom_guifont_original->empty()
-      execute 'set guifont=' .. get(vimrc_zoom_guifont_original, 0, '')
-      execute 'set guifontwide=' .. get(vimrc_zoom_guifont_original, 1, '')
+    if !g:vimrc_zoom_guifont_original->empty()
+      execute 'set guifont=' .. get(g:vimrc_zoom_guifont_original, 0, '')
+      execute 'set guifontwide=' .. get(g:vimrc_zoom_guifont_original, 1, '')
 
-      vimrc_zoom_guifont_original = []
+      g:vimrc_zoom_guifont_original = []
     endif
   }
 
