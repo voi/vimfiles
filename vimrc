@@ -87,7 +87,8 @@ set autoread
 set noswapfile
 set viminfo='100,<50,s0,h,rA:,rB:
 
-&viminfo = printf('%s,r%s,r%s', &viminfo, $TEMP, $VIM)
+&viminfo = printf('%s,r%s,r%s', &viminfo,
+      \ $TEMP->substitute('\\', '/', 'g'), $VIM->substitute('\\', '/', 'g'))
 
 # buffer
 set hidden
