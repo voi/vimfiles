@@ -633,7 +633,7 @@ augroup autocmd_vimrc
 
   #
   autocmd VimEnter,ColorScheme * call Custom_highlight()
-  autocmd VimEnter,WinEnter * {
+  autocmd VimEnter,ColorScheme,WinEnter * {
     # extra whitespaces
     #   u00A0 ' ' no-break space
     #   u2000 ' ' en quad
