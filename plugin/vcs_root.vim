@@ -1,11 +1,10 @@
 vim9script
 
 def VcsRoot_find_root(dirs: list<string>, files: list<string>): string
-  var source = expand('%')->fnamemodify(':p:h') .. ';'
   var root = ''
 
   for dir in dirs
-    var target = dir->finddir(source)
+    var target = dir->finddir('.;')
 
     if !target->empty()
       root = target->fnamemodify(':p')->substitute(dir .. '[\\/]$', '', '')
@@ -14,7 +13,7 @@ def VcsRoot_find_root(dirs: list<string>, files: list<string>): string
   endfor
 
   for file in files
-    var target = file->findfile(source)
+    var target = file->findfile('.;')
 
     if !target->empty()
       var root2 = target->fnamemodify(':p:h')
