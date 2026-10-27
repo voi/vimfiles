@@ -108,27 +108,19 @@ set cryptmethod=blowfish2
 def g:Vimrc_tabline(): string
   #
   var icon_page = get(g:, 'vimrc_info_icon_page', '📄')
-  var icon_page_cur = get(g:, 'vimrc_info_icon_current_page', '🔖')
   var icon_nor  = get(g:, 'vimrc_info_icon_nor', '📝')
-  var icon_dir  = get(g:, 'vimrc_info_icon_dir', '📁')
 
   #
-  var right = '%#TabLineSel# ' .. icon_nor .. '%t '
+  var cur_tabnr = tabpagenr()
+  var right = '%#TabLineSel# '
+    .. range(1, tabpagenr('$'))->map((i, v) => {
+      return (v == cur_tabnr) ? icon_nor : icon_page
+    })->join('') .. ' %t '
 
-  var tabnr = tabpagenr()
-  var bufnr = tabnr->tabpagebuflist()[tabnr->tabpagewinnr() - 1]
-  var mid = '%#TabLine#' .. icon_dir .. "/%{fnamemodify(getcwd(), ':~:t')}"
-
-  var tabcount = tabpagenr('$')
+  #
+  var mid = "%#TabLine#》%{fnamemodify(getcwd(), ':t')}/"
+  #
   var left = ''
-
-  if tabcount > 1
-    var tabs = repeat(icon_page, tabcount)->split('\zs')
-
-    tabs[tabnr - 1] = icon_page_cur
-
-    left = tabs->join('') .. '%#TabLineFill#'
-  endif
 
   return '%(' .. right .. '%)%<' .. mid .. '%=%(' .. left .. ' %)'
 enddef
@@ -155,13 +147,13 @@ def g:Vimrc_statusline(): string
   #
   var left = mode .. '%#CustomLine_Modes#'
     .. printf("%%{&modifiable?'':'%s'}", get(g:, 'vimrc_info_icon_ro',  '❎'))
-    .. printf("%%{&modified?'%s':'%s'}", get(g:, 'vimrc_info_icon_mod', '⚡ '), get(g:, 'vimrc_info_icon_nor', '📝 '))
-    .. '%t'
+    .. printf("%%{&modified?'%s':'%s'}", get(g:, 'vimrc_info_icon_mod', '⚡'), get(g:, 'vimrc_info_icon_nor', '📝'))
+    .. ' %t '
 
-  var mid = "%#StatusLineNC#》/%{expand('%:~:h:t')}"
+  var mid = "%#StatusLineNC#》%{expand('%:p:h:t')}/"
 
-  var right = '%#CustomLine_Modes#〉%l,%c %04B'
-    .. '%#CustomLine_CursorPos#》%y %{&fileencoding} %{&fileformat}'
+  var right = '%#CustomLine_Modes#）%l,%c %04B'
+    .. '%#CustomLine_CursorPos#〉%y %{&fileencoding} %{&fileformat}'
 
   return '%(' .. left .. '%)%<' .. mid .. '%=%(' .. right .. '%)'
 enddef
