@@ -841,5 +841,19 @@ if has('gui_running')
   augroup END
 
 else
+  set t_Co=256
+
+  if has('vim_starting')
+    # \e[1 q  :block blink
+    # \e[2 q  :block
+    # \e[3 q  :underline blink
+    # \e[4 q  :underline
+    # \e[5 q  :bar blink
+    # \e[6 q  :bar
+    &t_SI ..= "\e[6 q"  # insert
+    &t_EI ..= "\e[1 q"  # normal
+    &t_SR ..= "\e[4 q"  # replace
+  endif
+
   set cursorlineopt=both
 endif
