@@ -423,7 +423,7 @@ command! -bang BufTidyUp {
 command! -bang Here :call execute(('<bang>'->empty() ? 'l' : 't') .. 'cd %:p:h')
 
 # print full path of current file
-command! Me echo expand('%')->fnamemodify(':p')
+command! Me echo printf("%s\n-> %s", getcwd(), expand('%:.'))
 
 # open powershell (terminal is cmd.exe)
 if has('win32')
