@@ -578,7 +578,7 @@ def Custom_highlight()
     hi SpecialKey   guifg=#808080  guibg=NONE gui=NONE      ctermfg=grey
     hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
     hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
-    hi NormalNC     guifg=#BBBBBB             gui=italic    ctermfg=grey     cterm=italic
+    hi NormalNC     guifg=#DDDDDD  guibg=#696969  gui=italic  ctermfg=grey  cterm=italic
     hi Folded       guifg=#666666  guibg=NONE
     hi CursorLine                  guibg=#3A4B5C            ctermbg=235
 
@@ -604,8 +604,8 @@ def Custom_highlight()
     hi SpecialKey   guifg=#cccccc guibg=NONE gui=NONE      ctermfg=grey
     hi ZenkakuSpace guifg=grey               gui=underline ctermfg=grey     cterm=underline
     hi Comment      guifg=#808080 guibg=NONE gui=NONE      ctermfg=darkgrey
-    hi NormalNC     guifg=#808080            gui=italic    ctermfg=darkgrey cterm=italic
     hi Folded       guifg=#D8D8D8  guibg=NONE
+    hi NormalNC     guifg=#BBBBBB  guibg=#EEEEEE gui=italic ctermfg=darkgrey cterm=italic
 
     if has('gui_running')
       hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
