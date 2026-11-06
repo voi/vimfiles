@@ -326,9 +326,9 @@ for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
 endfor
 
 
-# skk like
-if has('win32')
-  inoremap <silent> <C-j> <C-^>
+# windows IME keymap
+if has('win32') && has('gui_running')
+  inoremap <silent> <C-Space> <C-^>
 endif
 
 
