@@ -645,8 +645,8 @@ augroup autocmd_vimrc
     call matchadd('ZenkakuSpace', '　')
     call matchadd('TrailingSpace', '\s\{2,\}$')
   }
-  autocmd WinEnter,BufWinEnter * setlocal wincolor=
-  autocmd WinLeave             * setlocal wincolor=NormalNC
+  autocmd WinEnter * setlocal wincolor=
+  autocmd WinLeave * setlocal wincolor=NormalNC
 
   # 
   if has('win32')
