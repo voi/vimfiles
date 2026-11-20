@@ -319,16 +319,6 @@ nnoremap <silent> <C-w>s  <C-w>s<C-^>
 nnoremap <silent> <C-w>v  <C-w>v<C-^>
 
 
-# auto-complete imitation
-def Vimrc_Keymap_Complete(chr: string): string
-  return chr .. ( pumvisible() ? '' : "\<C-x>\<C-p>\<C-n>" )
-enddef
-
-for k in split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", '\zs')
-  exec printf("imap <silent> <expr> %s Vimrc_Keymap_Complete('%s')", k, k)
-endfor
-
-
 # windows IME keymap
 if has('win32') && has('gui_running')
   inoremap <silent> <C-Space> <C-^>
