@@ -4,14 +4,14 @@ def TSvn_command_do(command: string, arguments: string)
   var path = arguments
 
   if path->empty()
-    path = finddir('.svn', getcwd() .. ';')
+    path = finddir('.svn', '.;')
 
     if !path->empty()
       path = path->fnamemodify(':h')->fnamemodify(':p')
+    else
+      path = getcwd()
     endif
   endif
-
-  if path->empty() | echomsg 'outside workcopy.' | return | endif
 
   #
   var cmdline = printf('TortoiseProc.exe /command:%s /path:"%s"', command, path)
