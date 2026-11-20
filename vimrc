@@ -571,7 +571,7 @@ def Custom_highlight()
     hi SpecialKey   guifg=#808080  guibg=NONE gui=NONE      ctermfg=grey
     hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
     hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
-    hi NormalNC     guifg=#DDDDDD  guibg=#696969  ctermfg=grey
+    hi NormalNC     guifg=#DDDDDD  guibg=#606060            ctermfg=grey
     hi Folded       guifg=#666666  guibg=NONE
     hi CursorLine                  guibg=#3A4B5C            ctermbg=235
 
@@ -594,11 +594,11 @@ def Custom_highlight()
 
     endif
   else
-    hi SpecialKey   guifg=#cccccc guibg=NONE gui=NONE      ctermfg=grey
+    hi SpecialKey   guifg=#CCCCCC guibg=NONE gui=NONE      ctermfg=grey
     hi ZenkakuSpace guifg=grey               gui=underline ctermfg=grey     cterm=underline
     hi Comment      guifg=#808080 guibg=NONE gui=NONE      ctermfg=darkgrey
-    hi Folded       guifg=#D8D8D8  guibg=NONE
-    hi NormalNC     guifg=#BBBBBB  guibg=#EEEEEE ctermfg=darkgrey
+    hi Folded       guifg=#D8D8D8 guibg=NONE
+    hi NormalNC     guifg=#999999 guibg=#ECECEC            ctermfg=darkgrey
 
     if has('gui_running')
       hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
@@ -618,7 +618,7 @@ augroup autocmd_vimrc
 
   #
   autocmd VimEnter,ColorScheme * call Custom_highlight()
-  autocmd VimEnter,ColorScheme,WinEnter * {
+  autocmd VimEnter,ColorScheme,BufWinEnter * {
     # extra whitespaces
     #   u00A0 ' ' no-break space
     #   u2000 ' ' en quad
@@ -638,7 +638,7 @@ augroup autocmd_vimrc
     call matchadd('ZenkakuSpace', '　')
     call matchadd('TrailingSpace', '\s\{2,\}$')
   }
-  autocmd WinEnter * setlocal wincolor=
+  autocmd WinEnter,BufWinEnter * setlocal wincolor=
   autocmd WinLeave * setlocal wincolor=NormalNC
 
   # 
