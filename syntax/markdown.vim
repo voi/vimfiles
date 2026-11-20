@@ -14,6 +14,7 @@ syn case ignore
 var is_latex_syntax_enabled = get(g:, 'markdown_latex_syntax_enabled', 1)
 var is_gfm_syntax_enabled = get(g:, 'markdown_gfm_extension_syntax_enabled', 1)
 var is_github_wiki_syntax_enabled = get(g:, 'markdown_github_wiki_syntax_enabled', 1)
+var is_match_pattern_reasonable = get(g:, 'markdown_match_pattern_reasonable', 1)
 
 
 #
@@ -57,7 +58,7 @@ endif
 ################################################################
 # 4. Leaf blocks {{{1
 syn cluster markdownLeafBlock 
-      \ contains=markdownThematicBreak,markdownHeader,markdownCodeBlock,markdownFencedCodeBlock,markdownLinkReferenceDefine
+      \ contains=markdownEscape,markdownThematicBreak,markdownHeader,markdownCodeBlock,markdownFencedCodeBlock,markdownLinkReferenceDefine
 
 
 ################################
@@ -77,7 +78,7 @@ hi link markdownThematicBreak Operator
 ################################
 #   4.2 ATX headings {{{2
 syn region markdownHeader matchgroup=markdownAtx 
-      \ start=/#\{1,6}\s\@=/ end=/\%(\s\@<=#\+\)\?\s*$/ 
+      \ start=/#\{1,6}\s\@=/ end=/\%(\s\@1<=#\+\)\?\s*$/ 
       \ keepend transparent oneline contained display
 
 hi link markdownAtx PreProc
@@ -126,7 +127,7 @@ hi link markdownFencedCodeBlock Comment
 #   4.6 HTML blocks
 #   4.7 Link reference definitions {{{2
 syn region markdownLinkReferenceDefine matchgroup=markdownLinkMarker 
-      \ start=/\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\]:/ 
+      \ start=/\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@1<!\]:/ 
       \ nextgroup=markdownLinkDestination skipwhite oneline display
 
 hi link markdownLinkReferenceDefine Tag
@@ -142,12 +143,24 @@ hi link markdownLinkMarker Statement
 if is_gfm_syntax_enabled
   syn cluster markdownLeafBlock add=markdownTable
 
-  syn match markdownTable /\%(\S.*\s\)\\\@<!|\%(.*\s|\)*\%(.*\)\?/ 
+  if !is_match_pattern_reasonable
+    # parsing ambiguity.
+    syn match markdownTable /:\?-\+:\?\s*|[:\-[:space:]|]*$/ 
+          \ transparent contains=markdownTableBorder contained
+    syn match markdownTable /\S.*\s|\%(\s\+\S.*\|\s*\)\?$/ 
+          \ transparent contains=markdownTableBorder,@markdownInline contained
+  endif
+
+  # explicit leading pipe
+  syn match markdownTable /|[:\-[:space:]|]*$/ 
+        \ transparent contains=markdownTableBorder contained
+  syn match markdownTable /|\%(\s\+\S.*\|\s*\)\?$/ 
         \ transparent contains=markdownTableBorder,@markdownInline contained
-  syn match markdownTableBorder /\%(^\|\s\)\@<=|\ze\%(\s\|$\)/ contained
+
+  syn match markdownTableBorder /\\\@1<!|/ contained
   syn match markdownTableBorder /:\?-\+:\?/ contained
 
-  hi link markdownTableBorder Statement
+  hi link markdownTableBorder Title
 endif
 #   }}}
 
@@ -259,7 +272,7 @@ endif
 ################################################################
 # 6. Inlines {{{1
 syn cluster markdownInline 
-      \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink,markdownLineBreak
+      \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasisStart,markdownLink,markdownImage,markdownAutoLink,markdownLineBreak
 
 
 ################################
@@ -274,9 +287,9 @@ hi link markdownEscape WarningMsg
 ################################
 #   6.2 Entity and numeric character references
 #   6.3 Code spans {{{2
-syn region markdownCodeSpan start=/\z([\\`]\@<!``\@!\)/  skip=/`\{2,}/ end=/\z1/ 
+syn region markdownCodeSpan start=/\z([\\`]\@1<!``\@!\)/  skip=/`\{2,}/ end=/\z1/ 
       \ oneline display
-syn region markdownCodeSpan start=/\z([\\`]\@<!```\@!\)/ skip=/`\{3,}/ end=/\z1/ 
+syn region markdownCodeSpan start=/\z([\\`]\@1<!```\@!\)/ skip=/`\{3,}/ end=/\z1/ 
       \ oneline display
 
 hi link markdownCodeSpan  String
@@ -286,7 +299,8 @@ hi link markdownCodeSpan  String
 ################################
 #   6.4 Emphasis and strong emphasis {{{2
 def Markdown_defineEmphasis(name: string, beg: string, end: string)
-  execute printf('syn region markdown%s matchgroup=markdownStrongEmphasisMarker start=/%s/ end=/%s/ keepend display %s',
+  execute printf(
+    'syn region markdown%s matchgroup=markdownStrongEmphasisMarker start=/%s/ end=/%s/ keepend display %s',
     name, beg, end, (get(g:, 'markdown_strong_emphasis_oneline', 0) ? 'oneline' : ''))
 enddef
 
@@ -295,11 +309,11 @@ def LeftFlanking_Delimiter_Run(chr: string, count: number, punct: string, left: 
 
   return join([
     # (1) and (2a)
-    '[[:space:][:cntrl:]' .. punct .. chr .. left .. '\\]\@<!' 
+    '[[:space:][:cntrl:]' .. punct .. chr .. left .. '\\]\@1<!' 
           \ .. delim 
           \ .. '[[:space:][:cntrl:]' .. punct .. chr .. ']\@!',
     # (2b)
-    '[[:space:][:cntrl:]' .. punct .. ']\@<=' 
+    '[[:space:][:cntrl:]' .. punct .. ']\@1<=' 
           \ .. delim 
           \ .. '[[:space:][:cntrl:]' .. chr .. ']\@!'
   ], '\|')
@@ -310,35 +324,55 @@ def RightFlaking_Delimiter_Run(chr: string, count: number, punct: string, right:
 
   return join([
     # (1) and (2a)
-    '[[:space:][:cntrl:]' .. punct .. chr .. '\\]\@<!' 
+    '[[:space:][:cntrl:]' .. punct .. chr .. '\\]\@1<!' 
           \ ..  delim 
           \ ..  '[[:space:][:cntrl:]' .. punct .. chr .. right .. ']\@!',
     # (2b)
-    '[[:space:][:cntrl:]\\' .. chr .. ']\@<!' 
+    '[[:space:][:cntrl:]\\' .. chr .. ']\@1<!' 
           \ .. delim 
           \ .. '[[:space:][:cntrl:]' .. punct .. chr .. ']\@='
   ], '\|')
 enddef
 
 def Markdown_syntaxEmphasis(name: string, count: number)
-  # asterisk
-  var ast_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^_`{|}~'
-  var ast_left = LeftFlanking_Delimiter_Run('\*', count, ast_punct, '')
-  var ast_right = RightFlaking_Delimiter_Run('\*', count, ast_punct, '')
+  if is_match_pattern_reasonable
+    # asterisk
+    var ast = repeat('\*', count)
+    var ast_left = ast .. '[[:space:][:cntrl:]\*]\@!'
+    var ast_right = '[[:space:][:cntrl:]\*\\]\@1<!' .. ast .. '\*\@!'
 
-  call Markdown_defineEmphasis(name, ast_left, ast_right)
+    call Markdown_defineEmphasis(name, ast_left, ast_right)
 
-  # underscore
-  var udl_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^*`{|}~'
-  var udl_left = LeftFlanking_Delimiter_Run('_', count, udl_punct, '[:alnum:]\u2E00-\U3FFFF')
-  var udl_right = RightFlaking_Delimiter_Run('_', count, udl_punct, '[:alnum:]\u2E00-\U3FFFF')
+    # underscore
+    var udl = repeat('_', count)
+    var udl_left = '[:alnum:]\@1<!' .. udl .. '[[:space:][:cntrl:]_]\@!'
+    var udl_right = '[[:space:][:cntrl:]_\\]\@1<!' .. udl .. '[[:alnum:]_]\@!'
 
-  call Markdown_defineEmphasis(name, udl_left, udl_right)
+    call Markdown_defineEmphasis(name, udl_left, udl_right)
+  else
+    # asterisk
+    var ast_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^_`{|}~'
+    var ast_left = LeftFlanking_Delimiter_Run('\*', count, ast_punct, '')
+    var ast_right = RightFlaking_Delimiter_Run('\*', count, ast_punct, '')
+
+    call Markdown_defineEmphasis(name, ast_left, ast_right)
+
+    # underscore
+    var udl_punct = "'" .. '!"#$%&()+,\-./:;<=>?@\[\]^*`{|}~'
+    var udl_left = LeftFlanking_Delimiter_Run('_', count, udl_punct, '[:alnum:]')
+    var udl_right = RightFlaking_Delimiter_Run('_', count, udl_punct, '[:alnum:]')
+
+    call Markdown_defineEmphasis(name, udl_left, udl_right)
+  endif
 enddef
 
 call Markdown_syntaxEmphasis('Emphasis', 1)
 call Markdown_syntaxEmphasis('Strong', 2)
 call Markdown_syntaxEmphasis('StrongEmphasis', 3)
+
+syn match markdownStrongEmphasisStart /\ze\%([_\*]\{1,3}\)/ 
+      \ nextgroup=markdownEmphasis,markdownStrong,markdownStrongEmphasis 
+      \ transparent display
 
 
 #
@@ -362,7 +396,7 @@ if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownStrikeThrough
 
   syn region markdownStrikeThrough 
-        \ start=/\z([\\\~]\@<!\~\{2}[\~]\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
+        \ start=/\z(\~\@1<!\~\{2}\~\@!\)/ skip=/\~\{3,}/ end=/\z1/ 
         \ contains=markdownLink oneline display
 
   if has('gui_running')
@@ -380,7 +414,7 @@ if is_latex_syntax_enabled
   syn cluster markdownInline add=markdownLatexSpan
 
   syn region markdownLatexSpan 
-        \ start=/\z([\\\$]\@<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
+        \ start=/\z([\\\$]\@1<!\$$\@!\)/ skip=/\$\{2,}/ end=/\z1/ 
         \ oneline display
 
   hi link markdownLatexSpan String
@@ -391,7 +425,7 @@ endif
 ################################
 #   6.6 Links {{{2
 syn region markdownLink matchgroup=markdownLinkMarker 
-      \ start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
+      \ start=/\\\@1<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@1<!\][(\[]\@=/ 
       \ nextgroup=markdownInlineLink,markdownLinkRef 
       \ keepend oneline display
       \ contains=@markdownInline
@@ -401,7 +435,7 @@ hi link markdownLink String
 
 #
 syn region markdownInlineLink matchgroup=markdownLinkMarker 
-      \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@<!)/ 
+      \ start=/(/ skip=/\\[()]\|([^()]\+)/ end=/\\\@1<!)/ 
       \ transparent oneline contains=markdownLinkDestination 
       \ keepend contained display
 
@@ -428,7 +462,7 @@ hi link markdownLinkDestination Underlined
 #
 def Markdown_syntaxLinkTitle(start: string, skip: string, end: string)
   execute 'syn region markdownLinkTitle '
-        \ .. printf('start=/\\\@<!%s/ skip=/\\%s/ end=/\\\@<!%s/ ', start, skip, end)
+        \ .. printf('start=/\\\@1<!%s/ skip=/\\%s/ end=/\\\@1<!%s/ ', start, skip, end)
         \ .. 'keepend contained display '
         \ .. markdown_link_title_conceal
 enddef
@@ -445,7 +479,7 @@ hi link markdownLinkTitle String
 ################################
 #   6.7 Images {{{2
 syn region markdownImage matchgroup=markdownLinkMarker 
-      \ start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
+      \ start=/\\\@1<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@1<!\](\@=/ 
       \ nextgroup=markdownInlineLink 
       \ keepend oneline display
 
@@ -456,12 +490,21 @@ hi link markdownImage String
 
 ################################
 #   6.8 Autolinks {{{2
-# absolute URL
-syn match markdownAutoLink /\\\@<!<[[:alnum:]+.-]\{2,32}:[^<>[:space:][:cntrl:]]\+>/ 
-      \ display
-# email
-syn match markdownAutoLink /\\\@<!<[[:alnum:].!#$%&'*+\/=?^_`{|}~-]\+@\w\%([[:alnum:]-]\{0,61}\w\)\?\%(\.\w\%([[:alnum:]-]\{0,61}\w\)\?\)*>/ 
-      \ display
+if is_match_pattern_reasonable
+  # absolute URI
+  syn match markdownAutoLink /<[[:alpha:]][[:alnum:]+\.\-]\{1,31}:[^[:space:][:cntrl:]<>]\+>/ 
+        \ display
+  # email
+  syn match markdownAutoLink /<[[:alnum:]\._%+\-]\+@[[:alnum:]\.\-]\+\.[[:alpha:]]\{2,}>/ 
+        \ display
+else
+  # absolute URI
+  syn match markdownAutoLink /<https\?:\/\/[[:alnum:]\.\-]\+\%(:[[:digit:]]\{1,5}\)\?\%(\/[^[:space:][:cntrl:]?#]*\)\?\%(?[^[:space:][:cntrl:]?#]*\)\?\%(#[^[:space:][:cntrl:]?#]*\)\?>/ 
+        \ display
+  # email
+  syn match markdownAutoLink /<[[:alnum:]\.!#$%&'\*+\/=?^_`{|}~\-]\+@[[:alnum:]]\%([[:alnum:]\-]*[[:alnum:]]\)\?\%(\.[[:alnum:]]\%([[:alnum:]\-]*[[:alnum:]]\)\?\)\+>/ 
+        \ display
+endif
 
 hi link markdownAutoLink Underlined
 #   }}}
@@ -472,16 +515,27 @@ hi link markdownAutoLink Underlined
 if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownAutoLinkEx
 
-  # www
-  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=www\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
-        \ display
-  # URL (http/https)
-  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=https\?:\/\/[[:alnum:]_-]\+\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
-        \ display
-  # email
-  syn match markdownAutoLinkEx /\%(\_^\|[[:space:]*_~]\)\@<=\%(mailto:\|xmpp:\)\?[[:alnum:]._+-]\+@[[:alnum:]._-]\+\%(\.[[:alnum:]._-]\+\)*[[:alnum:]]\>/ 
-        \ display
-
+  if is_match_pattern_reasonable
+    # www
+    syn match markdownAutoLinkEx /\<www\.[[:alnum:]!?\/+\-_~;.,\*&@#$%()'\[\]]\+\>/ 
+          \ display
+    # URI
+    syn match markdownAutoLinkEx /\<https\?:\/\/[[:alnum:]!?\/+\-_~;.,\*&@#$%()'\[\]]\+\>/ 
+          \ display
+    # email
+    syn match markdownAutoLinkEx /\<\%(mailto:\|xmpp:\)\?[[:alnum:]\.\-_+]\+@[[:alnum:]\-_\.]\+\>/ 
+          \ display
+  else
+    # www
+    syn match markdownAutoLinkEx /\<www\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+          \ display
+    # URL (http/https)
+    syn match markdownAutoLinkEx /\<https\?:\/\/[[:alnum:]_-]\+\%(\.[[:alnum:]_-]\+\)*\.[[:alnum:]-]\+\.[[:alnum:]-]\+\%(\/[[:alnum:]_\/:%#\$&\?\(\)~\.=\+\-]\+\)*\>\/\?/ 
+          \ display
+    # email
+    syn match markdownAutoLinkEx /\<\%(mailto:\|xmpp:\)\?[[:alnum:]._+-]\+@[[:alnum:]._-]\+\%(\.[[:alnum:]._-]\+\)*[[:alnum:]]\>/ 
+          \ display
+  endif
 
   hi link markdownAutoLinkEx Underlined
 endif
@@ -527,32 +581,42 @@ hi link markdownLineBreak ErrorMsg
 # }}}
 
 ################################################################
-if is_github_wiki_syntax_enabled
 # github wiki # {{{1
+if is_github_wiki_syntax_enabled
   syn cluster markdownInline add=markdownIssueRef,markdownMentions,markdownEmoji
 
 
-  #   Issue reference within a repository (Github) {{{
-  syn match markdownIssueRef /\%(\_^\|[^#[:alnum:]/_-]\)\@<=#\d\+\%(\_$\|[^#[:alnum:]_-]\)\@=/ 
-        \ display
-  syn match markdownIssueRef /\%(\_^\|[^#[:alnum:]/_-]\)\@<=\w[[:alnum:]-_]\+\%(\/[[:alnum:]-_]\+\)*#\d\+\%(\_$\|[^#[:alnum:]_-]\)\@=/ 
-        \ display
+  #   Issue reference within a repository (Github) {{{2
+  if is_match_pattern_reasonable
+    syn match markdownIssueRef /\<[[:alnum:]][[:alnum:]\-_]\+\/[[:alnum:]][[:alnum:]\-\._]\+#\d\+\>/ 
+          \ display
+  else
+    syn match markdownIssueRef /\<[[:alnum:]]\%([[:alnum:]]\?\|[\-_]\?\%([[:alnum:]]\)\)\{0,38}\>\/\<@[[:alnum:]]\%([[:alnum:]]\?\|[\-\._]\?\%([[:alnum:]]\)\)\{0,38}\>#\d\+\>/ 
+          \ display
+  endif
+
+  syn match markdownIssueRef /#\d\+\>/ display
+  syn match markdownIssueRef /\<\CGH-\d\+\>/ display
 
   hi link markdownIssueRef Tag
   #   }}}
 
 
-  #   Username @mentions (Github) {{{
-  syn match markdownMentions /\%(\_^\|[^@[:alnum:]/_-]\)\@<=@[[:alnum:]_-]\+\%(\_$\|[^@[:alnum:]_-]\)\@=/ 
-        \ display
+  #   Username @mentions (Github) {{{2
+  if is_match_pattern_reasonable
+    syn match markdownMentions /\<@[[:alnum:]][[:alnum:]\-_]\+\>/ 
+          \ display
+  else
+    syn match markdownMentions /\<@[[:alnum:]]\%([[:alnum:]]\?\|[\-_]\?\%([[:alnum:]]\)\)\{0,38}\>/ 
+          \ display
+  endif
 
   hi link markdownMentions Identifier
   #   }}}
 
 
-  #   Emoji (Github) {{{
-  syn match markdownEmoji /\%(\_^\|[^:[:alnum:]/_-]\)\@<=:\a\w*\a:\%(\_$\|[^[:alnum:]_-]\)\@=/ 
-        \ display
+  #   Emoji (Github) {{{2
+  syn match markdownEmoji /:\a\w*\a:/ display
 
   hi link markdownEmoji Constant
   #   }}}
