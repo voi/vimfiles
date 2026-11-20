@@ -2,7 +2,7 @@ vim9script
 
 def GitUtil_launchGui(path: string)
   #
-  if finddir('.git', getcwd() .. ';')->empty()
+  if finddir('.git', '.;')->empty()
     echomsg 'outside working copy.'
     return
   endif
