@@ -41,7 +41,7 @@ var markdown_list_done_conceal = Get_markdown_conceal('markdown_list_done_cchar'
 
 
 ################################################################
-# 3. Block and Inline {{{
+# 3. Block and Inline {{{1
 if &expandtab
   syn match markdownBlockStart /^\%( \{4}\)*\%( \{1,3}\)\?/ 
         \ nextgroup=@markdownLeafBlock,@markdownContainerBlock,markdownFrontMatter 
@@ -55,13 +55,13 @@ endif
 # }}}
 
 ################################################################
-# 4. Leaf blocks {{{
+# 4. Leaf blocks {{{1
 syn cluster markdownLeafBlock 
       \ contains=markdownThematicBreak,markdownHeader,markdownCodeBlock,markdownFencedCodeBlock,markdownLinkReferenceDefine
 
 
 ################################
-#   4.1 Thematic breaks {{{
+#   4.1 Thematic breaks {{{2
 syn match markdownThematicBreak /\*\{3,}\s*$/ contained display
 syn match markdownThematicBreak /_\{3,}\s*$/  contained display
 syn match markdownThematicBreak /-\{3,}\s*$/  contained display
@@ -75,7 +75,7 @@ hi link markdownThematicBreak Operator
 
 
 ################################
-#   4.2 ATX headings {{{
+#   4.2 ATX headings {{{2
 syn region markdownHeader matchgroup=markdownAtx 
       \ start=/#\{1,6}\s\@=/ end=/\%(\s\@<=#\+\)\?\s*$/ 
       \ keepend transparent oneline contained display
@@ -85,7 +85,7 @@ hi link markdownAtx PreProc
 
 
 ################################
-#   4.3 Setext headings {{{
+#   4.3 Setext headings {{{2
 syn match markdownHeader /^ \{,3}[^\-\*_=>[:space:]].\+\n\s\{,3}\%(-\|=\)\+\s*$/ 
       \ contains=markdownSetext transparent contained display
 syn match markdownSetext /[=-]\+/ contained
@@ -95,7 +95,7 @@ hi link markdownSetext PreProc
 
 
 ################################
-#   4.4 Indented code blocks {{{
+#   4.4 Indented code blocks {{{2
 if &expandtab
   syn match markdownCodeBlock /\t.*/ contained display
 else
@@ -107,7 +107,7 @@ hi link markdownCodeBlock Comment
 
 
 ################################
-#   4.5 Fenced code blocks {{{
+#   4.5 Fenced code blocks {{{2
 syn region markdownFencedCodeBlock matchgroup=Delimiter 
       \ start=/\z(`\{3,}\)\%(\.\?\w\+\|\s\?{[^}]\+}\)\?/  end=/\z1`*\s*$/ 
       \ keepend contained display contains=markdownBlockquoteContained
@@ -124,7 +124,7 @@ hi link markdownFencedCodeBlock Comment
 
 ################################
 #   4.6 HTML blocks
-#   4.7 Link reference definitions {{{
+#   4.7 Link reference definitions {{{2
 syn region markdownLinkReferenceDefine matchgroup=markdownLinkMarker 
       \ start=/\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\]:/ 
       \ nextgroup=markdownLinkDestination skipwhite oneline display
@@ -138,7 +138,7 @@ hi link markdownLinkMarker Statement
 ################################
 #   4.8 Paragraphs
 #   4.9 Blank lines
-#   4.10 Tables (extension) {{{
+#   4.10 Tables (extension) {{{2
 if is_gfm_syntax_enabled
   syn cluster markdownLeafBlock add=markdownTable
 
@@ -153,7 +153,7 @@ endif
 
 
 ################################
-#   x.x Latex Block (extension) {{{
+#   x.x Latex Block (extension) {{{2
 if is_latex_syntax_enabled
   syn cluster markdownLeafBlock add=markdownLatexBlock
 
@@ -169,7 +169,7 @@ endif
 # }}}
 
 ################################################################
-# 5 Container blocks {{{
+# 5. Container blocks {{{1
 syn cluster markdownContainerBlock 
       \ contains=markdownBlockquote,@markdownList
 
@@ -185,7 +185,7 @@ endif
 
 
 ################################
-#   5.1 Block quotes {{{
+#   5.1 Block quotes {{{2
 syn match markdownBlockquote />/ 
       \ nextgroup=markdownContainerBlockStart 
       \ contained display
@@ -203,7 +203,7 @@ hi link markdownBlockquoteContained markdownBlockquote
 
 ################################
 #   5.2 List items
-#   5.4 Lists {{{
+#   5.4 Lists {{{2
 syn cluster markdownList 
       \ contains=markdownOrderedList,markdownUnorderedList
 
@@ -221,7 +221,7 @@ hi link markdownUnorderedList Tag
 
 
 ################################
-#   5.3 Task list items (extension) {{{
+#   5.3 Task list items (extension) {{{2
 if is_gfm_syntax_enabled
   syn cluster markdownContainerBlock 
         \ add=markdownTaskTodo,markdownTaskDone
@@ -248,13 +248,13 @@ endif
 # }}}
 
 ################################################################
-# 6 Inlines {{{
+# 6. Inlines {{{1
 syn cluster markdownInline 
       \ contains=markdownEscape,markdownCodeSpan,markdownStrongEmphasis,markdownEmphasis,markdownStrongEmphasis,markdownLink,markdownImage,markdownAutoLink,markdownLineBreak
 
 
 ################################
-#   6.1 Backslash escapes {{{
+#   6.1 Backslash escapes {{{2
 syn match markdownEscape /\\[!"#$%&'()*+,\-./:;<=>?@\[\]^_`{|}~]/ 
       \ display
 
@@ -264,7 +264,7 @@ hi link markdownEscape WarningMsg
 
 ################################
 #   6.2 Entity and numeric character references
-#   6.3 Code spans {{{
+#   6.3 Code spans {{{2
 syn region markdownCodeSpan start=/\z([\\`]\@<!``\@!\)/  skip=/`\{2,}/ end=/\z1/ 
       \ oneline display
 syn region markdownCodeSpan start=/\z([\\`]\@<!```\@!\)/ skip=/`\{3,}/ end=/\z1/ 
@@ -275,7 +275,7 @@ hi link markdownCodeSpan  String
 
 
 ################################
-#   6.4 Emphasis and strong emphasis {{{
+#   6.4 Emphasis and strong emphasis {{{2
 def Markdown_defineEmphasis(name: string, beg: string, end: string)
   execute printf('syn region markdown%s matchgroup=markdownStrongEmphasisMarker start=/%s/ end=/%s/ keepend display %s',
     name, beg, end, (get(g:, 'markdown_strong_emphasis_oneline', 0) ? 'oneline' : ''))
@@ -348,7 +348,7 @@ hi link markdownStrongEmphasisMarker SpecialKey
 
 
 ################################
-#   6.5 Strikethrough (extension) {{{
+#   6.5 Strikethrough (extension) {{{2
 if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownStrikeThrough
 
@@ -366,7 +366,7 @@ endif
 
 
 ################################
-#   x.x Latex Span (extension) {{{
+#   x.x Latex Span (extension) {{{2
 if is_latex_syntax_enabled
   syn cluster markdownInline add=markdownLatexSpan
 
@@ -380,7 +380,7 @@ endif
 
 
 ################################
-#   6.6 Links {{{
+#   6.6 Links {{{2
 syn region markdownLink matchgroup=markdownLinkMarker 
       \ start=/\\\@<!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\][(\[]\@=/ 
       \ nextgroup=markdownInlineLink,markdownLinkRef 
@@ -434,7 +434,7 @@ hi link markdownLinkTitle String
 
 
 ################################
-#   6.7 Images {{{
+#   6.7 Images {{{2
 syn region markdownImage matchgroup=markdownLinkMarker 
       \ start=/\\\@<!!\[\s\@!/ skip=/\\[\[\]]/ end=/\s\@<!\](\@=/ 
       \ nextgroup=markdownInlineLink 
@@ -446,7 +446,7 @@ hi link markdownImage String
 
 
 ################################
-#   6.8 Autolinks {{{
+#   6.8 Autolinks {{{2
 # absolute URL
 syn match markdownAutoLink /\\\@<!<[[:alnum:]+.-]\{2,32}:[^<>[:space:][:cntrl:]]\+>/ 
       \ display
@@ -459,7 +459,7 @@ hi link markdownAutoLink Underlined
 
 
 ################################
-#   6.9 Autolinks (extension) {{{
+#   6.9 Autolinks (extension) {{{2
 if is_gfm_syntax_enabled
   syn cluster markdownInline add=markdownAutoLinkEx
 
@@ -480,7 +480,7 @@ endif
 
 
 ################################
-#   6.10 Raw HTML {{{
+#   6.10 Raw HTML {{{2
 runtime! syntax/xml.vim
 
 
@@ -503,7 +503,7 @@ syn clear xmlError
 
 ################################
 #   6.11 Disallowed Raw HTML (extension)
-#   6.12 Hard line breaks {{{
+#   6.12 Hard line breaks {{{2
 syn match markdownLineBreak / \{2,}$/ contained
 syn match markdownLineBreak /\\$/ contained
 
@@ -519,6 +519,7 @@ hi link markdownLineBreak ErrorMsg
 
 ################################################################
 if is_github_wiki_syntax_enabled
+# github wiki # {{{1
   syn cluster markdownInline add=markdownIssueRef,markdownMentions,markdownEmoji
 
 
@@ -547,10 +548,11 @@ if is_github_wiki_syntax_enabled
   hi link markdownEmoji Constant
   #   }}}
 endif
+# }}}
 
 
 ################################################################
-# Front matter (YAML) {{{
+# Front matter (YAML) {{{1
 syn region markdownFrontMatter matchgroup=markdownFrontMatterMarker 
       \ start=/\%^---$/ end=/^\%(---\|\.\.\.\)\s*$/ 
       \ keepend contained display contains=@Spell
