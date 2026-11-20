@@ -106,16 +106,19 @@ set cryptmethod=blowfish2
 
 # tab line
 def g:Vimrc_tabline(): string
-  #
-  var icon_page = get(g:, 'vimrc_info_icon_page', '📄')
-  var icon_nor  = get(g:, 'vimrc_info_icon_nor', '📝')
+  var right = get(g:, 'vimrc_info_icon_nor', '📝')
 
-  #
-  var cur_tabnr = tabpagenr()
-  var right = '%#TabLineSel# '
-    .. range(1, tabpagenr('$'))->map((i, v) => {
-      return (v == cur_tabnr) ? icon_nor : icon_page
-    })->join('') .. ' %t '
+  if tabpagenr('$') > 1
+    var icon_page = get(g:, 'vimrc_info_icon_page', '□')
+    var icon_curr = get(g:, 'vimrc_info_icon_curr', '■')
+    var cur_tabnr = tabpagenr()
+
+    right = range(1, tabpagenr('$'))->map((i, v) => {
+        return (v == cur_tabnr) ? icon_curr : icon_page
+      })->join('')
+  endif
+
+  right = '%#TabLineSel# ' .. right .. ' %t '
 
   #
   var mid = "%#TabLine#》%{fnamemodify(getcwd(), ':t')}/"
