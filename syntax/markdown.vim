@@ -171,7 +171,7 @@ endif
 ################################################################
 # 5. Container blocks {{{1
 syn cluster markdownContainerBlock 
-      \ contains=markdownBlockquote,@markdownList
+      \ contains=markdownBlockquote
 
 if &expandtab
   syn match markdownContainerBlockStart /\%( \{4}\)*\%( \{1,3}\)\?/ 
@@ -204,19 +204,19 @@ hi link markdownBlockquoteContained markdownBlockquote
 ################################
 #   5.2 List items
 #   5.4 Lists {{{2
-syn cluster markdownList 
-      \ contains=markdownOrderedList,markdownUnorderedList
+syn cluster markdownContainerBlock 
+      \ add=markdownOrderedList,markdownBulletList
 
 syn match markdownOrderedList /\d\{1,9}[.)]\s\@=/ 
       \ skipwhite nextgroup=markdownContainerBlockStart
       \ contained display
-execute 'syn match markdownUnorderedList /[-+*]\s\@=/ '
+execute 'syn match markdownBulletList /[-+*]\s\@=/ '
       \ .. 'skipwhite nextgroup=markdownContainerBlockStart '
       \ .. 'contained display '
       \ .. markdown_list_item_conceal
 
 hi link markdownOrderedList Tag
-hi link markdownUnorderedList Tag
+hi link markdownBulletList Tag
 #   }}}
 
 
@@ -227,23 +227,32 @@ if is_gfm_syntax_enabled
         \ add=markdownTaskTodo,markdownTaskDone
 
   execute 'syn match markdownTaskTodo /[-+*]\%( \{1,4}\|\t\)\[ \]\s\@=/ '
-        \ .. 'contained display '
+        \ .. 'nextgroup=markdownContainerBlockStart '
+        \ .. (markdown_list_todo_conceal->empty() ? 'contains=markdownBulletListMarker,markdownTaskTodoMarker ' : ' ')
+        \ .. 'transparent contained display '
         \ .. markdown_list_todo_conceal
 
   execute 'syn match markdownTaskDone /[-+*]\%( \{1,4}\|\t\)\[[xX]\]\s\@=/ '
-        \ .. 'skipwhite nextgroup=markdownTaskDoneContent '
-        \ .. 'contained display '
+        \ .. 'nextgroup=markdownTaskDoneContent '
+        \ .. (markdown_list_done_conceal->empty() ? 'contains=markdownBulletListMarker,markdownTaskDoneMarker ' : ' ')
+        \ .. 'transparent contained display '
         \ .. markdown_list_done_conceal
 
-  syn match markdownTaskDoneContent /.*/
-        \ contains=markdownInlineLink
-        \ contained display
+  execute 'syn match markdownTaskDoneContent /.*$/ '
+        \ .. (get(g:, 'markdown_task_done_include_inlines', 0) ? 'contains=@markdownInline ' : ' ')
+        \ .. 'contained display'
 
-  hi link markdownTaskTodo Statement
-  hi link markdownTaskDone markdownStrikeThrough
+  syn match markdownBulletListMarker /[-+*]\s\+/ skipwhite contained display
+  syn match markdownTaskTodoMarker /\[ \]/    contained display
+  syn match markdownTaskDoneMarker /\[[xX]\]/ contained display
+
+  hi link markdownBulletListMarker Tag
+  hi link markdownTaskTodoMarker Todo
+  hi link markdownTaskDoneMarker Comment
   hi link markdownTaskDoneContent markdownStrikeThrough
 endif
 #   }}}
+
 
 # }}}
 
