@@ -40,7 +40,8 @@ def VcsRoot_lcd(bang: string, arguments: list<string>)
   var root = VcsRoot_find_root(dirs, files)
 
   if root->empty()
-    echomsg "('_`;) >/" .. getcwd()->fnamemodify(':t') .. '/'
+    execute 'lcd %:h'
+    echomsg "root not found <- " getcwd()
   else
     execute (bang->empty() ? 'tcd ' : 'lcd ') .. root
   endif
@@ -53,7 +54,8 @@ command! -bang -nargs=? Root call VcsRoot_lcd('<bang>', [<f-args>])
 augroup vcs_root_autocmd
   autocmd!
   autocmd  BufWinEnter * {
-    if get(g:, 'vcs_root_auto_chdir', 0) && &buftype ==# ''
+    if get(g:, 'vcs_root_auto_chdir', 0) && 
+          \ &buftype ==# '' && !bufname('%')->empty()
       call VcsRoot_lcd('', [])
     endif
   }
