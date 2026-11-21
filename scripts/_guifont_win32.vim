@@ -10,10 +10,10 @@ if has('gui_running') && has('win32')
   # - ‐ ─ ― ー 　 → ⇒
   # 1 i I T l | 0 o O θ Θ , . ; : _
   #
-  g:vimrc_font_size = '13'
+  g:vimrc_font_size = '12'
   g:vimrc_guifonts = {
-    1: ['Cascadia_Code:h10.5,BIZ_UDゴシック:h11', 'BIZ_UDゴシック:h11'],
-    2: ['Cascadia_Code:h10.5,UD_デジタル_教科書体_N:h11', 'UD_デジタル_教科書体_N:h11'],
+    1: ['Cascadia_Code:h__,BIZ_UDゴシック:h__', 'BIZ_UDゴシック:h__'],
+    2: ['Cascadia_Code:h__,UD_デジタル_教科書体_N:h__', 'UD_デジタル_教科書体_N:h__'],
     3: ['BIZ_UDゴシック:h__'],
     4: ['UD_デジタル_教科書体_N:h__'],
     5: ['Consolas:h__,ＭＳ_ゴシック:h__', 'ＭＳ_ゴシック:h__'],
@@ -38,6 +38,8 @@ if has('gui_running') && has('win32')
       call Vimrc_set_guifont(fonts->get(i, []), get(g:, 'vimrc_font_size', '11'))
     endif
   }
+
+  command! GuiFonts set guifont? guifontwide?
 
   # zoom in / out and reset
   g:vimrc_zoom_guifont_original = []
