@@ -538,87 +538,12 @@ def Vimrc_markdown_foldexpr(): string
 enddef
 
 
-def Custom_highlight()
-  #
-  hi def CustomLine_Modes     guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
-  hi def CustomLine_CursorPos guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
-  hi def CustomLine_Normal    guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
-  hi def CustomLine_Insert    guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
-  hi def CustomLine_Replace   guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
-  hi def CustomLine_Visual    guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
-  hi def CustomLine_Command   guifg=#FFFFFF guibg=#030303 ctermfg=Black ctermbg=Yellow
-  hi def CustomLine_Select    guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
-
-  #
-  hi clear SpecialKey
-
-  # cursor
-  hi CursorLineNr term=reverse cterm=reverse gui=reverse
-
-  # ime
-  if has('multi_byte_ime')
-    hi CursorIM gui=NONE guifg=#FFFFFF guibg=#8000FF
-  endif
-
-  # vertical border
-  hi vertsplit guifg=fg guibg=bg
-
-  # space
-  hi link TrailingSpace NonText
-  hi Extraspace guibg=#8B008B ctermbg=darkmagenta
-
-  if &g:background ==# 'dark'
-    hi SpecialKey   guifg=#808080  guibg=NONE gui=NONE      ctermfg=grey
-    hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
-    hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
-    hi NormalNC     guifg=#DDDDDD  guibg=#606060            ctermfg=grey
-    hi Folded       guifg=#666666  guibg=NONE
-    hi CursorLine                  guibg=#3A4B5C            ctermbg=235
-
-    if has('gui_running')
-      hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
-      hi LineNr     guibg=#000000
-
-      hi Folded     guifg=#DDDDDD               gui=italic
-      hi FoldColumn guifg=#FFFFFF               gui=bold
-
-      hi Visual     guifg=#FF0000 guibg=#D0EEFF gui=NONE
-
-    else
-      # terminal transparency
-      hi Normal     guifg=#FEFEFE guibg=NONE             ctermfg=231 ctermbg=NONE
-      hi NonText    guifg=#DEDEDE guibg=NONE                         ctermbg=NONE
-
-      hi Visual                   guibg=#D84848 gui=NONE
-      hi VisualNOS                guibg=#D84848 gui=NONE
-
-    endif
-  else
-    hi SpecialKey   guifg=#CCCCCC guibg=NONE gui=NONE      ctermfg=grey
-    hi ZenkakuSpace guifg=grey               gui=underline ctermfg=grey     cterm=underline
-    hi Comment      guifg=#808080 guibg=NONE gui=NONE      ctermfg=darkgrey
-    hi Folded       guifg=#D8D8D8 guibg=NONE
-    hi NormalNC     guifg=#999999 guibg=#ECECEC            ctermfg=darkgrey
-
-    if has('gui_running')
-      hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
-      # hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
-      # hi Terminal   guifg=#EFEFEF guibg=#303030
-      # hi LineNr     guibg=#F5FFFA   # MintCream
-      hi LineNr     guibg=#FFFAF0   # FloralWhite
-
-    endif
-  endif
-enddef
-
-
 #
 augroup autocmd_vimrc
   autocmd!
 
   #
-  autocmd VimEnter,ColorScheme * call Custom_highlight()
-  autocmd VimEnter,ColorScheme,BufWinEnter * {
+  autocmd VimEnter,WinEnter * {
     # extra whitespaces
     #   u00A0 ' ' no-break space
     #   u2000 ' ' en quad
@@ -638,7 +563,81 @@ augroup autocmd_vimrc
     call matchadd('ZenkakuSpace', '　')
     call matchadd('TrailingSpace', '\s\{2,\}$')
   }
-  autocmd WinEnter,BufWinEnter * setlocal wincolor=
+  #
+  autocmd ColorScheme * {
+    #
+    hi def CustomLine_Modes     guifg=#030303 guibg=#FFFFFF ctermfg=Black ctermbg=White
+    hi def CustomLine_CursorPos guifg=#FFFFFF guibg=#333399 ctermfg=White ctermbg=DarkBlue
+    hi def CustomLine_Normal    guifg=#FFFFFF guibg=#0000FF ctermfg=White ctermbg=Blue
+    hi def CustomLine_Insert    guifg=#FFFFFF guibg=#009944 ctermfg=White ctermbg=Green
+    hi def CustomLine_Replace   guifg=#FFFFFF guibg=#9933A3 ctermfg=White ctermbg=Cyan
+    hi def CustomLine_Visual    guifg=#FFFFFF guibg=#F20000 ctermfg=White ctermbg=Red
+    hi def CustomLine_Command   guifg=#FFFFFF guibg=#030303 ctermfg=Black ctermbg=Yellow
+    hi def CustomLine_Select    guifg=#030303 guibg=#F2F200 ctermfg=Black ctermbg=Yellow
+
+    #
+    hi clear SpecialKey
+
+    # cursor
+    hi CursorLineNr term=reverse cterm=reverse gui=reverse
+
+    # ime
+    if has('multi_byte_ime')
+      hi CursorIM gui=NONE guifg=#FFFFFF guibg=#8000FF
+    endif
+
+    # vertical border
+    hi vertsplit guifg=fg guibg=bg
+
+    # space
+    hi link TrailingSpace NonText
+    hi Extraspace guibg=#8B008B ctermbg=darkmagenta
+
+    if &g:background ==# 'dark'
+      hi SpecialKey   guifg=#808080  guibg=NONE gui=NONE      ctermfg=grey
+      hi ZenkakuSpace guifg=darkgrey            gui=underline ctermfg=darkgrey cterm=underline
+      hi Comment      guifg=#CCCCCC  guibg=NONE gui=NONE      ctermfg=grey
+      hi NormalNC     guifg=#DDDDDD  guibg=#606060            ctermfg=grey
+      hi Folded       guifg=#666666  guibg=NONE
+      hi CursorLine                  guibg=#3A4B5C            ctermbg=235
+
+      if has('gui_running')
+        hi Normal     guifg=#F0F0F0  guibg=#363636 gui=NONE
+        hi LineNr     guibg=#000000
+
+        hi Folded     guifg=#DDDDDD               gui=italic
+        hi FoldColumn guifg=#FFFFFF               gui=bold
+
+        hi Visual     guifg=#FF0000 guibg=#D0EEFF gui=NONE
+
+      else
+        # terminal transparency
+        hi Normal     guifg=#FEFEFE guibg=NONE             ctermfg=231 ctermbg=NONE
+        hi NonText    guifg=#DEDEDE guibg=NONE                         ctermbg=NONE
+
+        hi Visual                   guibg=#D84848 gui=NONE
+        hi VisualNOS                guibg=#D84848 gui=NONE
+
+      endif
+    else
+      hi SpecialKey   guifg=#CCCCCC guibg=NONE gui=NONE      ctermfg=grey
+      hi ZenkakuSpace guifg=grey               gui=underline ctermfg=grey     cterm=underline
+      hi Comment      guifg=#808080 guibg=NONE gui=NONE      ctermfg=darkgrey
+      hi Folded       guifg=#D8D8D8 guibg=NONE
+      hi NormalNC     guifg=#999999 guibg=#ECECEC            ctermfg=darkgrey
+
+      if has('gui_running')
+        hi Normal     guifg=#303030 guibg=#FAFAFA gui=NONE
+        # hi Normal     guifg=#333333 guibg=#EEEEEE gui=NONE
+        # hi Terminal   guifg=#EFEFEF guibg=#303030
+        # hi LineNr     guibg=#F5FFFA   # MintCream
+        hi LineNr     guibg=#FFFAF0   # FloralWhite
+
+      endif
+    endif
+  }
+  #
+  autocmd vimEnter,WinEnter * setlocal wincolor=
   autocmd WinLeave * setlocal wincolor=NormalNC
 
   # 
