@@ -40,7 +40,10 @@ def VcsRoot_lcd(bang: string, arguments: list<string>)
   var root = VcsRoot_find_root(dirs, files)
 
   if root->empty()
-    execute 'lcd %:h'
+    if expand('%:h')->isdirectory()
+      execute 'lcd %:h'
+    endif
+
     echomsg "root not found <- " getcwd()
   else
     execute (bang->empty() ? 'tcd ' : 'lcd ') .. root
