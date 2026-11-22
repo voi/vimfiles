@@ -637,7 +637,7 @@ augroup autocmd_vimrc
     endif
   }
   #
-  autocmd vimEnter,WinEnter * setlocal wincolor=
+  autocmd vimEnter,WinEnter,BufWinEnter * setlocal wincolor=
   autocmd WinLeave * setlocal wincolor=NormalNC
 
   # 
