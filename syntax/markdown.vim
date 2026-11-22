@@ -22,7 +22,7 @@ def GetConcealOpt(option: string): string
   if option->empty()
     return ''
   else
-    return ' conceal cchar=' .. option_string->split('\zs')->get(0, '')
+    return ' conceal cchar=' .. option->split('\zs')->get(0, '')
   endif
 enddef
 
