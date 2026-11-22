@@ -18,10 +18,8 @@ var is_match_pattern_reasonable = get(g:, 'markdown_match_pattern_reasonable', 1
 
 
 #
-def Get_markdown_conceal(option: string): string
-  var option_string = get(g:, option, '')
-
-  if option_string->empty()
+def GetConcealOpt(option: string): string
+  if option->empty()
     return ''
   else
     return ' conceal cchar=' .. option_string->split('\zs')->get(0, '')
@@ -30,15 +28,15 @@ enddef
 
 
 #
-var markdown_link_reference_conceal = Get_markdown_conceal('markdown_link_reference_cchar')
-var markdown_link_destination_conceal = Get_markdown_conceal('markdown_link_destination_cchar')
-var markdown_link_title_conceal = Get_markdown_conceal('markdown_link_title_cchar')
+var markdown_link_reference_conceal = GetConcealOpt(get(g:, 'markdown_link_reference_cchar', ''))
+var markdown_link_destination_conceal = GetConcealOpt(get(g:, 'markdown_link_destination_cchar', ''))
+var markdown_link_title_conceal = GetConcealOpt(get(g:, 'markdown_link_title_cchar', ''))
 
 
 #
-var markdown_list_item_conceal = Get_markdown_conceal('markdown_list_item_cchar')
-var markdown_list_todo_conceal = Get_markdown_conceal('markdown_list_todo_cchar')
-var markdown_list_done_conceal = Get_markdown_conceal('markdown_list_done_cchar')
+var markdown_list_item_conceal = GetConcealOpt(get(g:, 'markdown_list_item_cchar', ''))
+var markdown_list_todo_conceal = GetConcealOpt(get(g:, 'markdown_list_todo_cchar', ''))
+var markdown_list_done_conceal = GetConcealOpt(get(g:, 'markdown_list_done_cchar', ''))
 
 
 ################################################################
