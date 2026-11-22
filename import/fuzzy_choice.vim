@@ -1,137 +1,138 @@
 vim9script
 
 
-# ###############################
-#
-def Popup_win_resize(winid: number, items: list<any>)
-  var height = ([items->len(), [&lines, winheight(0)]->max() * 8 / 10]->min())
-  var width = ([&columns, winwidth(0)]->max() * 9 / 10)
+# ##############################################################
+# fuzzy choice # {{{1
+export class FuzzyChoice
+  #
+  static def _ResizePopup(winid: number, item_count: number)
+    var height = ([item_count, [&lines, winheight(0)]->max() * 8 / 10]->min())
+    var width = ([&columns, winwidth(0)]->max() * 9 / 10)
 
-  call popup_move(winid, { minheight: height, maxheight: height, maxwidth: width })
-enddef
-
-
-#
-export def Popup_win_update(winid: number, ctx: any)
-  call popup_setoptions(winid, {
-    title: printf(' %s (%d) %s%s %s%s ', ctx._name, ctx._active->len(),
-      (ctx._pattern->empty() ? '' : '< '), ctx._pattern,
-      (ctx._filter->empty() ? '' : '< '), ctx._filter)
-  })
-  call popup_settext(winid, ctx._active)
-  call Popup_win_resize(winid, ctx._active)
-enddef
+    call popup_move(winid, { minheight: height, maxheight: height, maxwidth: width })
+  enddef
 
 
-# ###############################
-#
-def FuzzyChoice_action_fuzzy(winid: number, ctx: any)
-  var chars = input('fuzzy: ')
-
-  if empty(chars) | return | endif
-
-  ctx._filter = chars
-  ctx._active = ctx._active->matchfuzzy(chars, { key: 'text' })
-
-  call Popup_win_update(winid, ctx)
-enddef
+  #
+  static def _UpdatePopup(winid: number, ctx: any)
+    call popup_setoptions(winid, {
+      title: printf(' %s (%d) %s%s %s%s ', ctx._name, ctx._active->len(),
+        (ctx._pattern->empty() ? '' : '< '), ctx._pattern,
+        (ctx._filter->empty() ? '' : '< '), ctx._filter)
+    })
+    call popup_settext(winid, ctx._active)
+    call FuzzyChoice._ResizePopup(winid, ctx._active->len())
+  enddef
 
 
-#
-def FuzzyChoice_action_match(winid: number, ctx: any)
-  var text = input('include: ')
+  #
+  static def _ActionFuzzy(winid: number, ctx: any)
+    var chars = input('fuzzy: ')
 
-  if empty(text) | return | endif
+    if empty(chars) | return | endif
 
-  ctx._pattern = text
-  ctx._active = ctx._active->filter(((i, v) => v->get('text', '') =~? text))
+    ctx._filter = chars
+    ctx._active = ctx._active->matchfuzzy(chars, { key: 'text' })
 
-  call Popup_win_update(winid, ctx)
-enddef
-
-
-#
-def FuzzyChoice_action_reset(winid: number, ctx: any)
-  ctx._filter = ''
-  ctx._pattern = ''
-  ctx._active = ctx._source->copy()
-
-  call Popup_win_update(winid, ctx)
-enddef
+    call FuzzyChoice._UpdatePopup(winid, ctx)
+  enddef
 
 
-#
-def FuzzyChoice_action_fuzzy_incremental(winid: number, key: string, ctx: any)
-  ctx._filter ..= key
-  ctx._active = ctx._active->matchfuzzy(ctx._filter, { key: 'text' })
+  #
+  static def _ActionMatch(winid: number, ctx: any)
+    var text = input('include: ')
 
-  call Popup_win_update(winid, ctx)
-enddef
+    if empty(text) | return | endif
+
+    ctx._pattern = text
+    ctx._active = ctx._active->filter(((i, v) => v->get('text', '') =~? text))
+
+    call FuzzyChoice._UpdatePopup(winid, ctx)
+  enddef
 
 
-#
-def FuzzyChoice_action_fuzzy_back(winid: number, ctx: any)
-  ctx._filter = ctx._filter->slice(0, -1)
-
-  if ctx._filter->len() > 0
-    ctx._active = ctx._source->matchfuzzy(ctx._filter, { key: 'text' })
-  elseif ctx._pattern->len() > 0
-    ctx._active = ctx._source->copy()->filter(((i, v) => v->get('text', '') =~? ctx._pattern))
-  else
+  #
+  static def ActionReset(winid: number, ctx: any)
+    ctx._filter = ''
+    ctx._pattern = ''
     ctx._active = ctx._source->copy()
-  endif
 
-  call Popup_win_update(winid, ctx)
-enddef
+    call FuzzyChoice._UpdatePopup(winid, ctx)
+  enddef
 
 
-#
-def FuzzyChoice_action(winid: number, key: string, ctx: any): bool
-  var handlers = get(ctx, '_handlers', {})
-  var item = ctx._active->get(line('.', winid) - 1, '')
-
-  if     key ==# "\<C-f>" | call FuzzyChoice_action_fuzzy(winid, ctx)
-  elseif key ==# "\<C-i>" | call FuzzyChoice_action_match(winid, ctx)
-  elseif key ==# "\<C-u>" | call FuzzyChoice_action_reset(winid, ctx)
   #
-  elseif key ==# "\<C-h>" || key ==# "\<BS>"
-    call FuzzyChoice_action_fuzzy_back(winid, ctx)
+  static def _ActionFuzzyIncremental(winid: number, key: string, ctx: any)
+    ctx._filter ..= key
+    ctx._active = ctx._active->matchfuzzy(ctx._filter, { key: 'text' })
+
+    call FuzzyChoice._UpdatePopup(winid, ctx)
+  enddef
+
+
   #
-  elseif key =~# '^[0-9A-Za-z_.@\-]$'
-    call FuzzyChoice_action_fuzzy_incremental(winid, key, ctx)
+  static def _ActionFuzzyBack(winid: number, ctx: any)
+    ctx._filter = ctx._filter->slice(0, -1)
+
+    if ctx._filter->len() > 0
+      ctx._active = ctx._source->matchfuzzy(ctx._filter, { key: 'text' })
+    elseif ctx._pattern->len() > 0
+      ctx._active = ctx._source->copy()->filter(((i, v) => v->get('text', '') =~? ctx._pattern))
+    else
+      ctx._active = ctx._source->copy()
+    endif
+
+    call FuzzyChoice._UpdatePopup(winid, ctx)
+  enddef
+
+
   #
-  elseif handlers->has_key(key)
-    var Handler = get(handlers,
-      (key ==# "\<CR>" && handlers->has_key('ENTER') ? 'ENTER' : key), ((w, c, i) => 1))
+  static def _Action(winid: number, key: string, ctx: any): bool
+    var item = ctx._active->get(line('.', winid) - 1, '')
 
-    call Handler(winid, ctx, item)
+    #
+    if     key ==# "\<C-f>" | call FuzzyChoice._ActionFuzzy(winid, ctx)
+    elseif key ==# "\<C-i>" | call FuzzyChoice._ActionMatch(winid, ctx)
+    elseif key ==# "\<C-u>" | call FuzzyChoice.ActionReset(winid, ctx)
+    #
+    elseif key ==# "\<C-h>" || key ==# "\<BS>"
+      call FuzzyChoice._ActionFuzzyBack(winid, ctx)
+    #
+    elseif key =~# '^[0-9A-Za-z_.@\-]$'
+      call FuzzyChoice._ActionFuzzyIncremental(winid, key, ctx)
+    #
+    elseif ctx._actions->has_key(key)
+      var after = ctx._actions->get(key, ((w, c, i) => 0))(winid, ctx, item)
 
-  else
-    return popup_filter_menu(winid, key)
-  endif
+      if after > 0
+        call FuzzyChoice._UpdatePopup(winid, ctx)
+      elseif after < 0
+        call FuzzyChoice.ActionReset(winid, ctx)
+      endif
+    #
+    else
+      return popup_filter_menu(winid, key)
+    endif
 
-  return true
-enddef
-
-
-#
-def FuzzyChoice_open(caption: string, items: list<any>, user_handlers: dict<func>)
-  var ctx = {
-    _source: items, _active: items->copy(), _handlers: user_handlers,
-    _name: caption, _filter: '', _pattern: ''
-  }
-  var winid = popup_menu(items, {
-    title: printf(" %s (%d) ", caption, items->len()),
-    filter: (winid, key) => FuzzyChoice_action(winid, key, ctx),
-    borderchars: get(g:, 'fuzzy_choice_borderchars', [])
-  })
-  call Popup_win_resize(winid, items)
-enddef
+    return true
+  enddef
 
 
-# ###############################
-#
-export def Do(caption: string, items: list<any>, user_handlers: dict<func>)
-  call FuzzyChoice_open(caption, items, user_handlers)
-enddef
+  #
+  static def Do(caption: string, items: list<any>, actions: dict<any> = {}, user_ctx: dict<any> = {})
+    var ctx = {
+       _name: caption, _source: items, _active: items->copy(),
+       _actions: actions, _filter: '', _pattern: ''
+    }->extend(user_ctx, 'keep')
+
+    var winid = popup_menu(items, {
+      title: printf(" %s (%d) ", caption, items->len()),
+      filter: (winid, key) => FuzzyChoice._Action(winid, key, ctx),
+      borderchars: get(g:, 'fuzzy_choice_borderchars', [])
+    })
+
+    call FuzzyChoice._ResizePopup(winid, items->len())
+  enddef
+endclass
+# }}}
 

@@ -1,10 +1,13 @@
 vim9script
 
-import 'fuzzy_choice.vim'
+import 'fuzzy_choice_path.vim'
+import 'cache_buffer.vim'
+type FuzzyChoicePath = fuzzy_choice_path.FuzzyChoicePath
+type CacheBuffer = cache_buffer.CacheBuffer
 
 
 # ###############################
-#
+# fuzzy choice glob # {{{1
 def FuzzyChoice_glob_make_cache(bnr: number, root: string)
   #
   call deletebufline(bnr, 1, '$')
@@ -61,24 +64,29 @@ enddef
 
 
 #
-command! -nargs=? -complete=dir -bang FuzzyChoiceGlob {
-  var [bnr, _] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
-  var items = getbufline(bnr, 1, '$')
+var glob_cache = []
+
+def FuzzyChoice_glob(arguments: list<string>)
+  var dir = arguments->get(0, '')
+
+  if glob_cache->empty() || !'<bang>'->empty() || dir !=# glob_cache->get(0, '')
+    var cb = CacheBuffer.new(dir)
+
+    glob_cache = [cb.bufnr, cb.root]
+  endif
+
+  #
+  call FuzzyChoice_glob_make_cache(glob_cache[0], glob_cache[1])
+
+  var items = getbufline(glob_cache[0], 1, '$')
 
   if items->empty()
     echomsg 'FuzzyChoiceGlob : no candidates.'
   else
-    call fuzzy_choice.DoAsFiles('Glob', items)
+    call FuzzyChoicePath.Do('Glob', items)
   endif
-}
+enddef
 
-
-# ###############################
-#
-command! -nargs=? -complete=dir -bang FuzzyChoiceGlobCache {
-  var [bnr, _] = fuzzy_choice.GetCache(<q-args>, '<bang>'->empty(), FuzzyChoice_glob_make_cache)
-
-  execute 'silent botright :16split'
-  execute 'silent buffer ' .. bnr
-}
+command! -nargs=? -complete=dir -bang FuzzyChoiceGlob call FuzzyChoice_glob([<f-args>])
+# }}}
 

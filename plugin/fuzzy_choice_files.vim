@@ -1,107 +1,92 @@
 vim9script
 
-import 'fuzzy_choice.vim' as FuzzyChoice
-import 'fuzzy_choice_path.vim' as FuzzyChoicePath
+import 'fuzzy_choice.vim'
+import 'fuzzy_choice_path.vim'
+type FuzzyChoice = fuzzy_choice.FuzzyChoice
+type FuzzyChoicePath = fuzzy_choice_path.FuzzyChoicePath
 
 
-# ###############################
+# ##############################################################
 #
-var icons = { file: '📝', dir: '📁', empty: '🈳' }
+export class FuzzyChoiceFiler extends FuzzyChoicePath
+  #
+  static def _NewSource(root: string): list<any>
+    var icon_dir = get(g:, 'fuzzy_choice_icon_dir', '📁')
+    var icon_file = get(g:, 'fuzzy_choice_icon_file', '📝')
 
-var pattern_type_dir = '\v^(dir|linkd)$'
-var pattern_type_file = '\v^(file|link)$'
-var pattern_ignore_dir = '\v^\.%(git|jj|svn|hg|bzr)$'
-var pattern_ignore_file = '\v^_FOSSIL_$'
-
-
-# ###############################
-#
-def FuzzyChoice_filer_new_source(root: string): list<any>
-  return readdirex(root)
-    ->filter((i, v) => {
-      return (
-        ((v.type =~# pattern_type_dir)  && (v.name !~# pattern_ignore_dir)) ||
-        ((v.type =~# pattern_type_file) && (v.name !~# pattern_ignore_file)))
-    })
-    ->map((i, v) => ({
+    return readdirex(root, (e) => {
+        return (
+          ((e.type ==# 'dir'  || e.type ==# 'linkd') && (e.name !~# '\v^\.%(git|jj|svn|hg|bzr)$')) ||
+          ((e.type ==# 'file' || e.type ==# 'link')  && (e.name !~# '\v^_FOSSIL_$')))
+    })->map((i, v) => ({
       text: printf('%s %s (%s)',
-        ((v.type =~# pattern_type_dir) ? icons.dir : icons.file), v.name, root->fnamemodify(':~')),
+        ((v.type =~# '\v^(dir|linkd)$') ? icon_dir : icon_file), v.name, root->fnamemodify(':~')),
       path: root->expand()->fnamemodify(':p') .. v.name
     }))
-enddef
+  enddef
 
 
-#
-def FuzzyChoice_action_filer_up(winid: number, ctx: any, item: any)
-  var path = item->get('path', '')
-  var root = (path->isdirectory() ?
-    (path->fnamemodify(':p') .. '../..')->fnamemodify(':p') :
-    path->fnamemodify(':p:h:h'))
+  #
+  static def _ActionDirUp(winid: number, ctx: any, item: any): number
+    var path = item->get('path', '')
+    var root = (path->isdirectory() ?
+      (path->fnamemodify(':p') .. '../..')->fnamemodify(':p') : path->fnamemodify(':p:h:h'))
+
+    ctx._source = FuzzyChoiceFiler._NewSource(root)
+
+    call FuzzyChoice.ActionReset(winid, ctx)
+
+    return -1
+  enddef
 
 
-  ctx._source = FuzzyChoice_filer_new_source(root)
-  ctx._active = ctx._source->copy()
-  ctx._filter = ''
-  ctx._pattern = ''
+  #
+  static def _ActionEnter(cmd: string, winid: number, ctx: any, item: any): number
+    var path = item->get('path', '')
 
-  call FuzzyChoice.Popup_win_update(winid, ctx)
-enddef
+    if path->isdirectory()
+      var children = FuzzyChoiceFiler._NewSource(path->fnamemodify(':p'))
 
+      if empty(children)
+        echomsg get(g:, 'fuzzy_choice_icon_empty', '🈳') .. ' No files in ' ..  path->fnamemodify(':t') .. '/'
 
-#
-def FuzzyChoice_action_filer_enter( Handler: func, winid: number, ctx: any, item: any)
-  var path = item->get('path', '')
+      else
+        ctx._source = children
 
-  if path->isdirectory()
-    var children = FuzzyChoice_filer_new_source(path->fnamemodify(':p'))
+        return -1
+      endif
 
-    if empty(children)
-      echomsg icons.empty .. ' No files in ' ..  path->fnamemodify(':t') .. '/'
+    elseif !path->empty()
+      return FuzzyChoicePath.ActionPath(cmd, winid, ctx, item)
 
-    else
-      ctx._source = children
-      ctx._active = children->copy()
-      ctx._filter = ''
-      ctx._pattern = ''
-
-      call FuzzyChoice.Popup_win_update(winid, ctx)
     endif
 
-  elseif !path->empty()
-    call Handler(winid, ctx, item)
-  endif
-enddef
+    return 0
+  enddef
 
 
-# ###############################
-def FuzzyChoice_update_variables()
-  icons.file  = get(g:, 'fuzzy_choice_icon_file',  icons.file)
-  icons.dir   = get(g:, 'fuzzy_choice_icon_dir',   icons.dir)
-  icons.empty = get(g:, 'fuzzy_choice_icon_empty', icons.empty)
-
-  pattern_ignore_dir = get(g:, 'fuzzy_choice_glob_regex_ignore_dir', pattern_ignore_dir)
-  pattern_ignore_file = get(g:, 'fuzzy_choice_glob_regex_ignore_file', pattern_ignore_file)
-enddef
-
-
-#
-var fuzzy_choice_handlers_filer = {
-  '^': function(FuzzyChoice_action_filer_up),
-  "\<CR>": function(FuzzyChoice_action_filer_enter, [FuzzyChoicePath.fuzzy_choice_handlers_path["\<CR>"]]),
-  "\<C-v>": function(FuzzyChoice_action_filer_enter, [FuzzyChoicePath.fuzzy_choice_handlers_path["\<C-v>"]]),
-  "\<C-s>": function(FuzzyChoice_action_filer_enter, [FuzzyChoicePath.fuzzy_choice_handlers_path["\<C-s>"]]),
-  "\<C-t>": function(FuzzyChoice_action_filer_enter, [FuzzyChoicePath.fuzzy_choice_handlers_path["\<C-t>"]])
-}
+  #
+  static var _actions = {
+    '^': function(FuzzyChoiceFiler._ActionDirUp),
+    "\<CR>":  function(FuzzyChoiceFiler._ActionEnter, ['edit']),
+    "\<C-v>": function(FuzzyChoiceFiler._ActionEnter, ['vsplit']),
+    "\<C-s>": function(FuzzyChoiceFiler._ActionEnter, ['split']),
+    "\<C-t>": function(FuzzyChoiceFiler._ActionEnter, ['tabedit'])
+  }
 
 
-# ###############################
-#
-command! -nargs=? -complete=dir FuzzyChoiceFiles {
-  call FuzzyChoice_update_variables()
+  #
+  static def Do(arguments: list<string>)
+    var root_dir = arguments->get(0, getcwd())
 
-  var items = FuzzyChoice_filer_new_source(('<f-args>'->empty() ? getcwd() : root_dir))
+    if root_dir->isdirectory()
+      var items = FuzzyChoiceFiler._NewSource(root_dir)
 
-  call FuzzyChoice.Do('Files', items, fuzzy_choice_handlers_filer)
-}
+      call FuzzyChoicePath.Do('Files', items, _actions)
+    endif
+  enddef
 
+endclass
+
+command! -nargs=? -complete=dir FuzzyChoiceFiles call FuzzyChoiceFiler.Do([<f-args>])
 
