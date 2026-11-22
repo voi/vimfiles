@@ -1,0 +1,512 @@
+*vimrc-help.txt* for my vimrc scripts   Last change: 2026-11-22
+
+        command and various reference provided my vimrc
+
+
+==============================================================================
+
+1. global variables
+
+-------------------
+vimrc
+
+*g:vimrc_info_icon_nor*
+						string (default `'📝'`)
+
+	icon letter indicating the file.
+	show in tab-line and status-line.
+
+*g:vimrc_info_icon_page*
+						string (default `'□'`)
+
+	icon letter indecating the tabe page.
+	show in tab-line.
+
+*g:vimrc_info_icon_curr*
+						string (default `'■'`)
+
+	icon letter indecating the active tabe page.
+	show in tab-line.
+
+*g:vimrc_info_icon_ro*
+						string (default `'❎'`)
+
+	icon letter indicating that a current buffer is read-only or not.
+	show in status-line.
+
+*g:vimrc_info_icon_mod*
+						string (default `'⚡'`)
+
+	icon letter indicating that a current buffer is modified or not.
+	show in tab-line and status-line.
+
+-------------------
+fuzzy_choice.vim
+
+*g:fuzzy_choice_borderchars*
+						list (default [])
+
+-------------------
+fuzzy_choice_path.vim
+
+*g:fuzzy_choice_icon_file*
+						string (default `'📝'`)
+
+	icon letter indicating the file.
+
+-------------------
+fuzzy_choice_buffer.vim
+
+*g:fuzzy_choice_icon_buff*
+						string (default `'📜'`)
+
+	icon letter indicating the buffer.
+
+-------------------
+fuzzy_choice_files.vim
+
+*g:fuzzy_choice_icon_dir*
+						string (default `'📁'`)
+
+	icon letter indicating the directory.
+
+*g:fuzzy_choice_icon_empty*
+						string (default `'🈳'`)
+
+	icon letter indicating the empty directory.
+
+-------------------
+fuzzy_choice_glob.vim
+
+*g:fuzzy_choice_glob_max_candidates*
+						? (default 10000)
+
+	The maximum number of files that can be recursively listed by the
+	|FuzzyChoiceMru| command.
+
+*g:fuzzy_choice_glob_regex_ignore_dir*
+						string (default `'\v^\.%(git|jj|svn|hg|bzr)$'`)
+
+	A regular expression that matches file names to be ignored when listing
+	files using the |FuzzyChoiceMru| command.
+
+*g:fuzzy_choice_glob_regex_ignore_file*
+						string (default `'\v^_FOSSIL_$'`)
+
+	A regular expression that matches directory names to be ignored when
+	listing files using the |FuzzyChoiceMru| command.
+
+-------------------
+fuzzy_choice_mru.vim
+
+*g:fuzzy_choice_vim_mru_bookmark*
+						string (default `'~/.vim_fuzzy_choice_mru_bookmark.txt'`)
+
+	A file in the file list used as a bookmark. When you enter the
+	|FuzzyChoiceMru| command, the contents of the bookmark file list are
+	listed as suggestions.
+
+-------------------
+gf_ex.vim
+
+*g:gf_ex_executable_binary_pattern*
+						string (default `'\v\.(exe|pdf|ppt|mdb|(doc|xls|vsd)[xm]?)$'`)
+
+*g:gf_ex_file_open_command*
+						string (default `'e'`)
+
+-------------------
+insert_vscode_snippet.vim
+
+*g:code_snippet_glob_pathes*
+						? (default |&rtp|)
+
+	directory path contained snippet json file of visual studio code.
+
+	Note: '~/vscode/data/user-data/User/snippets'->expand()->fnamemodify(':p')
+
+-------------------
+vcs_root.vim
+
+*g:vcs_root_target_dirs*
+						list (default ['.git', '.svn'])
+
+*g:vcs_root_target_files*
+						list (default ['_FOSSIL_'])
+
+*g:vcs_root_auto_chdir*
+						? (default 0)
+
+-------------------
+markdown.vim
+
+*g:markdown_latex_syntax_enabled*
+						? (default 1)
+
+	When not 0, LaTex syntax is enabled.
+	When 0, LaTex syntax is disabled.
+
+*g:markdown_gfm_extension_syntax_enabled*
+						? (default 1)
+
+	When not 0, GFM extension syntax is enabled.
+	When 0, GFM extension syntax is disabled.
+
+	- 4.10 Tables (extension)
+	- 5.3 Task list items (extension)
+	- 6.5 Strikethrough (extension)
+
+*g:markdown_github_wiki_syntax_enabled*
+						? (default 1)
+
+	When not 0, github wiki syntax is enabled.
+	When 0, github wiki syntax is disabled.
+
+	- mention
+	- issue
+
+*g:markdown_match_pattern_reasonable*
+						? (default 1)
+
+*g:markdown_link_reference_cchar*
+						string (default '')
+
+	When not '', the link reference syntax becomes “conceal,” and the
+	specified characters are used.
+
+*g:markdown_link_destination_cchar*
+						string (default '')
+
+	When not '', the link destination syntax becomes “conceal,” and the
+	specified characters are used.
+
+*g:markdown_link_title_cchar*
+						string (default '')
+
+	When not '', the link title syntax becomes “conceal,” and the
+	specified characters are used.
+
+*g:markdown_list_item_cchar*
+						string (default '')
+
+	When not '', the list item syntax becomes “conceal,” and the
+	specified characters are used.
+
+*g:markdown_list_todo_cchar*
+						string (default '')
+
+	When not '', the unchecked task list item syntax becomes “conceal,”
+	and the specified characters are used.
+
+*g:markdown_list_done_cchar*
+						string (default '')
+
+	When not '', the checked task list item syntax becomes “conceal,”
+	and the specified characters are used.
+
+*g:markdown_task_done_include_inlines*
+						? (default 0)
+
+*g:markdown_strong_emphasis_oneline*
+						? (default 0)
+
+	When 0, the strong emphasis syntax is valid only within a single
+	line.
+	When not 0, the strong emphasis syntax is valid across multiple lines.
+
+==============================================================================
+2. command
+
+-------------------
+vimrc
+
+						:*RelativeJK*
+RelativeJK[!]
+
+						:*ToggleWrap*
+ToggleWrap
+
+						:*Rename*
+Rename[!]
+
+						:*BufClear*
+BufClear[!]
+
+						:*BufOnly*
+BufOnly[!]
+
+						:*BufTidyUp*
+BufTidyUp[!]
+
+						:*Here*
+Here[!]
+
+						:*Me*
+Me
+
+						:*Powershell*
+Powershell
+
+						:*QFiles*
+QFiles
+
+						:*CursorLineOnOff*
+CursorLineOnOff
+
+						:*CursorLineReverseOnOff*
+CursorLineReverseOnOff
+
+						:*ShowSyntax*
+ShowSyntax
+
+						:*GVim*
+GVim
+
+						:*ClearOldFiles*
+ClearOldFiles
+
+-------------------
+align_words.vim
+
+						:*Align*
+Align
+
+-------------------
+enclose_text.vim
+
+						:*EncloseText*
+EncloseText
+
+						:*EncloseTextRegisterMap*
+EncloseTextRegisterMap
+
+-------------------
+fuzzy_choice_buffer.vim
+
+						:*FuzzyChoiceBuffers*
+FuzzyChoiceBuffers
+
+-------------------
+fuzzy_choice_files.vim
+
+						:*FuzzyChoiceFiles*
+FuzzyChoiceFiles
+
+-------------------
+fuzzy_choice_git.vim
+
+						:*FuzzyGitStatus*
+FuzzyGitStatus
+
+						:*FuzzyGitLs*
+FuzzyGitLs
+
+-------------------
+fuzzy_choice_glob.vim
+
+						:*FuzzyChoiceGlob*
+FuzzyChoiceGlob[!]
+
+-------------------
+fuzzy_choice_line.vim
+
+						:*FuzzyChoiceLines*
+FuzzyChoiceLines
+
+-------------------
+fuzzy_choice_mru.vim
+
+						:*FuzzyChoiceMru*
+FuzzyChoiceMru
+
+-------------------
+fuzzy_choice_svn.vim
+
+						:*FuzzySvnStatus*
+FuzzySvnStatus
+
+						:*FuzzySvnLs*
+FuzzySvnLs
+
+-------------------
+fuzzy_choice_windows.vim
+
+						:*FuzzyChoiceWindows*
+FuzzyChoiceWindows
+
+-------------------
+gf_ex.vim
+
+						:*GoToFileEx*
+GoToFileEx
+
+-------------------
+insert_vscode_snippet.vim
+
+						:*VSCodeSnippetInitialize*
+VSCodeSnippetInitialize
+
+						:*VSCodeSnippetInsert*
+VSCodeSnippetInsert
+
+						:*VSCodeSnippetReplace*
+VSCodeSnippetReplace
+
+-------------------
+mark_and_sign.vim
+
+						:*MarkAndSignToggle*
+MarkAndSignToggle[!]
+
+						:*MarkAndSignClear*
+MarkAndSignClear[!]
+
+						:*MarkAndSignPopup*
+MarkAndSignPopup[!]
+
+-------------------
+tortoisesvn.vim
+
+						:*TSvnLog*
+TSvnLog
+
+						:*TSvnDiff*
+TSvnDiff
+
+						:*TSvnBlame*
+TSvnBlame
+
+						:*TSvnAdd*
+TSvnAdd
+
+						:*TSvnStatus*
+TSvnStatus
+
+						:*TSvnUpdate*
+TSvnUpdate
+
+						:*TSvnCommit*
+TSvnCommit
+
+-------------------
+vcs_commands.vim
+
+						:*SvnLs*
+SvnLs
+
+						:*SvnStatus*
+SvnStatus
+
+						:*SvnUpdate*
+SvnUpdate
+
+						:*SvnLog*
+SvnLog
+
+						:*SvnDiff*
+SvnDiff
+
+						:*SvnBlame*
+SvnBlame
+
+						:*SvnAdd*
+SvnAdd
+
+						:*SvnRevert*
+SvnRevert
+
+						:*SvnResolved*
+SvnResolved
+
+						:*SvnHelp*
+SvnHelp
+
+						:*GitLs*
+GitLs
+
+						:*GitStatus*
+GitStatus
+
+						:*GitGrep*
+GitGrep
+
+						:*GitLog*
+GitLog
+
+						:*GitDiff*
+GitDiff
+
+						:*GitBlame*
+GitBlame
+
+						:*GitAdd*
+GitAdd
+
+						:*GitRevert*
+GitRevert
+
+						:*GitHelp*
+GitHelp
+
+						:*FossilLs*
+FossilLs
+
+						:*FossilStatus*
+FossilStatus
+
+						:*FossilChange*
+FossilChange
+
+						:*FossilGrep*
+FossilGrep
+
+						:*FossilDiff*
+FossilDiff
+
+						:*FossilBlame*
+FossilBlame
+
+						:*FossilAdd*
+FossilAdd
+
+						:*FossilRevert*
+FossilRevert
+
+						:*FossilLog*
+FossilLog
+
+						:*FossilHelp*
+FossilHelp
+
+-------------------
+vcs_root.vim
+
+						:*Root*
+Root[!]
+
+-------------------
+word_highlight.vim
+
+						:*WordHLAdd*
+WordHLAdd
+
+						:*WordHLVisualAdd*
+WordHLVisualAdd
+
+						:*WordHLDelete*
+WordHLDelete
+
+						:*WordHLClear*
+WordHLClear
+
+-------------------
+zen_han_ja.vim
+
+						:*Hankaku*
+Hankaku
+
+						:*Zenkaku*
+Zenkaku
+
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,\":sw=8:ts=8:sts=8:ft=help:norl:et:
