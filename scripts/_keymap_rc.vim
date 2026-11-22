@@ -18,21 +18,19 @@ endif
 
 # ###############################
 # fuzzy choice
-nnoremap <silent> <C-p>f     :FuzzyChoiceFiles<CR>
-nnoremap <silent> <C-p>F     :FuzzyChoiceFiles %:h<CR>
-nnoremap <silent> <C-p>h     :FuzzyChoiceMru<CR>
-nnoremap <silent> <C-p>b     :FuzzyChoiceBuffers<CR>
-nnoremap <silent> <C-p>w     :FuzzyChoiceWindows<CR>
-nnoremap <silent> <C-p>l     :FuzzyChoiceLines<CR>
-nnoremap <silent> <C-p>g     :FuzzyChoiceGlob<CR>
-nnoremap <silent> <C-p>G     :FuzzyChoiceGlob %:h<CR>
-nnoremap <silent> <C-p><C-g> :FuzzyChoiceGlob!<CR>
+nnoremap <silent> <C-p>f      :FuzzyChoiceFiles<CR>
+nnoremap          <C-p>F      :FuzzyChoiceFiles 
+nnoremap <silent> <C-p><C-f>  :FuzzyChoiceFiles %:h<CR>
+nnoremap <silent> <C-p>h      :FuzzyChoiceMru<CR>
+nnoremap <silent> <C-p>b      :FuzzyChoiceBuffers<CR>
+nnoremap <silent> <C-p>w      :FuzzyChoiceWindows<CR>
+nnoremap <silent> <C-p>l      :FuzzyChoiceLines<CR>
+nnoremap <silent> <C-p>g      :FuzzyChoiceGlob<CR>
+nnoremap          <C-p>G      :FuzzyChoiceGlob 
+nnoremap <silent> <C-p><C-g>  :FuzzyChoiceGlob %:h<CR>
 
-nnoremap <silent> <C-p>vss  :FuzzySvnStatus<CR>
-nnoremap <silent> <C-p>vsl  :FuzzySvnLs -R<CR>
-
-nnoremap <silent> <C-p>vgs  :FuzzyGitStatus<CR>
-nnoremap <silent> <C-p>vgl  :FuzzyGitLs<CR>
+nnoremap          <C-p>vs :FuzzySvn
+nnoremap          <C-p>vg :FuzzyGit
 
 
 # ###############################
