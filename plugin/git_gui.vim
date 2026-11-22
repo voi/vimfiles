@@ -6,11 +6,9 @@ def GitGui_addCommand()
       #
       if finddir('.git', '.;')->empty()
         echomsg 'outside working copy.'
-        return
+      else
+        call job_start('git gui', { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
       endif
-
-      #
-      call job_start('git gui', { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' })
     }
   endif
 enddef
