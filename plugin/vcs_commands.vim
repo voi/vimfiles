@@ -62,7 +62,7 @@ def VcsCmd_addCommand()
   if executable('git')
     command! -nargs=* -complete=dir  GitLs     call VcsCmd_exec_to_out(["git", "ls-files", <q-args>], "git")
     command! -nargs=* -complete=dir  GitStatus call VcsCmd_exec_to_out(["git", "status", "-s", <q-args>], "git")
-    command! -nargs=* -complete=dir  GitGrep   call VcsCmd_exec_to_out(["git", "grep", <q-args>], "tags")
+    command! -nargs=* -complete=dir  GitGrep   call VcsCmd_exec_to_out(["git", "grep", "-I", "--line-number", <q-args>], "tags")
 
     command! -nargs=* -complete=file GitLog    call VcsCmd_exec_to_out(["git", "log", <q-args>], "git")
     command! -nargs=* -complete=file GitDiff   call VcsCmd_exec_to_out(["git", "diff", <q-args>], "diff")
