@@ -76,7 +76,7 @@ xnoremap <silent> <Leader>ea` :EncloseText -a -p `<CR>
 #
 nnoremap <silent> <Leader>m :MarkAndSignToggle<CR>
 nnoremap <silent> <Leader>M :MarkAndSignToggle!<CR>
-nnoremap <silent> <M-m>     :MarkAndSignPopup<CR>
+nnoremap <silent> <C-p>m    :MarkAndSignPopup<CR>
 
 
 # ###############################

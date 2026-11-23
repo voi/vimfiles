@@ -1,6 +1,7 @@
 vim9script
 
-import 'fuzzy_choice.vim' as FuzzyChoice
+import 'fuzzy_choice.vim'
+type FuzzyChoice = fuzzy_choice.FuzzyChoice
 
 
 class MarkAndSign
@@ -81,10 +82,12 @@ class MarkAndSign
 
 
   #
-  static def PopupAction(winid: number, ctx: any, item: any)
+  static def PopupAction(winid: number, ctx: any, item: any): number
     call popup_close(winid)
 
     execute 'normal `' .. item->get('mark', "'")
+
+    return 0
   enddef
 
 
@@ -99,7 +102,7 @@ class MarkAndSign
 
       var handlers = { "\<CR>": function(MarkAndSign.PopupAction) }
 
-      call FuzzyChoice.Open('Marks', marked, handlers)
+      call FuzzyChoice.Do('Marks', marked, handlers)
     endif
   enddef
 endclass
