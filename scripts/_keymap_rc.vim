@@ -82,6 +82,7 @@ nnoremap <silent> <C-p>m    :MarkAndSignPopup<CR>
 # ###############################
 # input_helper
 import 'input_helper.vim'
+type InputHelper = input_helper.InputHelper
 
 g:input_helper_map_left_parenthesis = [
       \ ['\%#[^()]',  "()\<Left>"],
@@ -138,20 +139,20 @@ g:input_helper_map_back_quote = [
       \ ['"[^"]*\%#[^"]*"',   '`'],
       \ ['\%#', "``\<Left>"]]
 
-inoremap <silent> <expr> ( input_helper.Map('(', g:input_helper_map_left_parenthesis)
-inoremap <silent> <expr> ) input_helper.Map(')', g:input_helper_map_right_parenthesis)
+inoremap <silent> <expr> ( InputHelper.Map('(', g:input_helper_map_left_parenthesis)
+inoremap <silent> <expr> ) InputHelper.Map(')', g:input_helper_map_right_parenthesis)
 
-inoremap <silent> <expr> ] input_helper.Map(']', g:input_helper_map_right_square_bracket)
-inoremap <silent> <expr> [ input_helper.Map('[', g:input_helper_map_left_square_bracket)
+inoremap <silent> <expr> ] InputHelper.Map(']', g:input_helper_map_right_square_bracket)
+inoremap <silent> <expr> [ InputHelper.Map('[', g:input_helper_map_left_square_bracket)
 
-inoremap <silent> <expr> { input_helper.Map('{', g:input_helper_map_left_curly_bracket)
-inoremap <silent> <expr> } input_helper.Map('}', g:input_helper_map_right_curly_bracket)
+inoremap <silent> <expr> { InputHelper.Map('{', g:input_helper_map_left_curly_bracket)
+inoremap <silent> <expr> } InputHelper.Map('}', g:input_helper_map_right_curly_bracket)
 
-inoremap <silent> <expr> <Space> input_helper.Map("\<Space>", g:input_helper_map_space)
-inoremap <silent> <expr> <CR> input_helper.Map("\<CR>", g:input_helper_map_enter)
-inoremap <silent> <expr> <C-h> input_helper.Map("\<C-h>", g:input_helper_map_backspace)
+inoremap <silent> <expr> <Space> InputHelper.Map("\<Space>", g:input_helper_map_space)
+inoremap <silent> <expr> <CR> InputHelper.Map("\<CR>", g:input_helper_map_enter)
+inoremap <silent> <expr> <C-h> InputHelper.Map("\<C-h>", g:input_helper_map_backspace)
 
-inoremap <silent> <expr> ' input_helper.Map("'", g:input_helper_map_single_quote)
-inoremap <silent> <expr> " input_helper.Map('"', g:input_helper_map_double_quote)
-inoremap <silent> <expr> ` input_helper.Map('`', g:input_helper_map_back_quote)
+inoremap <silent> <expr> ' InputHelper.Map("'", g:input_helper_map_single_quote)
+inoremap <silent> <expr> " InputHelper.Map('"', g:input_helper_map_double_quote)
+inoremap <silent> <expr> ` InputHelper.Map('`', g:input_helper_map_back_quote)
 
