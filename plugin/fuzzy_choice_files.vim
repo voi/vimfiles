@@ -8,7 +8,7 @@ type FuzzyChoicePath = fuzzy_choice_path.FuzzyChoicePath
 
 # ##############################################################
 #
-export class FuzzyChoiceFiler extends FuzzyChoicePath
+export class FuzzyChoiceFiler
   #
   static def _NewSource(root: string): list<any>
     var icon_dir = get(g:, 'fuzzy_choice_icon_dir', '📁')
@@ -48,7 +48,7 @@ export class FuzzyChoiceFiler extends FuzzyChoicePath
       var children = FuzzyChoiceFiler._NewSource(path->fnamemodify(':p'))
 
       if empty(children)
-        echomsg get(g:, 'fuzzy_choice_icon_empty', '🈳') .. ' No files in ' ..  path->fnamemodify(':t') .. '/'
+        echomsg '>< No files in ' ..  path->fnamemodify(':t') .. '/'
 
       else
         ctx._source = children
@@ -82,7 +82,7 @@ export class FuzzyChoiceFiler extends FuzzyChoicePath
     if root_dir->isdirectory()
       var items = FuzzyChoiceFiler._NewSource(root_dir)
 
-      call FuzzyChoicePath.Do('Files', items, _actions)
+      call FuzzyChoice.Do('Files', items, _actions)
     endif
   enddef
 
