@@ -22,7 +22,8 @@ nnoremap <silent> <C-p>f      :FuzzyChoiceFiles<CR>
 nnoremap          <C-p>F      :FuzzyChoiceFiles 
 nnoremap <silent> <C-p><C-f>  :FuzzyChoiceFiles %:h<CR>
 nnoremap <silent> <C-p>h      :FuzzyChoiceMru<CR>
-nnoremap <silent> <C-p>b      :FuzzyChoiceBuffers<CR>
+nnoremap <silent> <C-p>b      :FuzzyChoiceBuffers!<CR>
+nnoremap <silent> <C-p><C-b>  :FuzzyChoiceBuffers<CR>
 nnoremap <silent> <C-p>w      :FuzzyChoiceWindows<CR>
 nnoremap <silent> <C-p>l      :FuzzyChoiceLines<CR>
 nnoremap <silent> <C-p>g      :FuzzyChoiceGlob<CR>

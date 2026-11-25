@@ -8,17 +8,20 @@ type FuzzyChoice = fuzzy_choice.FuzzyChoice
 # fuzzy choice buffer # {{{1
 class FuzzyChoiceBuffer
   #
-  static def GetItems(): list<any>
+  static def GetItems(cd: string): list<any>
     var icon = get(g:, 'fuzzy_choice_icon_buff', '📜')
 
     return range(1, bufnr('$'))
-      ->filter((i, v) => buflisted(v) && bufexists(v) && !bufname(v)->empty() && getbufvar(v, '&buftype', '')->empty())
+      ->filter((i, v) => buflisted(v) && bufexists(v) && getbufvar(v, '&buftype', 'ERR')->empty())
+      ->filter((i, v) => {
+        var bname = bufname(v)
+
+        return (!bname->empty() && 0 == stridx(bname->fnamemodify(':p'), cd))
+      })
       ->map((i, v) => {
         var bname = v->bufname()
 
-        if v->getbufvar('&buftype', '')->empty()
-          bname = printf('%s (%s)', bname->fnamemodify(':t'), bname->fnamemodify(':p:h:~'))
-        endif
+        bname = printf('%s (%s)', bname->fnamemodify(':t'), bname->fnamemodify(':p:h:~'))
 
         return { text: printf('%4d %s %s', v, icon, bname), bufnr: v }
       })
@@ -41,9 +44,9 @@ class FuzzyChoiceBuffer
     #
     execute printf('bw %d', item->get('bufnr', 0))
 
-    ctx._source = FuzzyChoiceBuffer.GetItems()
+    ctx._source = FuzzyChoiceBuffer.GetItems(get(ctx, 'cd_filter', ''))
 
-    return 1
+    return -1
   enddef
 
 
@@ -60,10 +63,11 @@ endclass
 
 
 #
-command! -nargs=0 FuzzyChoiceBuffers {
-  var items = FuzzyChoiceBuffer.GetItems()
+command! -bang -nargs=0 FuzzyChoiceBuffers {
+  var cd = ('<bang>'->empty() ? '' : getcwd()->fnamemodify(':p'))
+  var items = FuzzyChoiceBuffer.GetItems(cd)
 
-  call FuzzyChoice.Do('Buffers', items, FuzzyChoiceBuffer.actions)
+  call FuzzyChoice.Do('Buffers', items, FuzzyChoiceBuffer.actions, { cd_filter: cd  })
 }
 # }}}
 
